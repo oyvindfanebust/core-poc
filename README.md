@@ -32,6 +32,7 @@ A comprehensive banking ledger API built with Node.js, TypeScript, TigerBeetle, 
 - Node.js 18+ and npm
 - PostgreSQL 12+
 - TigerBeetle database (for accounting ledger)
+- direnv (for environment variable management)
 
 ### 1. Installation
 ```bash
@@ -40,10 +41,23 @@ cd yet-another-core-poc
 npm install
 ```
 
-### 2. Environment Setup
+### 2. Environment Setup with direnv
 ```bash
-cp .env.example .env
-# Edit .env with your configuration
+# Install direnv if not already installed
+# macOS: brew install direnv
+# Ubuntu: sudo apt install direnv
+# Or visit: https://direnv.net/docs/installation.html
+
+# Set up your shell hook (add to ~/.bashrc, ~/.zshrc, etc.)
+# For bash: echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
+# For zsh: echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
+
+# Copy the template and customize for your environment
+cp .envrc.template .envrc
+# Edit .envrc with your configuration
+
+# Allow direnv to load the environment variables
+direnv allow
 ```
 
 ### 3. Database Setup
@@ -81,7 +95,9 @@ Once running, visit:
 
 ## Configuration
 
-### Environment Variables
+### Environment Variables (managed with direnv)
+
+The application uses direnv to manage environment variables. Copy `.envrc.template` to `.envrc` and customize as needed.
 
 | Variable | Description | Default |
 |----------|-------------|---------|

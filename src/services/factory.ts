@@ -33,17 +33,49 @@ export class ServiceFactory {
       logger.info('Initializing services...');
 
       // Initialize database connection and schema
+      logger.info('Initializing database connection...');
       const database = DatabaseConnection.getInstance();
-      await database.initializeSchema();
+      try {
+        await database.initializeSchema();
+        logger.info('Database schema initialized successfully');
+      } catch (dbError) {
+        logger.error('Failed to initialize database schema', { 
+          error: dbError,
+          dbHost: process.env.DB_HOST,
+          dbPort: process.env.DB_PORT,
+          dbName: process.env.DB_NAME
+        });
+        throw new Error(`Database initialization failed: ${(dbError as Error)?.message || 'Unknown database error'}`);
+      }
 
       // Create TigerBeetle client
-      const tigerBeetleClient = createClient({
-        cluster_id: BigInt(process.env.TIGERBEETLE_CLUSTER_ID || 0),
-        replica_addresses: process.env.TIGERBEETLE_ADDRESSES?.split(',') || ['3000'],
+      logger.info('Initializing TigerBeetle client...');
+      const tigerbeetleAddresses = process.env.TIGERBEETLE_ADDRESSES?.split(',') || ['3000'];
+      const clusterId = BigInt(process.env.TIGERBEETLE_CLUSTER_ID || 0);
+      
+      logger.info('TigerBeetle configuration', {
+        clusterId: clusterId.toString(),
+        addresses: tigerbeetleAddresses
       });
 
+      let tigerBeetleClient;
+      try {
+        tigerBeetleClient = createClient({
+          cluster_id: clusterId,
+          replica_addresses: tigerbeetleAddresses,
+        });
+        logger.info('TigerBeetle client created successfully');
+      } catch (tbError) {
+        logger.error('Failed to create TigerBeetle client', { 
+          error: tbError,
+          clusterId: clusterId.toString(),
+          addresses: tigerbeetleAddresses
+        });
+        throw new Error(`TigerBeetle client creation failed: ${(tbError as Error)?.message || 'Unknown TigerBeetle error'}`);
+      }
+
       // Create core services
-      const tigerBeetleService = new TigerBeetleService(tigerBeetleClient);
+      const tigerBeetleService = new TigerBeetleService(tigerBeetleClient, clusterId, tigerbeetleAddresses);
       const accountService = new AccountService(tigerBeetleService);
 
       // Create repositories
@@ -86,13 +118,15 @@ export class ServiceFactory {
       await database.initializeSchema();
 
       // Create TigerBeetle client for container testing
+      const clusterId = BigInt(process.env.TIGERBEETLE_CLUSTER_ID || 0);
+      const tigerbeetleAddresses = process.env.TIGERBEETLE_ADDRESSES?.split(',') || ['3001'];
       const tigerBeetleClient = createClient({
-        cluster_id: BigInt(process.env.TIGERBEETLE_CLUSTER_ID || 0),
-        replica_addresses: process.env.TIGERBEETLE_ADDRESSES?.split(',') || ['3001'],
+        cluster_id: clusterId,
+        replica_addresses: tigerbeetleAddresses,
       });
 
       // Create core services
-      const tigerBeetleService = new TigerBeetleService(tigerBeetleClient);
+      const tigerBeetleService = new TigerBeetleService(tigerBeetleClient, clusterId, tigerbeetleAddresses);
       const accountService = new AccountService(tigerBeetleService);
 
       // Create repositories

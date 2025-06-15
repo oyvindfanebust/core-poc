@@ -2,11 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
-
-// Load environment variables first
-dotenv.config();
 
 // Add BigInt JSON serialization support
 (BigInt.prototype as any).toJSON = function() {
@@ -114,7 +110,7 @@ async function createApp(): Promise<express.Application> {
     });
 
     // 404 handler for undefined routes
-    app.use('*', (req, res) => {
+    app.use((req, res) => {
       res.status(404).json({
         error: 'Route not found',
         path: req.originalUrl,
@@ -152,7 +148,8 @@ async function createApp(): Promise<express.Application> {
     
     return app;
   } catch (error) {
-    logger.error('Failed to initialize application', { error });
+    console.error('Failed to initialize application:', error);
+    logger.error('Failed to initialize application', { error: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : undefined });
     throw error;
   }
 }
@@ -177,17 +174,40 @@ process.on('SIGTERM', gracefulShutdown);
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
-  logger.error('Uncaught exception', { error });
+  logger.error('Uncaught exception', { 
+    error,
+    message: error?.message || 'No error message',
+    stack: error?.stack || 'No stack trace',
+    name: error?.name || 'Unknown error type',
+    toString: error?.toString() || 'Cannot convert to string',
+    errorType: typeof error,
+    errorConstructor: error?.constructor?.name || 'Unknown constructor',
+    // Log all enumerable properties
+    errorProps: Object.getOwnPropertyNames(error).reduce((acc, key) => {
+      try {
+        acc[key] = error[key];
+      } catch (e) {
+        acc[key] = `[Error accessing property: ${e?.message}]`;
+      }
+      return acc;
+    }, {} as any)
+  });
   gracefulShutdown();
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled rejection', { reason, promise });
+  logger.error('Unhandled rejection', { 
+    reason,
+    reasonType: typeof reason,
+    reasonMessage: reason?.message || 'No reason message',
+    reasonStack: reason?.stack || 'No stack trace',
+    promise: promise?.toString() || 'Cannot convert promise to string'
+  });
   gracefulShutdown();
 });
 
 // Start the server
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const port = parseInt(process.env.PORT || '3001');
   
   createApp().then(app => {
@@ -201,7 +221,8 @@ if (require.main === module) {
       });
     });
   }).catch(error => {
-    logger.error('Failed to start application', { error });
+    console.error('Failed to start application:', error);
+    logger.error('Failed to start application', { error: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : undefined });
     process.exit(1);
   });
 }

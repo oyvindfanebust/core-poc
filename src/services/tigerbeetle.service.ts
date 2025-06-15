@@ -1,12 +1,76 @@
-import { id } from 'tigerbeetle-node';
+import { id, createClient } from 'tigerbeetle-node';
 import { ACCOUNT_TYPES, LEDGER_CODES } from '../config/tigerbeetle.js';
 import { CreateAccountRequest, CreateTransferRequest } from '../types/index.js';
+import { logger } from '../utils/logger.js';
 
 export class TigerBeetleService {
   private client: any;
+  private clusterId: bigint;
+  private addresses: string[];
 
-  constructor(client: any) {
+  constructor(client: any, clusterId: bigint = 0n, addresses: string[] = ['localhost:3000']) {
     this.client = client;
+    this.clusterId = clusterId;
+    this.addresses = addresses;
+  }
+
+  private async ensureConnection(): Promise<void> {
+    if (!this.client) {
+      await this.reconnect();
+    }
+  }
+
+  private async reconnect(): Promise<void> {
+    try {
+      logger.info('Attempting to reconnect to TigerBeetle...', {
+        clusterId: this.clusterId.toString(),
+        addresses: this.addresses
+      });
+
+      if (this.client) {
+        try {
+          await this.client.close();
+        } catch (error) {
+          logger.debug('Error closing existing client', { error });
+        }
+      }
+
+      this.client = createClient({
+        cluster_id: this.clusterId,
+        replica_addresses: this.addresses,
+      });
+
+      // Connection established successfully
+      logger.info('TigerBeetle reconnection successful');
+    } catch (error) {
+      logger.error('Failed to reconnect to TigerBeetle', { error });
+      this.client = null;
+      throw error;
+    }
+  }
+
+  private async withRetry<T>(operation: () => Promise<T>, maxRetries: number = 3): Promise<T> {
+    let lastError: any;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        await this.ensureConnection();
+        return await operation();
+      } catch (error) {
+        lastError = error;
+        logger.warn(`TigerBeetle operation failed (attempt ${attempt}/${maxRetries})`, { 
+          error: error instanceof Error ? error.message : String(error) 
+        });
+
+        if (attempt < maxRetries) {
+          // Connection might be broken, try to reconnect
+          this.client = null;
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        }
+      }
+    }
+    
+    throw lastError;
   }
 
   async close(): Promise<void> {
@@ -25,7 +89,7 @@ export class TigerBeetleService {
       credits_pending: 0n,
       credits_posted: 0n,
       user_data_128: 0n,
-      user_data_64: BigInt(request.customerId.slice(0, 8).padEnd(8, '0').split('').map(c => c.charCodeAt(0)).join('')),
+      user_data_64: 0n,
       user_data_32: 0,
       reserved: 0,
       ledger: LEDGER_CODES[request.currency],
@@ -106,7 +170,10 @@ export class TigerBeetleService {
       timestamp: 0n,
     };
 
-    await this.client.createAccounts([systemAccount]);
+    const errors = await this.client.createAccounts([systemAccount]);
+    if (errors.length > 0) {
+      throw new Error(`Failed to create system account: ${JSON.stringify(errors)}`);
+    }
 
     await this.createTransfer({
       fromAccountId: systemAccountId,

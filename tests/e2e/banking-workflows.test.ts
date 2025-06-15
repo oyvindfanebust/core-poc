@@ -3,14 +3,19 @@ import express from 'express';
 import { AccountController } from '../../src/controllers/account.controller';
 import { validateRequest } from '../../src/middleware/validation';
 import { CreateAccountSchema, TransferSchema, CreateInvoiceSchema, AccountIdParamSchema } from '../../src/validation/schemas';
-import { createLocalTestContext, cleanupLocalTestContext, LocalTestContext } from '../helpers/test-utils-local';
+import { createTestContext, cleanupTestContext, TestContext } from '../helpers/test-utils.js';
+import { setupTestTigerBeetle, teardownTestTigerBeetle } from '../helpers/test-tigerbeetle.js';
 
 describe('Banking Workflows E2E', () => {
-  let context: LocalTestContext;
+  let context: TestContext;
   let app: express.Application;
 
   beforeAll(async () => {
-    context = await createLocalTestContext();
+    // Setup TigerBeetle container first
+    await setupTestTigerBeetle();
+    
+    // Then create test context
+    context = await createTestContext();
     
     const accountController = new AccountController(
       context.services.accountService,
@@ -42,11 +47,12 @@ describe('Banking Workflows E2E', () => {
       validateRequest(AccountIdParamSchema, 'params'),
       accountController.getInvoices.bind(accountController)
     );
-  }, 15000);
+  }, 60000);
 
   afterAll(async () => {
-    await cleanupLocalTestContext(context);
-  }, 5000);
+    await cleanupTestContext(context);
+    await teardownTestTigerBeetle();
+  }, 30000);
 
   describe('Complete Banking Scenario', () => {
     it('should handle a complete customer banking workflow', async () => {

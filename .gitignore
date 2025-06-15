@@ -61,3 +61,8 @@ temp/
 
 # Yarn Integrity file
 .yarn-integrity
+
+# TigerBeetle binary (now using containerized version)
+tigerbeetle
+tigerbeetle.exe
+*.tigerbeetle

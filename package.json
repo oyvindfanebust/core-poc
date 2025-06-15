@@ -13,10 +13,12 @@
     "test:e2e": "jest --selectProjects e2e --forceExit",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage --forceExit",
-    "docker:test:up": "docker-compose -f docker-compose.test.yml up -d postgres-test",
+    "docker:test:up": "docker-compose -f docker-compose.test.yml up -d postgres-test tigerbeetle-test",
     "docker:test:down": "docker-compose -f docker-compose.test.yml down",
-    "docker:dev:up": "docker-compose -f docker-compose.test.yml up -d postgres-dev",
-    "docker:dev:down": "docker-compose -f docker-compose.test.yml down postgres-dev"
+    "docker:dev:up": "docker-compose -f docker-compose.test.yml up -d postgres-dev tigerbeetle-dev",
+    "docker:dev:down": "docker-compose -f docker-compose.test.yml down postgres-dev tigerbeetle-dev",
+    "docker:tigerbeetle:up": "docker-compose -f docker-compose.test.yml up -d tigerbeetle-test",
+    "docker:tigerbeetle:down": "docker-compose -f docker-compose.test.yml down tigerbeetle-test"
   },
   "keywords": [],
   "author": "",

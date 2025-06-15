@@ -1,19 +1,25 @@
-import { TigerBeetleService } from '../../../src/services/tigerbeetle.service';
-import { createLocalTestContext, cleanupLocalTestContext, LocalTestContext } from '../../helpers/test-utils-local';
-import { testCustomers, testAmounts } from '../../fixtures/test-data';
+import { TigerBeetleService } from '../../../src/services/tigerbeetle.service.js';
+import { createTestContext, cleanupTestContext, TestContext } from '../../helpers/test-utils.js';
+import { setupTestTigerBeetle, teardownTestTigerBeetle } from '../../helpers/test-tigerbeetle.js';
+import { testCustomers, testAmounts } from '../../fixtures/test-data.js';
 
-describe('TigerBeetleService Integration (Local)', () => {
-  let context: LocalTestContext;
+describe('TigerBeetleService Integration', () => {
+  let context: TestContext;
   let tigerBeetleService: TigerBeetleService;
 
   beforeAll(async () => {
-    context = await createLocalTestContext();
+    // Setup TigerBeetle container first
+    await setupTestTigerBeetle();
+    
+    // Then create test context
+    context = await createTestContext();
     tigerBeetleService = context.services.tigerBeetleService;
-  }, 15000);
+  }, 60000);
 
   afterAll(async () => {
-    await cleanupLocalTestContext(context);
-  }, 10000);
+    await cleanupTestContext(context);
+    await teardownTestTigerBeetle();
+  }, 30000);
 
   describe('createAccount', () => {
     it('should create a deposit account without initial balance', async () => {

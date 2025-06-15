@@ -1,5 +1,5 @@
-import { setupTestDatabase, teardownTestDatabase } from './helpers/test-database';
-import { logger } from '../src/utils/logger';
+import { setupTestDatabase, teardownTestDatabase } from './helpers/test-database.js';
+import { logger } from '../src/utils/logger.js';
 
 // Global test setup
 beforeAll(async () => {

@@ -39,9 +39,49 @@ services:
     networks:
       - test-network
 
+  tigerbeetle-test:
+    image: ghcr.io/tigerbeetle/tigerbeetle:0.16.44
+    ports:
+      - "3001:3000"
+    volumes:
+      - tigerbeetle_test_data:/data
+    entrypoint: 
+      - sh
+      - -c
+      - |
+        /tigerbeetle format --cluster=0 --replica=0 --replica-count=1 --development /data/test.tigerbeetle
+        exec /tigerbeetle start --addresses=0.0.0.0:3000 --development /data/test.tigerbeetle
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_ADMIN
+    networks:
+      - test-network
+
+  tigerbeetle-dev:
+    image: ghcr.io/tigerbeetle/tigerbeetle:0.16.44
+    ports:
+      - "3000:3000"
+    volumes:
+      - tigerbeetle_dev_data:/data
+    entrypoint:
+      - sh
+      - -c
+      - |
+        /tigerbeetle format --cluster=0 --replica=0 --replica-count=1 --development /data/dev.tigerbeetle
+        exec /tigerbeetle start --addresses=0.0.0.0:3000 --development /data/dev.tigerbeetle
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_ADMIN
+    networks:
+      - test-network
+
 volumes:
   postgres_test_data:
   postgres_dev_data:
+  tigerbeetle_test_data:
+  tigerbeetle_dev_data:
 
 networks:
   test-network:

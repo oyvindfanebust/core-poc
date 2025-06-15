@@ -76,18 +76,19 @@ export class ServiceFactory {
     }
   }
 
-  static async createLocalTestServices(): Promise<ServiceContainer> {
+
+  static async createTestServices(): Promise<ServiceContainer> {
     try {
-      logger.info('Initializing local test services...');
+      logger.info('Initializing test services...');
 
       // Use the existing database connection configured by TestDatabase
       const database = DatabaseConnection.getInstance();
       await database.initializeSchema();
 
-      // Create TigerBeetle client for testing (this should use the test setup)
+      // Create TigerBeetle client for container testing
       const tigerBeetleClient = createClient({
         cluster_id: BigInt(process.env.TIGERBEETLE_CLUSTER_ID || 0),
-        replica_addresses: process.env.TIGERBEETLE_ADDRESSES?.split(',') || ['3000'],
+        replica_addresses: process.env.TIGERBEETLE_ADDRESSES?.split(',') || ['3001'],
       });
 
       // Create core services
@@ -116,10 +117,10 @@ export class ServiceFactory {
         tigerBeetleService,
       };
 
-      logger.info('Local test services initialized successfully');
+      logger.info('Test services initialized successfully');
       return container;
     } catch (error) {
-      logger.error('Failed to initialize local test services', { error });
+      logger.error('Failed to initialize test services', { error });
       throw error;
     }
   }

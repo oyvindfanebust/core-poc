@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-banking_poc}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-banking_poc}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  tigerbeetle:
+    image: ghcr.io/tigerbeetle/tigerbeetle:0.16.44
+    ports:
+      - "${TIGERBEETLE_PORT:-3000}:3000"
+    volumes:
+      - tigerbeetle_data:/data
+    entrypoint:
+      - sh
+      - -c
+      - |
+        /tigerbeetle format --cluster=0 --replica=0 --replica-count=1 --development /data/${TB_FILE:-app}.tigerbeetle
+        exec /tigerbeetle start --addresses=0.0.0.0:3000 --development /data/${TB_FILE:-app}.tigerbeetle
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_ADMIN
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+  tigerbeetle_data:
+
+networks:
+  app-network:
+    driver: bridge

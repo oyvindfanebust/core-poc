@@ -1,0 +1,20 @@
+# Database Configuration
+export DB_HOST=localhost
+export DB_PORT=5432
+export DB_NAME=banking_poc
+export DB_USER=postgres
+export DB_PASSWORD=postgres
+export DB_POOL_SIZE=10
+export DB_IDLE_TIMEOUT=30000
+export DB_CONNECTION_TIMEOUT=2000
+
+# TigerBeetle Configuration
+export TIGERBEETLE_CLUSTER_ID=0
+export TIGERBEETLE_ADDRESSES=localhost:3000
+
+# Application Configuration
+export NODE_ENV=development
+export PORT=3002
+
+# Logging Configuration
+export LOG_LEVEL=debug

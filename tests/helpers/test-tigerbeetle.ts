@@ -111,7 +111,7 @@ export class TestTigerBeetle {
 // Global setup and teardown for Jest
 export async function setupTestTigerBeetle(): Promise<void> {
   // Note: This assumes TigerBeetle container is already running via Docker Compose
-  // Run: docker-compose -f docker-compose.test.yml up -d tigerbeetle-test
+  // Run: docker-compose up -d tigerbeetle
   await TestTigerBeetle.getInstance();
 }
 

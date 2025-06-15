@@ -185,9 +185,9 @@ process.on('uncaughtException', (error) => {
     // Log all enumerable properties
     errorProps: Object.getOwnPropertyNames(error).reduce((acc, key) => {
       try {
-        acc[key] = error[key];
+        acc[key] = (error as any)[key];
       } catch (e) {
-        acc[key] = `[Error accessing property: ${e?.message}]`;
+        acc[key] = `[Error accessing property: ${(e as Error)?.message || 'Unknown error'}]`;
       }
       return acc;
     }, {} as any)
@@ -199,8 +199,8 @@ process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled rejection', { 
     reason,
     reasonType: typeof reason,
-    reasonMessage: reason?.message || 'No reason message',
-    reasonStack: reason?.stack || 'No stack trace',
+    reasonMessage: (reason as Error)?.message || 'No reason message',
+    reasonStack: (reason as Error)?.stack || 'No stack trace',
     promise: promise?.toString() || 'Cannot convert promise to string'
   });
   gracefulShutdown();

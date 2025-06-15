@@ -16,6 +16,14 @@ export interface Config {
     idleTimeout: number;
     connectionTimeout: number;
   };
+  cdc: {
+    enabled: boolean;
+    amqpUrl: string;
+    exchange: string;
+    queue: string;
+    routingKeys: string[];
+    autoAck: boolean;
+  };
   env: string;
   logLevel: string;
 }
@@ -45,6 +53,14 @@ export const getConfig = (): Config => {
       idleTimeout: envConfig.DB_IDLE_TIMEOUT,
       connectionTimeout: envConfig.DB_CONNECTION_TIMEOUT,
     },
+    cdc: {
+      enabled: envConfig.CDC_ENABLED,
+      amqpUrl: envConfig.AMQP_URL,
+      exchange: envConfig.CDC_EXCHANGE,
+      queue: envConfig.CDC_QUEUE,
+      routingKeys: envConfig.CDC_ROUTING_KEYS.split(','),
+      autoAck: envConfig.CDC_AUTO_ACK,
+    },
     env: envConfig.NODE_ENV,
     logLevel: envConfig.LOG_LEVEL,
   };
@@ -68,6 +84,14 @@ export const getTestConfig = (tigerbeetlePort?: number): Config => {
       poolSize: 5,
       idleTimeout: 30000,
       connectionTimeout: 2000,
+    },
+    cdc: {
+      enabled: false, // Disable CDC in tests by default
+      amqpUrl: 'amqp://guest:guest@localhost:5672',
+      exchange: 'test-banking-events',
+      queue: 'test-banking-queue',
+      routingKeys: ['#'],
+      autoAck: true,
     },
     env: 'test',
     logLevel: 'error', // Reduce noise in tests

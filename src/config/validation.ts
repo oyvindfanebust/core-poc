@@ -21,6 +21,14 @@ const ConfigSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.string().transform(val => parseInt(val)).pipe(z.number().min(1).max(65535)).default('3001'),
 
+  // CDC/AMQP
+  CDC_ENABLED: z.string().transform(val => val.toLowerCase() === 'true').pipe(z.boolean()).default('false'),
+  AMQP_URL: z.string().url().default('amqp://guest:guest@localhost:5672'),
+  CDC_EXCHANGE: z.string().min(1).default('banking-events'),
+  CDC_QUEUE: z.string().min(1).default('banking-queue'),
+  CDC_ROUTING_KEYS: z.string().min(1).default('#'),
+  CDC_AUTO_ACK: z.string().transform(val => val.toLowerCase() === 'true').pipe(z.boolean()).default('false'),
+
   // Logging
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
 });

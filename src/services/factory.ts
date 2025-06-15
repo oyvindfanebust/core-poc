@@ -1,5 +1,6 @@
 import { AccountService } from './account.service.js';
 import { TigerBeetleService } from './tigerbeetle.service.js';
+import { CDCManagerService } from './cdc-manager.service.js';
 import { PaymentPlanJob } from '../jobs/payment-plan.job.js';
 import { InvoiceJob } from '../jobs/invoice.job.js';
 import { LoanService } from '../domain/services/loan.service.js';
@@ -10,6 +11,7 @@ import { DatabaseConnection } from '../database/connection.js';
 import { createClient } from 'tigerbeetle-node';
 import { readFileSync } from 'fs';
 import { logger } from '../utils/logger.js';
+import { getConfig, getTestConfig } from '../config/index.js';
 
 export interface ServiceContainer {
   accountService: AccountService;
@@ -19,6 +21,7 @@ export interface ServiceContainer {
   invoiceJob: InvoiceJob;
   database: DatabaseConnection;
   tigerBeetleService: TigerBeetleService;
+  cdcManager: CDCManagerService;
 }
 
 export class ServiceFactory {
@@ -32,6 +35,9 @@ export class ServiceFactory {
     try {
       logger.info('Initializing services...');
 
+      // Get configuration
+      const config = getConfig();
+
       // Initialize database connection and schema
       logger.info('Initializing database connection...');
       const database = DatabaseConnection.getInstance();
@@ -41,17 +47,17 @@ export class ServiceFactory {
       } catch (dbError) {
         logger.error('Failed to initialize database schema', { 
           error: dbError,
-          dbHost: process.env.DB_HOST,
-          dbPort: process.env.DB_PORT,
-          dbName: process.env.DB_NAME
+          dbHost: config.database.host,
+          dbPort: config.database.port,
+          dbName: config.database.name
         });
         throw new Error(`Database initialization failed: ${(dbError as Error)?.message || 'Unknown database error'}`);
       }
 
       // Create TigerBeetle client
       logger.info('Initializing TigerBeetle client...');
-      const tigerbeetleAddresses = process.env.TIGERBEETLE_ADDRESSES?.split(',') || ['3000'];
-      const clusterId = BigInt(process.env.TIGERBEETLE_CLUSTER_ID || 0);
+      const tigerbeetleAddresses = [config.tigerbeetle.address];
+      const clusterId = config.tigerbeetle.clusterId;
       
       logger.info('TigerBeetle configuration', {
         clusterId: clusterId.toString(),
@@ -90,6 +96,10 @@ export class ServiceFactory {
       const paymentPlanJob = new PaymentPlanJob(paymentPlanRepository, accountService);
       const invoiceJob = new InvoiceJob(invoiceService);
 
+      // Create CDC Manager
+      const cdcManager = new CDCManagerService(config);
+      await cdcManager.initialize();
+
       ServiceFactory.instance = {
         accountService,
         loanService,
@@ -98,6 +108,7 @@ export class ServiceFactory {
         invoiceJob,
         database,
         tigerBeetleService,
+        cdcManager,
       };
 
       logger.info('Services initialized successfully');
@@ -113,13 +124,16 @@ export class ServiceFactory {
     try {
       logger.info('Initializing test services...');
 
+      // Get test configuration
+      const config = getTestConfig();
+
       // Use the existing database connection configured by TestDatabase
       const database = DatabaseConnection.getInstance();
       await database.initializeSchema();
 
       // Create TigerBeetle client for container testing
-      const clusterId = BigInt(process.env.TIGERBEETLE_CLUSTER_ID || 0);
-      const tigerbeetleAddresses = process.env.TIGERBEETLE_ADDRESSES?.split(',') || ['3001'];
+      const clusterId = config.tigerbeetle.clusterId;
+      const tigerbeetleAddresses = [config.tigerbeetle.address];
       const tigerBeetleClient = createClient({
         cluster_id: clusterId,
         replica_addresses: tigerbeetleAddresses,
@@ -141,6 +155,10 @@ export class ServiceFactory {
       const paymentPlanJob = new PaymentPlanJob(paymentPlanRepository, accountService);
       const invoiceJob = new InvoiceJob(invoiceService);
 
+      // Create CDC Manager (disabled for tests)
+      const cdcManager = new CDCManagerService(config);
+      // Don't initialize CDC in tests
+
       const container = {
         accountService,
         loanService,
@@ -149,6 +167,7 @@ export class ServiceFactory {
         invoiceJob,
         database,
         tigerBeetleService,
+        cdcManager,
       };
 
       logger.info('Test services initialized successfully');
@@ -167,6 +186,9 @@ export class ServiceFactory {
         // Stop background jobs
         ServiceFactory.instance.paymentPlanJob.stopMonthlyJob();
         ServiceFactory.instance.invoiceJob.stopOverdueJob();
+        
+        // Shutdown CDC Manager
+        await ServiceFactory.instance.cdcManager.shutdown();
         
         // Close database connection
         await ServiceFactory.instance.database.close();

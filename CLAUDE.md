@@ -1,0 +1,1 @@
+- Always use the context7 tool for developer docs

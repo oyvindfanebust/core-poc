@@ -1,13 +1,12 @@
 services:
   postgres:
     image: postgres:15-alpine
+    network_mode: host
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-banking_poc}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_HOST_AUTH_METHOD: trust
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -19,32 +18,76 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - app-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    network_mode: host
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq-init:
+    image: rabbitmq:3-management
+    network_mode: host
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    entrypoint:
+      - sh
+      - -c
+      - |
+        sleep 2
+        rabbitmqadmin -H localhost -u ${RABBITMQ_USER:-guest} -p ${RABBITMQ_PASS:-guest} declare exchange name=banking-events type=topic durable=true
+        rabbitmqadmin -H localhost -u ${RABBITMQ_USER:-guest} -p ${RABBITMQ_PASS:-guest} declare queue name=banking-queue durable=true
+        rabbitmqadmin -H localhost -u ${RABBITMQ_USER:-guest} -p ${RABBITMQ_PASS:-guest} declare binding source=banking-events destination=banking-queue routing_key=#
 
   tigerbeetle:
     image: ghcr.io/tigerbeetle/tigerbeetle:0.16.44
-    ports:
-      - "${TIGERBEETLE_PORT:-3000}:3000"
+    network_mode: host
     volumes:
       - tigerbeetle_data:/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     entrypoint:
       - sh
       - -c
       - |
         /tigerbeetle format --cluster=0 --replica=0 --replica-count=1 --development /data/${TB_FILE:-app}.tigerbeetle
-        exec /tigerbeetle start --addresses=0.0.0.0:3000 --development /data/${TB_FILE:-app}.tigerbeetle
+        exec /tigerbeetle start --addresses=127.0.0.1:3000 --development /data/${TB_FILE:-app}.tigerbeetle
     security_opt:
       - seccomp:unconfined
     cap_add:
       - SYS_ADMIN
-    networks:
-      - app-network
+
+  tigerbeetle-cdc:
+    image: ghcr.io/tigerbeetle/tigerbeetle:0.16.44
+    network_mode: host
+    depends_on:
+      tigerbeetle:
+        condition: service_started
+      rabbitmq-init:
+        condition: service_completed_successfully
+    privileged: true
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_ADMIN
+    entrypoint:
+      - sh
+      - -c
+      - |
+        sleep 5
+        exec /tigerbeetle amqp --addresses=127.0.0.1:3000 --cluster=0 --host=127.0.0.1 --user=${RABBITMQ_USER:-guest} --password=${RABBITMQ_PASS:-guest} --vhost=/ --publish-exchange=banking-events
 
 volumes:
   postgres_data:
   tigerbeetle_data:
-
-networks:
-  app-network:
-    driver: bridge
+  rabbitmq_data:

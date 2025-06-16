@@ -42,3 +42,4 @@ Always run: `npm run build && npm test`
 - Money amounts are integers (cents)
 - CDC events must be idempotent
 - Never log sensitive financial data
+- Don't add references like "edited by Claude" in commit messages

@@ -181,8 +181,45 @@ const options: swaggerJSDoc.Options = {
               description: 'Loan term in months (1-480)',
               example: '360',
             },
+            loanType: {
+              type: 'string',
+              enum: ['ANNUITY', 'SERIAL'],
+              description: 'Type of loan payment structure',
+              example: 'ANNUITY',
+            },
+            paymentFrequency: {
+              type: 'string',
+              enum: ['WEEKLY', 'BI_WEEKLY', 'MONTHLY'],
+              description: 'How often payments are due',
+              example: 'MONTHLY',
+            },
+            fees: {
+              type: 'array',
+              description: 'Additional fees associated with the loan',
+              items: {
+                type: 'object',
+                properties: {
+                  type: {
+                    type: 'string',
+                    enum: ['ORIGINATION', 'PROCESSING', 'INSURANCE', 'LATE_PAYMENT'],
+                    example: 'ORIGINATION',
+                  },
+                  amount: {
+                    type: 'string',
+                    description: 'Fee amount in cents',
+                    example: '50000',
+                  },
+                  description: {
+                    type: 'string',
+                    description: 'Fee description',
+                    example: 'Origination fee',
+                  },
+                },
+                required: ['type', 'amount', 'description'],
+              },
+            },
           },
-          required: ['type', 'customerId', 'currency', 'principalAmount', 'interestRate', 'termMonths'],
+          required: ['type', 'customerId', 'currency', 'principalAmount', 'interestRate', 'termMonths', 'loanType', 'paymentFrequency', 'fees'],
         },
         CreateCreditAccount: {
           type: 'object',
@@ -259,6 +296,145 @@ const options: swaggerJSDoc.Options = {
             },
           },
           required: ['accountId', 'amount', 'dueDate'],
+        },
+        PaymentPlan: {
+          type: 'object',
+          properties: {
+            accountId: {
+              type: 'string',
+              description: 'Associated account identifier',
+              example: '1234567890',
+            },
+            principalAmount: {
+              type: 'string',
+              description: 'Loan principal amount in cents',
+              example: '20000000',
+            },
+            interestRate: {
+              type: 'number',
+              description: 'Annual interest rate',
+              example: 4.5,
+            },
+            termMonths: {
+              type: 'integer',
+              description: 'Loan term in months',
+              example: 360,
+            },
+            monthlyPayment: {
+              type: 'string',
+              description: 'Payment amount in cents',
+              example: '156789',
+            },
+            remainingPayments: {
+              type: 'integer',
+              description: 'Number of payments remaining',
+              example: 350,
+            },
+            loanType: {
+              type: 'string',
+              enum: ['ANNUITY', 'SERIAL'],
+              description: 'Type of loan payment structure',
+              example: 'ANNUITY',
+            },
+            paymentFrequency: {
+              type: 'string',
+              enum: ['WEEKLY', 'BI_WEEKLY', 'MONTHLY'],
+              description: 'How often payments are due',
+              example: 'MONTHLY',
+            },
+            fees: {
+              type: 'array',
+              description: 'Fees associated with the loan',
+              items: {
+                type: 'object',
+                properties: {
+                  type: {
+                    type: 'string',
+                    enum: ['ORIGINATION', 'PROCESSING', 'INSURANCE', 'LATE_PAYMENT'],
+                    example: 'ORIGINATION',
+                  },
+                  amount: {
+                    type: 'string',
+                    description: 'Fee amount in cents',
+                    example: '50000',
+                  },
+                  description: {
+                    type: 'string',
+                    description: 'Fee description',
+                    example: 'Origination fee',
+                  },
+                },
+              },
+            },
+            totalLoanAmount: {
+              type: 'string',
+              description: 'Total loan amount including fees in cents',
+              example: '20050000',
+            },
+          },
+          required: ['accountId', 'principalAmount', 'interestRate', 'termMonths', 'monthlyPayment', 'remainingPayments', 'loanType', 'paymentFrequency', 'fees', 'totalLoanAmount'],
+        },
+        AmortizationSchedule: {
+          type: 'object',
+          properties: {
+            accountId: {
+              type: 'string',
+              description: 'Associated account identifier',
+              example: '1234567890',
+            },
+            totalPayments: {
+              type: 'string',
+              description: 'Total of all payments in cents',
+              example: '56452440',
+            },
+            totalInterest: {
+              type: 'string',
+              description: 'Total interest paid in cents',
+              example: '36452440',
+            },
+            schedule: {
+              type: 'array',
+              description: 'Payment schedule entries',
+              items: {
+                type: 'object',
+                properties: {
+                  paymentNumber: {
+                    type: 'integer',
+                    description: 'Payment number in sequence',
+                    example: 1,
+                  },
+                  paymentDate: {
+                    type: 'string',
+                    format: 'date',
+                    description: 'Payment due date',
+                    example: '2024-02-01',
+                  },
+                  paymentAmount: {
+                    type: 'string',
+                    description: 'Total payment amount in cents',
+                    example: '156789',
+                  },
+                  principalAmount: {
+                    type: 'string',
+                    description: 'Principal portion in cents',
+                    example: '81789',
+                  },
+                  interestAmount: {
+                    type: 'string',
+                    description: 'Interest portion in cents',
+                    example: '75000',
+                  },
+                  remainingBalance: {
+                    type: 'string',
+                    description: 'Remaining principal balance in cents',
+                    example: '19918211',
+                  },
+                },
+                required: ['paymentNumber', 'paymentDate', 'paymentAmount', 'principalAmount', 'interestAmount', 'remainingBalance'],
+              },
+            },
+          },
+          required: ['accountId', 'totalPayments', 'totalInterest', 'schedule'],
         },
         HealthResponse: {
           type: 'object',
@@ -437,6 +613,15 @@ const options: swaggerJSDoc.Options = {
                       principalAmount: '20000000',
                       interestRate: '4.5',
                       termMonths: '360',
+                      loanType: 'ANNUITY',
+                      paymentFrequency: 'MONTHLY',
+                      fees: [
+                        {
+                          type: 'ORIGINATION',
+                          amount: '50000',
+                          description: 'Origination fee',
+                        },
+                      ],
                     },
                   },
                   credit: {
@@ -671,6 +856,108 @@ const options: swaggerJSDoc.Options = {
             },
             '400': {
               description: 'Invalid account ID',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/Error',
+                  },
+                },
+              },
+            },
+            '500': {
+              description: 'Internal server error',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/Error',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      '/accounts/{accountId}/payment-plan': {
+        get: {
+          tags: ['Payment Plans'],
+          summary: 'Get payment plan details',
+          description: 'Retrieves the payment plan details for the specified loan account',
+          parameters: [
+            {
+              name: 'accountId',
+              in: 'path',
+              required: true,
+              schema: {
+                type: 'string',
+              },
+              description: 'The loan account identifier',
+              example: '1234567890',
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'Payment plan retrieved successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/PaymentPlan',
+                  },
+                },
+              },
+            },
+            '404': {
+              description: 'Payment plan not found',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/Error',
+                  },
+                },
+              },
+            },
+            '500': {
+              description: 'Internal server error',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/Error',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      '/accounts/{accountId}/amortization-schedule': {
+        get: {
+          tags: ['Payment Plans'],
+          summary: 'Get amortization schedule',
+          description: 'Generates and retrieves the complete amortization schedule for the specified loan account',
+          parameters: [
+            {
+              name: 'accountId',
+              in: 'path',
+              required: true,
+              schema: {
+                type: 'string',
+              },
+              description: 'The loan account identifier',
+              example: '1234567890',
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'Amortization schedule generated successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/AmortizationSchedule',
+                  },
+                },
+              },
+            },
+            '404': {
+              description: 'Payment plan not found',
               content: {
                 'application/json': {
                   schema: {

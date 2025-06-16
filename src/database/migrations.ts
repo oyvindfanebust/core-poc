@@ -242,6 +242,90 @@ export class MigrationRunner {
           `);
         },
       },
+      {
+        id: '006_enhance_payment_plans',
+        name: 'Add loan type, payment frequency, fees, and total loan amount to payment plans',
+        up: async (db: DatabaseConnection) => {
+          // Add new fields to payment_plans table
+          await db.query(`
+            DO $$ 
+            BEGIN
+              IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='payment_plans' AND column_name='loan_type') THEN
+                ALTER TABLE payment_plans ADD COLUMN loan_type VARCHAR(20) DEFAULT 'ANNUITY';
+              END IF;
+              
+              IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='payment_plans' AND column_name='payment_frequency') THEN
+                ALTER TABLE payment_plans ADD COLUMN payment_frequency VARCHAR(20) DEFAULT 'MONTHLY';
+              END IF;
+              
+              IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='payment_plans' AND column_name='fees') THEN
+                ALTER TABLE payment_plans ADD COLUMN fees JSONB DEFAULT '[]'::jsonb;
+              END IF;
+              
+              IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='payment_plans' AND column_name='total_loan_amount') THEN
+                ALTER TABLE payment_plans ADD COLUMN total_loan_amount BIGINT;
+              END IF;
+            END $$;
+          `);
+
+          // Update existing records with default values
+          await db.query(`
+            UPDATE payment_plans 
+            SET total_loan_amount = principal_amount 
+            WHERE total_loan_amount IS NULL
+          `);
+
+          // Add constraints
+          await db.query(`
+            DO $$ 
+            BEGIN
+              IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name='chk_loan_type') THEN
+                ALTER TABLE payment_plans ADD CONSTRAINT chk_loan_type CHECK (loan_type IN ('ANNUITY', 'SERIAL'));
+              END IF;
+              
+              IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name='chk_payment_frequency') THEN
+                ALTER TABLE payment_plans ADD CONSTRAINT chk_payment_frequency CHECK (payment_frequency IN ('WEEKLY', 'BI_WEEKLY', 'MONTHLY'));
+              END IF;
+            END $$;
+          `);
+        },
+        down: async (db: DatabaseConnection) => {
+          await db.query('ALTER TABLE payment_plans DROP COLUMN IF EXISTS loan_type');
+          await db.query('ALTER TABLE payment_plans DROP COLUMN IF EXISTS payment_frequency');
+          await db.query('ALTER TABLE payment_plans DROP COLUMN IF EXISTS fees');
+          await db.query('ALTER TABLE payment_plans DROP COLUMN IF EXISTS total_loan_amount');
+        },
+      },
+      {
+        id: '007_add_payment_schedule_tracking',
+        name: 'Add next payment date and customer ID to payment plans',
+        up: async (db: DatabaseConnection) => {
+          // Add new fields to payment_plans table
+          await db.query(`
+            DO $$ 
+            BEGIN
+              IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='payment_plans' AND column_name='next_payment_date') THEN
+                ALTER TABLE payment_plans ADD COLUMN next_payment_date DATE;
+              END IF;
+              
+              IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='payment_plans' AND column_name='customer_id') THEN
+                ALTER TABLE payment_plans ADD COLUMN customer_id VARCHAR(8);
+              END IF;
+            END $$;
+          `);
+
+          // Set default next payment date for existing records (30 days from now)
+          await db.query(`
+            UPDATE payment_plans 
+            SET next_payment_date = CURRENT_DATE + INTERVAL '30 days'
+            WHERE next_payment_date IS NULL AND remaining_payments > 0
+          `);
+        },
+        down: async (db: DatabaseConnection) => {
+          await db.query('ALTER TABLE payment_plans DROP COLUMN IF EXISTS next_payment_date');
+          await db.query('ALTER TABLE payment_plans DROP COLUMN IF EXISTS customer_id');
+        },
+      },
     ];
   }
 }

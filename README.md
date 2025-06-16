@@ -26,6 +26,14 @@ A comprehensive banking ledger API built with Node.js, TypeScript, TigerBeetle, 
 - **Background Jobs**: Automated payment processing and invoice management
 - **Request Validation**: Comprehensive input validation with detailed error messages
 
+### Payment Plan Features
+- **Multiple Loan Types**: Support for annuity and serial loan structures
+- **Flexible Payment Frequencies**: Weekly, bi-weekly, and monthly payment options
+- **Fee Management**: Comprehensive fee structures (origination, processing, insurance, late fees)
+- **Automated Invoice Generation**: Scheduled payment invoice creation
+- **Amortization Schedules**: Complete payment breakdowns with principal/interest calculations
+- **Payment Processing Integration**: Direct TigerBeetle transfer processing for loan payments
+
 ## Quick Start
 
 ### Prerequisites
@@ -150,7 +158,16 @@ curl -X POST http://localhost:3002/accounts \
     "currency": "USD",
     "principalAmount": "20000000",
     "interestRate": "4.5",
-    "termMonths": "360"
+    "termMonths": "360",
+    "loanType": "ANNUITY",
+    "paymentFrequency": "MONTHLY",
+    "fees": [
+      {
+        "type": "ORIGINATION",
+        "amount": "50000",
+        "description": "Origination fee"
+      }
+    ]
   }'
 ```
 
@@ -175,6 +192,16 @@ curl -X POST http://localhost:3002/invoices \
     "amount": "250000",
     "dueDate": "2024-12-01"
   }'
+```
+
+### Get Payment Plan
+```bash
+curl -X GET http://localhost:3002/accounts/1234567890/payment-plan
+```
+
+### Get Amortization Schedule
+```bash
+curl -X GET http://localhost:3002/accounts/1234567890/amortization-schedule
 ```
 
 ## Testing

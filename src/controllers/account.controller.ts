@@ -54,17 +54,30 @@ export class AccountController {
     res: Response, 
     data: CreateLoanAccountRequest
   ): Promise<void> {
+    // Convert fee strings to LoanFee objects with bigint amounts
+    const fees = data.fees.map(fee => ({
+      type: fee.type,
+      amount: BigInt(fee.amount),
+      description: fee.description,
+    }));
+
     const loanAccount = await this.loanService.createLoanWithPaymentPlan({
       customerId: new CustomerId(data.customerId),
       currency: data.currency,
       principalAmount: new Money(data.principalAmount, data.currency),
       interestRate: parseFloat(data.interestRate),
       termMonths: parseInt(data.termMonths),
+      loanType: data.loanType,
+      paymentFrequency: data.paymentFrequency,
+      fees,
     });
 
     res.status(201).json({
       accountId: loanAccount.accountId.toString(),
       monthlyPayment: loanAccount.monthlyPayment.toString(),
+      loanType: data.loanType,
+      paymentFrequency: data.paymentFrequency,
+      totalFees: fees.reduce((total, fee) => total + fee.amount, 0n).toString(),
     });
   }
 
@@ -219,6 +232,89 @@ export class AccountController {
         error 
       });
       res.status(500).json({ error: 'Failed to get invoices' });
+    }
+  }
+
+  async getPaymentPlan(req: Request, res: Response): Promise<void> {
+    try {
+      const { accountId } = req.params;
+      
+      logger.debug('Getting payment plan for account', { accountId });
+      
+      const paymentPlan = await this.loanService.getPaymentPlan(
+        new AccountId(accountId)
+      );
+      
+      if (!paymentPlan) {
+        res.status(404).json({ error: 'Payment plan not found' });
+        return;
+      }
+      
+      // Convert BigInt fields to strings for JSON serialization
+      const serializedPaymentPlan = {
+        accountId: paymentPlan.accountId.toString(),
+        principalAmount: paymentPlan.principalAmount.toString(),
+        interestRate: paymentPlan.interestRate,
+        termMonths: paymentPlan.termMonths,
+        monthlyPayment: paymentPlan.monthlyPayment.toString(),
+        remainingPayments: paymentPlan.remainingPayments,
+        loanType: paymentPlan.loanType,
+        paymentFrequency: paymentPlan.paymentFrequency,
+        fees: paymentPlan.fees.map(fee => ({
+          type: fee.type,
+          amount: fee.amount.toString(),
+          description: fee.description,
+        })),
+        totalLoanAmount: paymentPlan.totalLoanAmount.toString(),
+      };
+      
+      res.json(serializedPaymentPlan);
+    } catch (error) {
+      logger.error('Failed to get payment plan', { 
+        accountId: req.params.accountId,
+        error 
+      });
+      res.status(500).json({ error: 'Failed to get payment plan' });
+    }
+  }
+
+  async getAmortizationSchedule(req: Request, res: Response): Promise<void> {
+    try {
+      const { accountId } = req.params;
+      
+      logger.debug('Getting amortization schedule for account', { accountId });
+      
+      const schedule = await this.loanService.generateAmortizationSchedule(
+        new AccountId(accountId)
+      );
+      
+      if (!schedule) {
+        res.status(404).json({ error: 'Payment plan not found' });
+        return;
+      }
+      
+      // Convert BigInt fields to strings for JSON serialization
+      const serializedSchedule = {
+        accountId: schedule.accountId.toString(),
+        totalPayments: schedule.totalPayments.toString(),
+        totalInterest: schedule.totalInterest.toString(),
+        schedule: schedule.schedule.map(entry => ({
+          paymentNumber: entry.paymentNumber,
+          paymentDate: entry.paymentDate,
+          paymentAmount: entry.paymentAmount.toString(),
+          principalAmount: entry.principalAmount.toString(),
+          interestAmount: entry.interestAmount.toString(),
+          remainingBalance: entry.remainingBalance.toString(),
+        })),
+      };
+      
+      res.json(serializedSchedule);
+    } catch (error) {
+      logger.error('Failed to get amortization schedule', { 
+        accountId: req.params.accountId,
+        error 
+      });
+      res.status(500).json({ error: 'Failed to get amortization schedule' });
     }
   }
 }

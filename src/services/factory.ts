@@ -1,6 +1,7 @@
 import { AccountService } from './account.service.js';
 import { TigerBeetleService } from './tigerbeetle.service.js';
 import { CDCManagerService } from './cdc-manager.service.js';
+import { PaymentProcessingService } from './payment-processing.service.js';
 import { PaymentPlanJob } from '../jobs/payment-plan.job.js';
 import { InvoiceJob } from '../jobs/invoice.job.js';
 import { LoanService } from '../domain/services/loan.service.js';
@@ -17,6 +18,7 @@ export interface ServiceContainer {
   accountService: AccountService;
   loanService: LoanService;
   invoiceService: InvoiceService;
+  paymentProcessingService: PaymentProcessingService;
   paymentPlanJob: PaymentPlanJob;
   invoiceJob: InvoiceJob;
   database: DatabaseConnection;
@@ -92,8 +94,15 @@ export class ServiceFactory {
       const loanService = new LoanService(accountService, paymentPlanRepository);
       const invoiceService = new InvoiceService(invoiceRepository);
 
+      // Create payment processing service
+      const paymentProcessingService = new PaymentProcessingService(
+        paymentPlanRepository,
+        invoiceService,
+        accountService
+      );
+
       // Create background jobs
-      const paymentPlanJob = new PaymentPlanJob(paymentPlanRepository, accountService);
+      const paymentPlanJob = new PaymentPlanJob(paymentPlanRepository, accountService, paymentProcessingService);
       const invoiceJob = new InvoiceJob(invoiceService);
 
       // Create CDC Manager
@@ -104,6 +113,7 @@ export class ServiceFactory {
         accountService,
         loanService,
         invoiceService,
+        paymentProcessingService,
         paymentPlanJob,
         invoiceJob,
         database,
@@ -151,8 +161,15 @@ export class ServiceFactory {
       const loanService = new LoanService(accountService, paymentPlanRepository);
       const invoiceService = new InvoiceService(invoiceRepository);
 
+      // Create payment processing service
+      const paymentProcessingService = new PaymentProcessingService(
+        paymentPlanRepository,
+        invoiceService,
+        accountService
+      );
+
       // Create background jobs (but don't start them in tests)
-      const paymentPlanJob = new PaymentPlanJob(paymentPlanRepository, accountService);
+      const paymentPlanJob = new PaymentPlanJob(paymentPlanRepository, accountService, paymentProcessingService);
       const invoiceJob = new InvoiceJob(invoiceService);
 
       // Create CDC Manager (disabled for tests)
@@ -163,6 +180,7 @@ export class ServiceFactory {
         accountService,
         loanService,
         invoiceService,
+        paymentProcessingService,
         paymentPlanJob,
         invoiceJob,
         database,

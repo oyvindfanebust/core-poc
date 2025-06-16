@@ -45,6 +45,16 @@ export const CreateDepositAccountSchema = z.object({
   initialBalance: MoneyAmountSchema.optional(),
 });
 
+// Loan-specific validation schemas
+export const LoanTypeSchema = z.enum(['ANNUITY', 'SERIAL'] as const);
+export const PaymentFrequencySchema = z.enum(['WEEKLY', 'BI_WEEKLY', 'MONTHLY'] as const);
+
+export const LoanFeeSchema = z.object({
+  type: z.string().min(1, 'Fee type is required'),
+  amount: MoneyAmountSchema,
+  description: z.string().min(1, 'Fee description is required'),
+});
+
 export const CreateLoanAccountSchema = z.object({
   type: z.literal('LOAN'),
   customerId: CustomerIdSchema,
@@ -53,7 +63,7 @@ export const CreateLoanAccountSchema = z.object({
   interestRate: z.string().refine(
     (val) => {
       const rate = parseFloat(val);
-      return !isNaN(rate) && rate > 0 && rate <= 100;
+      return !isNaN(rate) && rate >= 0 && rate <= 100;
     },
     { message: 'Interest rate must be between 0 and 100' }
   ),
@@ -64,6 +74,9 @@ export const CreateLoanAccountSchema = z.object({
     },
     { message: 'Term must be between 1 and 480 months' }
   ),
+  loanType: LoanTypeSchema.optional().default('ANNUITY'),
+  paymentFrequency: PaymentFrequencySchema.optional().default('MONTHLY'),
+  fees: z.array(LoanFeeSchema).optional().default([]),
 });
 
 export const CreateCreditAccountSchema = z.object({

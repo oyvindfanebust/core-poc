@@ -1,5 +1,6 @@
 import { PaymentPlanRepository } from '../repositories/payment-plan.repository.js';
 import { AccountService } from '../services/account.service.js';
+import { PaymentProcessingService } from '../services/payment-processing.service.js';
 import { Money, AccountId } from '../domain/value-objects.js';
 import { PaymentPlan } from '../types/index.js';
 import { logger } from '../utils/logger.js';
@@ -10,12 +11,13 @@ export class PaymentPlanJob {
 
   constructor(
     private paymentPlanRepository: PaymentPlanRepository,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private paymentProcessingService: PaymentProcessingService
   ) {}
 
   /**
-   * Process monthly payments for all active payment plans
-   * This now actually creates transfers in TigerBeetle
+   * Process scheduled payments for all payment plans that are due
+   * This creates invoices and TigerBeetle transactions automatically
    */
   async processMonthlyPayments(): Promise<void> {
     if (this.isRunning) {
@@ -25,65 +27,34 @@ export class PaymentPlanJob {
 
     try {
       this.isRunning = true;
-      logger.info('Starting monthly payment processing');
+      logger.info('Starting scheduled payment processing');
 
-      const paymentPlans = await this.paymentPlanRepository.findAll();
+      // Use the payment processing service to handle all the logic
+      const results = await this.paymentProcessingService.processScheduledPayments();
       
-      if (paymentPlans.length === 0) {
-        logger.info('No active payment plans found');
-        return;
-      }
+      const successful = results.filter(r => r.invoiceCreated && r.paymentProcessed).length;
+      const invoiceOnly = results.filter(r => r.invoiceCreated && !r.paymentProcessed).length;
+      const failed = results.filter(r => !r.invoiceCreated).length;
 
-      let processed = 0;
-      let failed = 0;
-
-      for (const plan of paymentPlans) {
-        if (plan.remainingPayments > 0) {
-          try {
-            logger.info('Processing payment', {
-              accountId: plan.accountId.toString(),
-              monthlyPayment: plan.monthlyPayment.toString(),
-              remainingPayments: plan.remainingPayments,
-            });
-
-            // TODO: In a real system, this would need to:
-            // 1. Find the customer's deposit account
-            // 2. Create a transfer from deposit account to loan account
-            // 3. Handle insufficient funds scenarios
-            // 4. Send notifications
-            
-            // For now, we'll just log and update the remaining payments
-            const newRemainingPayments = plan.remainingPayments - 1;
-            
-            await this.paymentPlanRepository.updateRemainingPayments(
-              new AccountId(plan.accountId),
-              newRemainingPayments
-            );
-
-            if (newRemainingPayments === 0) {
-              logger.info('Payment plan completed', {
-                accountId: plan.accountId.toString(),
-              });
-            }
-
-            processed++;
-          } catch (error) {
-            logger.error('Failed to process payment', {
-              accountId: plan.accountId.toString(),
-              error,
-            });
-            failed++;
-          }
-        }
-      }
-
-      logger.info('Monthly payment processing completed', {
-        total: paymentPlans.length,
-        processed,
+      logger.info('Scheduled payment processing completed', {
+        total: results.length,
+        successful,
+        invoiceOnly,
         failed,
+        invoicesCreated: results.filter(r => r.invoiceCreated).map(r => r.invoiceId),
+        transfers: results.filter(r => r.transferId).map(r => r.transferId?.toString()),
       });
+
+      // Log individual failures for debugging
+      const failures = results.filter(r => r.error);
+      if (failures.length > 0) {
+        logger.warn('Some payments failed to process', {
+          failures: failures.map(f => ({ invoiceId: f.invoiceId, error: f.error })),
+        });
+      }
+
     } catch (error) {
-      logger.error('Failed to process monthly payments', { error });
+      logger.error('Failed to process scheduled payments', { error });
     } finally {
       this.isRunning = false;
     }

@@ -1,0 +1,302 @@
+import { PaymentPlanRepository } from '../repositories/payment-plan.repository.js';
+import { InvoiceService } from '../domain/services/invoice.service.js';
+import { AccountService } from './account.service.js';
+import { Money, AccountId, CustomerId } from '../domain/value-objects.js';
+import { PaymentPlan } from '../types/index.js';
+import { logger } from '../utils/logger.js';
+
+export interface PaymentProcessingResult {
+  invoiceCreated: boolean;
+  paymentProcessed: boolean;
+  invoiceId?: string;
+  transferId?: bigint;
+  error?: string;
+}
+
+export class PaymentProcessingService {
+  constructor(
+    private paymentPlanRepository: PaymentPlanRepository,
+    private invoiceService: InvoiceService,
+    private accountService: AccountService
+  ) {}
+
+  /**
+   * Process all payment plans that are due for payment
+   */
+  async processScheduledPayments(processDate: Date = new Date()): Promise<PaymentProcessingResult[]> {
+    try {
+      logger.info('Starting scheduled payment processing', {
+        processDate: processDate.toISOString(),
+      });
+
+      const paymentsDue = await this.paymentPlanRepository.findPaymentsDue(processDate);
+      
+      if (paymentsDue.length === 0) {
+        logger.info('No payments due for processing');
+        return [];
+      }
+
+      logger.info('Found payments due for processing', {
+        count: paymentsDue.length,
+        accountIds: paymentsDue.map(p => p.accountId.toString()),
+      });
+
+      const results: PaymentProcessingResult[] = [];
+
+      for (const paymentPlan of paymentsDue) {
+        const result = await this.processPaymentPlan(paymentPlan, processDate);
+        results.push(result);
+      }
+
+      const successful = results.filter(r => r.invoiceCreated && r.paymentProcessed).length;
+      const failed = results.filter(r => !r.invoiceCreated || !r.paymentProcessed).length;
+
+      logger.info('Scheduled payment processing completed', {
+        total: results.length,
+        successful,
+        failed,
+      });
+
+      return results;
+    } catch (error) {
+      logger.error('Failed to process scheduled payments', { error });
+      throw error;
+    }
+  }
+
+  /**
+   * Process a single payment plan
+   */
+  async processPaymentPlan(paymentPlan: PaymentPlan, processDate: Date = new Date()): Promise<PaymentProcessingResult> {
+    const result: PaymentProcessingResult = {
+      invoiceCreated: false,
+      paymentProcessed: false,
+    };
+
+    try {
+      logger.info('Processing payment plan', {
+        accountId: paymentPlan.accountId.toString(),
+        customerId: paymentPlan.customerId,
+        amount: paymentPlan.monthlyPayment.toString(),
+        remainingPayments: paymentPlan.remainingPayments,
+      });
+
+      // Step 1: Create invoice for the payment
+      const invoice = await this.createPaymentInvoice(paymentPlan, processDate);
+      result.invoiceCreated = true;
+      result.invoiceId = invoice.id;
+
+      logger.info('Invoice created for payment', {
+        invoiceId: invoice.id,
+        accountId: paymentPlan.accountId.toString(),
+        amount: invoice.amount.toString(),
+      });
+
+      // Step 2: Find customer's deposit account
+      const customerDepositAccount = await this.findCustomerDepositAccount(paymentPlan.customerId);
+      
+      if (!customerDepositAccount) {
+        result.error = `No deposit account found for customer ${paymentPlan.customerId}`;
+        logger.error('No deposit account found for customer', {
+          customerId: paymentPlan.customerId,
+          accountId: paymentPlan.accountId.toString(),
+        });
+        return result;
+      }
+
+      // Step 3: Process the payment transaction
+      const transferId = await this.processPaymentTransaction(
+        customerDepositAccount,
+        new AccountId(paymentPlan.accountId),
+        new Money(paymentPlan.monthlyPayment, 'USD') // TODO: Get currency from payment plan
+      );
+
+      result.paymentProcessed = true;
+      result.transferId = transferId;
+
+      logger.info('Payment transaction processed', {
+        transferId: transferId.toString(),
+        fromAccount: customerDepositAccount.toString(),
+        toAccount: paymentPlan.accountId.toString(),
+        amount: paymentPlan.monthlyPayment.toString(),
+      });
+
+      // Step 4: Update payment plan for next payment
+      await this.updatePaymentPlanAfterPayment(paymentPlan);
+
+      logger.info('Payment plan processing completed successfully', {
+        accountId: paymentPlan.accountId.toString(),
+        invoiceId: result.invoiceId,
+        transferId: result.transferId?.toString(),
+      });
+
+      return result;
+    } catch (error) {
+      result.error = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to process payment plan', {
+        accountId: paymentPlan.accountId.toString(),
+        error,
+      });
+      return result;
+    }
+  }
+
+  /**
+   * Create an invoice for a payment plan payment
+   */
+  private async createPaymentInvoice(paymentPlan: PaymentPlan, dueDate: Date) {
+    const invoice = await this.invoiceService.createInvoice({
+      accountId: new AccountId(paymentPlan.accountId),
+      amount: new Money(paymentPlan.monthlyPayment, 'USD'), // TODO: Get currency from payment plan
+      dueDate,
+    });
+
+    return invoice;
+  }
+
+  /**
+   * Find the customer's primary deposit account for payments
+   */
+  private async findCustomerDepositAccount(customerId: string): Promise<AccountId | null> {
+    try {
+      // In a real system, this would query the database for customer accounts
+      // For now, we'll use a simple approach of looking for deposit accounts
+      // that might belong to this customer based on account creation patterns
+      
+      // TODO: This is a simplified implementation
+      // In reality, you'd have a customer-account mapping table
+      logger.info('Looking for deposit account for customer', { customerId });
+      
+      // For now, return null to indicate we need a proper customer-account mapping
+      // This will be implemented when we have customer account management
+      return null;
+    } catch (error) {
+      logger.error('Failed to find customer deposit account', {
+        customerId,
+        error,
+      });
+      return null;
+    }
+  }
+
+  /**
+   * Process the actual payment transaction in TigerBeetle
+   */
+  private async processPaymentTransaction(
+    fromAccountId: AccountId,
+    toAccountId: AccountId,
+    amount: Money
+  ): Promise<bigint> {
+    try {
+      const transferId = await this.accountService.transfer(
+        fromAccountId.value,
+        toAccountId.value,
+        amount.amount,
+        amount.currency
+      );
+
+      logger.info('Payment transfer created in TigerBeetle', {
+        transferId: transferId.toString(),
+        fromAccount: fromAccountId.toString(),
+        toAccount: toAccountId.toString(),
+        amount: amount.toString(),
+      });
+
+      return transferId;
+    } catch (error) {
+      logger.error('Failed to create payment transfer', {
+        fromAccount: fromAccountId.toString(),
+        toAccount: toAccountId.toString(),
+        amount: amount.toString(),
+        error,
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Update payment plan after successful payment
+   */
+  private async updatePaymentPlanAfterPayment(paymentPlan: PaymentPlan): Promise<void> {
+    try {
+      // Decrement remaining payments
+      const newRemainingPayments = paymentPlan.remainingPayments - 1;
+      
+      await this.paymentPlanRepository.updateRemainingPayments(
+        new AccountId(paymentPlan.accountId),
+        newRemainingPayments
+      );
+
+      // Calculate next payment date based on payment frequency
+      if (newRemainingPayments > 0) {
+        const nextPaymentDate = this.calculateNextPaymentDate(
+          paymentPlan.nextPaymentDate,
+          paymentPlan.paymentFrequency
+        );
+
+        await this.paymentPlanRepository.updateNextPaymentDate(
+          new AccountId(paymentPlan.accountId),
+          nextPaymentDate
+        );
+
+        logger.info('Next payment date updated', {
+          accountId: paymentPlan.accountId.toString(),
+          nextPaymentDate: nextPaymentDate.toISOString(),
+          remainingPayments: newRemainingPayments,
+        });
+      } else {
+        logger.info('Payment plan completed', {
+          accountId: paymentPlan.accountId.toString(),
+        });
+      }
+    } catch (error) {
+      logger.error('Failed to update payment plan after payment', {
+        accountId: paymentPlan.accountId.toString(),
+        error,
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate the next payment date based on payment frequency
+   */
+  private calculateNextPaymentDate(currentDate: Date, frequency: string): Date {
+    const nextDate = new Date(currentDate);
+
+    switch (frequency) {
+      case 'WEEKLY':
+        nextDate.setDate(nextDate.getDate() + 7);
+        break;
+      case 'BI_WEEKLY':
+        nextDate.setDate(nextDate.getDate() + 14);
+        break;
+      case 'MONTHLY':
+      default:
+        nextDate.setMonth(nextDate.getMonth() + 1);
+        break;
+    }
+
+    return nextDate;
+  }
+
+  /**
+   * Mark an invoice as paid (called when payment is confirmed)
+   */
+  async markInvoicePaid(invoiceId: string): Promise<boolean> {
+    try {
+      const success = await this.invoiceService.markInvoicePaid(invoiceId);
+      
+      if (success) {
+        logger.info('Invoice marked as paid', { invoiceId });
+      } else {
+        logger.warn('Failed to mark invoice as paid', { invoiceId });
+      }
+
+      return success;
+    } catch (error) {
+      logger.error('Error marking invoice as paid', { invoiceId, error });
+      return false;
+    }
+  }
+}

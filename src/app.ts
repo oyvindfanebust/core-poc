@@ -95,6 +95,17 @@ async function createApp(): Promise<express.Application> {
       accountController.getInvoices.bind(accountController)
     );
 
+    // Payment plan routes
+    app.get('/accounts/:accountId/payment-plan', 
+      validateRequest(AccountIdParamSchema, 'params'),
+      accountController.getPaymentPlan.bind(accountController)
+    );
+    
+    app.get('/accounts/:accountId/amortization-schedule', 
+      validateRequest(AccountIdParamSchema, 'params'),
+      accountController.getAmortizationSchedule.bind(accountController)
+    );
+
     // API info endpoint
     app.get('/api/info', (req, res) => {
       res.json({
@@ -140,6 +151,8 @@ async function createApp(): Promise<express.Application> {
         'POST /transfers',
         'POST /invoices',
         'GET /accounts/:accountId/invoices',
+        'GET /accounts/:accountId/payment-plan',
+        'GET /accounts/:accountId/amortization-schedule',
         'GET /health',
         'GET /metrics',
         'GET /api-docs',

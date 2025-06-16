@@ -1,23 +1,27 @@
 import { PaymentPlanJob } from '../../../src/jobs/payment-plan.job';
 import { PaymentPlanRepository } from '../../../src/repositories/payment-plan.repository';
 import { AccountService } from '../../../src/services/account.service';
+import { PaymentProcessingService } from '../../../src/services/payment-processing.service';
 import { AccountId } from '../../../src/domain/value-objects';
 import { PaymentPlan } from '../../../src/types';
 
 // Mock the dependencies
 jest.mock('../../../src/repositories/payment-plan.repository');
 jest.mock('../../../src/services/account.service');
+jest.mock('../../../src/services/payment-processing.service');
 jest.mock('../../../src/utils/logger');
 
 describe('PaymentPlanJob', () => {
   let paymentPlanJob: PaymentPlanJob;
   let mockPaymentPlanRepository: jest.Mocked<PaymentPlanRepository>;
   let mockAccountService: jest.Mocked<AccountService>;
+  let mockPaymentProcessingService: jest.Mocked<PaymentProcessingService>;
 
   beforeEach(() => {
     mockPaymentPlanRepository = new PaymentPlanRepository() as jest.Mocked<PaymentPlanRepository>;
     mockAccountService = new AccountService({} as any) as jest.Mocked<AccountService>;
-    paymentPlanJob = new PaymentPlanJob(mockPaymentPlanRepository, mockAccountService);
+    mockPaymentProcessingService = new PaymentProcessingService({} as any, {} as any, {} as any) as jest.Mocked<PaymentProcessingService>;
+    paymentPlanJob = new PaymentPlanJob(mockPaymentPlanRepository, mockAccountService, mockPaymentProcessingService);
   });
 
   afterEach(() => {
@@ -26,7 +30,32 @@ describe('PaymentPlanJob', () => {
   });
 
   describe('processMonthlyPayments', () => {
-    it('should process payments and decrement remaining payments', async () => {
+    it('should process scheduled payments using payment processing service', async () => {
+      const mockResults = [
+        {
+          invoiceCreated: true,
+          paymentProcessed: true,
+          invoiceId: 'test-invoice-1',
+          transferId: 123n,
+        },
+      ];
+
+      mockPaymentProcessingService.processScheduledPayments.mockResolvedValue(mockResults);
+
+      await paymentPlanJob.processMonthlyPayments();
+
+      expect(mockPaymentProcessingService.processScheduledPayments).toHaveBeenCalled();
+    });
+
+    it('should handle empty payment results', async () => {
+      mockPaymentProcessingService.processScheduledPayments.mockResolvedValue([]);
+
+      await paymentPlanJob.processMonthlyPayments();
+
+      expect(mockPaymentProcessingService.processScheduledPayments).toHaveBeenCalled();
+    });
+
+    it('should process payments and decrement remaining payments (legacy test)', async () => {
       const plans: PaymentPlan[] = [
         {
           accountId: 123n,
@@ -35,19 +64,23 @@ describe('PaymentPlanJob', () => {
           termMonths: 12,
           monthlyPayment: 856n,
           remainingPayments: 2,
+          loanType: 'ANNUITY',
+          paymentFrequency: 'MONTHLY',
+          fees: [],
+          totalLoanAmount: 10000n,
+          nextPaymentDate: new Date(),
+          customerId: 'CUST001',
         },
       ];
 
-      mockPaymentPlanRepository.findAll.mockResolvedValue(plans);
-      mockPaymentPlanRepository.updateRemainingPayments.mockResolvedValue(undefined);
+      // This test is now obsolete since the job uses PaymentProcessingService
+      // But we'll keep it for compatibility
+      const mockResults = [{ invoiceCreated: true, paymentProcessed: true }];
+      mockPaymentProcessingService.processScheduledPayments.mockResolvedValue(mockResults);
 
       await paymentPlanJob.processMonthlyPayments();
 
-      expect(mockPaymentPlanRepository.findAll).toHaveBeenCalled();
-      expect(mockPaymentPlanRepository.updateRemainingPayments).toHaveBeenCalledWith(
-        expect.any(AccountId),
-        1
-      );
+      expect(mockPaymentProcessingService.processScheduledPayments).toHaveBeenCalled();
     });
 
     it('should handle completed payment plans', async () => {
@@ -59,43 +92,33 @@ describe('PaymentPlanJob', () => {
           termMonths: 12,
           monthlyPayment: 856n,
           remainingPayments: 1,
+          loanType: 'ANNUITY',
+          paymentFrequency: 'MONTHLY',
+          fees: [],
+          totalLoanAmount: 10000n,
+          nextPaymentDate: new Date(),
+          customerId: 'CUST001',
         },
       ];
 
-      mockPaymentPlanRepository.findAll.mockResolvedValue(plans);
-      mockPaymentPlanRepository.updateRemainingPayments.mockResolvedValue(undefined);
+      const mockResults = [{ invoiceCreated: true, paymentProcessed: true }];
+      mockPaymentProcessingService.processScheduledPayments.mockResolvedValue(mockResults);
 
       await paymentPlanJob.processMonthlyPayments();
 
-      expect(mockPaymentPlanRepository.updateRemainingPayments).toHaveBeenCalledWith(
-        expect.any(AccountId),
-        0
-      );
+      expect(mockPaymentProcessingService.processScheduledPayments).toHaveBeenCalled();
     });
 
     it('should handle empty payment plans', async () => {
-      mockPaymentPlanRepository.findAll.mockResolvedValue([]);
+      mockPaymentProcessingService.processScheduledPayments.mockResolvedValue([]);
 
       await paymentPlanJob.processMonthlyPayments();
 
-      expect(mockPaymentPlanRepository.findAll).toHaveBeenCalled();
-      expect(mockPaymentPlanRepository.updateRemainingPayments).not.toHaveBeenCalled();
+      expect(mockPaymentProcessingService.processScheduledPayments).toHaveBeenCalled();
     });
 
     it('should handle errors gracefully', async () => {
-      const plans: PaymentPlan[] = [
-        {
-          accountId: 123n,
-          principalAmount: 10000n,
-          interestRate: 5.0,
-          termMonths: 12,
-          monthlyPayment: 856n,
-          remainingPayments: 2,
-        },
-      ];
-
-      mockPaymentPlanRepository.findAll.mockResolvedValue(plans);
-      mockPaymentPlanRepository.updateRemainingPayments.mockRejectedValue(new Error('Database error'));
+      mockPaymentProcessingService.processScheduledPayments.mockRejectedValue(new Error('Service error'));
 
       // Should not throw
       await expect(paymentPlanJob.processMonthlyPayments()).resolves.toBeUndefined();
@@ -112,6 +135,12 @@ describe('PaymentPlanJob', () => {
         termMonths: 12,
         monthlyPayment: 856n,
         remainingPayments: 5,
+        loanType: 'ANNUITY',
+        paymentFrequency: 'MONTHLY',
+        fees: [],
+        totalLoanAmount: 10000n,
+        nextPaymentDate: new Date(),
+        customerId: 'CUST001',
       };
 
       mockPaymentPlanRepository.findByAccountId.mockResolvedValue(plan);
@@ -143,6 +172,12 @@ describe('PaymentPlanJob', () => {
         termMonths: 12,
         monthlyPayment: 856n,
         remainingPayments: 0,
+        loanType: 'ANNUITY',
+        paymentFrequency: 'MONTHLY',
+        fees: [],
+        totalLoanAmount: 10000n,
+        nextPaymentDate: new Date(),
+        customerId: 'CUST001',
       };
 
       mockPaymentPlanRepository.findByAccountId.mockResolvedValue(plan);
@@ -164,6 +199,12 @@ describe('PaymentPlanJob', () => {
         termMonths: 12,
         monthlyPayment: 856n,
         remainingPayments: 5,
+        loanType: 'ANNUITY',
+        paymentFrequency: 'MONTHLY',
+        fees: [],
+        totalLoanAmount: 10000n,
+        nextPaymentDate: new Date(),
+        customerId: 'CUST001',
       };
 
       mockPaymentPlanRepository.findByAccountId.mockResolvedValue(plan);

@@ -2,7 +2,7 @@ import request from 'supertest';
 import express from 'express';
 import { AccountController } from '../../src/controllers/account.controller';
 import { validateRequest } from '../../src/middleware/validation';
-import { CreateAccountSchema, TransferSchema, CreateInvoiceSchema, AccountIdParamSchema } from '../../src/validation/schemas';
+import { CreateAccountSchema, TransferSchema, CreateInvoiceSchema, AccountIdParamSchema, CustomerIdParamSchema } from '../../src/validation/schemas';
 import { createTestContext, cleanupTestContext, TestContext } from '../helpers/test-utils.js';
 import { setupTestTigerBeetle, teardownTestTigerBeetle } from '../helpers/test-tigerbeetle.js';
 
@@ -46,6 +46,10 @@ describe('Banking Workflows E2E', () => {
     app.get('/accounts/:accountId/invoices', 
       validateRequest(AccountIdParamSchema, 'params'),
       accountController.getInvoices.bind(accountController)
+    );
+    app.get('/customers/:customerId/accounts',
+      validateRequest(CustomerIdParamSchema, 'params'),
+      accountController.getAccountsByCustomer.bind(accountController)
     );
   }, 60000);
 
@@ -433,6 +437,161 @@ describe('Banking Workflows E2E', () => {
       invoices.body.forEach((invoice: any) => {
         expect(invoice.status).toBe('pending');
       });
+    });
+  });
+
+  describe('Customer Account Management Scenario', () => {
+    it('should list all accounts for a specific customer', async () => {
+      const customerId = 'CUSTLIST';
+      
+      // Create multiple accounts for the same customer
+      const depositAccount = await request(app)
+        .post('/accounts')
+        .send({
+          type: 'DEPOSIT',
+          customerId,
+          currency: 'USD',
+          initialBalance: '25000',
+        })
+        .expect(201);
+
+      const loanAccount = await request(app)
+        .post('/accounts')
+        .send({
+          type: 'LOAN',
+          customerId,
+          currency: 'USD',
+          principalAmount: '150000',
+          interestRate: '3.5',
+          termMonths: '240',
+        })
+        .expect(201);
+
+      const creditAccount = await request(app)
+        .post('/accounts')
+        .send({
+          type: 'CREDIT',
+          customerId,
+          currency: 'USD',
+          creditLimit: '15000',
+        })
+        .expect(201);
+
+      // List all accounts for the customer
+      const accountsResponse = await request(app)
+        .get(`/customers/${customerId}/accounts`)
+        .expect(200);
+
+      const accounts = accountsResponse.body;
+      expect(accounts).toHaveLength(3);
+
+      // Verify all accounts belong to the correct customer
+      accounts.forEach((account: any) => {
+        expect(account.customerId).toBe(customerId);
+        expect(account.currency).toBe('USD');
+        expect(account).toHaveProperty('accountId');
+        expect(account).toHaveProperty('accountType');
+        expect(account).toHaveProperty('createdAt');
+        expect(account).toHaveProperty('updatedAt');
+      });
+
+      // Verify account types are present
+      const accountTypes = accounts.map((account: any) => account.accountType);
+      expect(accountTypes).toContain('DEPOSIT');
+      expect(accountTypes).toContain('LOAN');
+      expect(accountTypes).toContain('CREDIT');
+
+      // Verify account IDs match created accounts
+      const accountIds = accounts.map((account: any) => account.accountId);
+      expect(accountIds).toContain(depositAccount.body.accountId);
+      expect(accountIds).toContain(loanAccount.body.accountId);
+      expect(accountIds).toContain(creditAccount.body.accountId);
+    });
+
+    it('should return empty array for customer with no accounts', async () => {
+      const nonExistentCustomerId = 'NOACCNT';
+      
+      const accountsResponse = await request(app)
+        .get(`/customers/${nonExistentCustomerId}/accounts`)
+        .expect(200);
+
+      expect(accountsResponse.body).toHaveLength(0);
+      expect(Array.isArray(accountsResponse.body)).toBe(true);
+    });
+
+    it('should handle customer ID validation', async () => {
+      // Test invalid customer ID (too long)
+      await request(app)
+        .get('/customers/TOOLONGID/accounts')
+        .expect(400);
+
+      // Test invalid customer ID (invalid characters)
+      await request(app)
+        .get('/customers/cust@123/accounts')
+        .expect(400);
+
+      // Test empty customer ID
+      await request(app)
+        .get('/customers//accounts')
+        .expect(404); // Route not found
+    });
+
+    it('should return accounts ordered by creation date (newest first)', async () => {
+      const customerId = 'CUSTORD';
+      
+      // Create accounts with small delays to ensure different creation times
+      const firstAccount = await request(app)
+        .post('/accounts')
+        .send({
+          type: 'DEPOSIT',
+          customerId,
+          currency: 'USD',
+          initialBalance: '10000',
+        })
+        .expect(201);
+
+      // Small delay
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const secondAccount = await request(app)
+        .post('/accounts')
+        .send({
+          type: 'CREDIT',
+          customerId,
+          currency: 'USD',
+          creditLimit: '5000',
+        })
+        .expect(201);
+
+      // Small delay
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const thirdAccount = await request(app)
+        .post('/accounts')
+        .send({
+          type: 'DEPOSIT',
+          customerId,
+          currency: 'EUR',
+          initialBalance: '8000',
+        })
+        .expect(201);
+
+      // Get accounts list
+      const accountsResponse = await request(app)
+        .get(`/customers/${customerId}/accounts`)
+        .expect(200);
+
+      const accounts = accountsResponse.body;
+      expect(accounts).toHaveLength(3);
+
+      // Verify accounts are ordered by creation date (newest first)
+      const creationDates = accounts.map((account: any) => new Date(account.createdAt));
+      for (let i = 0; i < creationDates.length - 1; i++) {
+        expect(creationDates[i].getTime()).toBeGreaterThanOrEqual(creationDates[i + 1].getTime());
+      }
+
+      // Verify the newest account is first
+      expect(accounts[0].accountId).toBe(thirdAccount.body.accountId);
     });
   });
 });

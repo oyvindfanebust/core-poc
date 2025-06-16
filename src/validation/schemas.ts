@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { Currency } from '../types/index.js';
 
 // Base schemas for reusable validation
-export const CurrencySchema = z.enum(['USD', 'EUR', 'NOK'] as const);
+export const CurrencySchema = z.enum(['USD', 'EUR', 'GBP', 'NOK', 'SEK', 'DKK', 'JPY', 'CAD', 'AUD', 'CHF'] as const);
 export const AccountTypeSchema = z.enum(['DEPOSIT', 'LOAN', 'CREDIT'] as const);
 
 // Money amount validation (positive BigInt as string)
@@ -31,11 +31,11 @@ export const AccountIdSchema = z.string().refine(
   { message: 'Account ID must be a valid number' }
 );
 
-// Customer ID validation
+// Customer ID validation - More realistic for real-world usage
 export const CustomerIdSchema = z.string()
   .min(1, 'Customer ID is required')
-  .max(8, 'Customer ID cannot exceed 8 characters')
-  .regex(/^[A-Z0-9_]+$/, 'Customer ID must contain only uppercase letters, numbers, and underscores');
+  .max(50, 'Customer ID cannot exceed 50 characters')
+  .regex(/^[A-Za-z0-9\-_]+$/, 'Customer ID must contain only letters, numbers, hyphens, and underscores');
 
 // Account creation schemas
 export const CreateDepositAccountSchema = z.object({
@@ -47,10 +47,13 @@ export const CreateDepositAccountSchema = z.object({
 
 // Loan-specific validation schemas
 export const LoanTypeSchema = z.enum(['ANNUITY', 'SERIAL'] as const);
-export const PaymentFrequencySchema = z.enum(['WEEKLY', 'BI_WEEKLY', 'MONTHLY'] as const);
+export const PaymentFrequencySchema = z.enum(['WEEKLY', 'BI_WEEKLY', 'MONTHLY', 'QUARTERLY', 'SEMI_ANNUALLY', 'ANNUALLY'] as const);
+
+// Fee types for loans
+export const FeeTypeSchema = z.enum(['ORIGINATION', 'PROCESSING', 'INSURANCE', 'LATE_PAYMENT', 'PREPAYMENT', 'APPRAISAL', 'ADMINISTRATION'] as const);
 
 export const LoanFeeSchema = z.object({
-  type: z.string().min(1, 'Fee type is required'),
+  type: FeeTypeSchema,
   amount: MoneyAmountSchema,
   description: z.string().min(1, 'Fee description is required'),
 });
@@ -119,6 +122,10 @@ export const AccountIdParamSchema = z.object({
   accountId: AccountIdSchema,
 });
 
+export const CustomerIdParamSchema = z.object({
+  customerId: CustomerIdSchema,
+});
+
 // Type exports for use in controllers
 export type CreateAccountRequest = z.infer<typeof CreateAccountSchema>;
 export type CreateDepositAccountRequest = z.infer<typeof CreateDepositAccountSchema>;
@@ -127,3 +134,4 @@ export type CreateCreditAccountRequest = z.infer<typeof CreateCreditAccountSchem
 export type TransferRequest = z.infer<typeof TransferSchema>;
 export type CreateInvoiceRequest = z.infer<typeof CreateInvoiceSchema>;
 export type AccountIdParam = z.infer<typeof AccountIdParamSchema>;
+export type CustomerIdParam = z.infer<typeof CustomerIdParamSchema>;

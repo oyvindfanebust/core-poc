@@ -326,6 +326,126 @@ export class MigrationRunner {
           await db.query('ALTER TABLE payment_plans DROP COLUMN IF EXISTS customer_id');
         },
       },
+      {
+        id: '008_create_accounts_metadata',
+        name: 'Create accounts metadata table for customer-account relationships',
+        up: async (db: DatabaseConnection) => {
+          // Create accounts table to track customer-account relationships
+          await db.query(`
+            CREATE TABLE IF NOT EXISTS accounts (
+              account_id TEXT PRIMARY KEY,
+              customer_id VARCHAR(8) NOT NULL,
+              account_type VARCHAR(20) NOT NULL,
+              currency VARCHAR(3) NOT NULL,
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+          `);
+
+          // Create indexes for efficient lookups
+          await db.query(`
+            CREATE INDEX IF NOT EXISTS idx_accounts_customer_id ON accounts(customer_id)
+          `);
+          
+          await db.query(`
+            CREATE INDEX IF NOT EXISTS idx_accounts_type ON accounts(account_type)
+          `);
+          
+          await db.query(`
+            CREATE INDEX IF NOT EXISTS idx_accounts_customer_type ON accounts(customer_id, account_type)
+          `);
+
+          // Add constraints
+          await db.query(`
+            DO $$ 
+            BEGIN
+              IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name='chk_account_type') THEN
+                ALTER TABLE accounts ADD CONSTRAINT chk_account_type CHECK (account_type IN ('DEPOSIT', 'LOAN', 'CREDIT'));
+              END IF;
+              
+              IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name='chk_currency') THEN
+                ALTER TABLE accounts ADD CONSTRAINT chk_currency CHECK (currency IN ('USD', 'EUR', 'NOK'));
+              END IF;
+            END $$;
+          `);
+        },
+        down: async (db: DatabaseConnection) => {
+          await db.query('DROP TABLE IF EXISTS accounts');
+        },
+      },
+      {
+        id: '009_update_constraints_for_realistic_values',
+        name: 'Update constraints to support more realistic values',
+        up: async (db: DatabaseConnection) => {
+          // Update customer_id column to support longer customer IDs
+          await db.query(`
+            ALTER TABLE accounts 
+            ALTER COLUMN customer_id TYPE VARCHAR(50)
+          `);
+          
+          await db.query(`
+            ALTER TABLE payment_plans 
+            ALTER COLUMN customer_id TYPE VARCHAR(50)
+          `);
+
+          // Drop old currency constraint and add new one with more currencies
+          await db.query(`
+            ALTER TABLE accounts DROP CONSTRAINT IF EXISTS chk_currency
+          `);
+          
+          await db.query(`
+            DO $$ 
+            BEGIN
+              IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name='chk_currency_updated') THEN
+                ALTER TABLE accounts ADD CONSTRAINT chk_currency_updated CHECK (currency IN ('USD', 'EUR', 'GBP', 'NOK', 'SEK', 'DKK', 'JPY', 'CAD', 'AUD', 'CHF'));
+              END IF;
+            END $$;
+          `);
+
+          // Drop old payment frequency constraint and add new one
+          await db.query(`
+            ALTER TABLE payment_plans DROP CONSTRAINT IF EXISTS chk_payment_frequency
+          `);
+          
+          await db.query(`
+            DO $$ 
+            BEGIN
+              IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name='chk_payment_frequency_updated') THEN
+                ALTER TABLE payment_plans ADD CONSTRAINT chk_payment_frequency_updated CHECK (payment_frequency IN ('WEEKLY', 'BI_WEEKLY', 'MONTHLY', 'QUARTERLY', 'SEMI_ANNUALLY', 'ANNUALLY'));
+              END IF;
+            END $$;
+          `);
+        },
+        down: async (db: DatabaseConnection) => {
+          // Revert customer_id back to VARCHAR(8)
+          await db.query(`
+            ALTER TABLE accounts 
+            ALTER COLUMN customer_id TYPE VARCHAR(8)
+          `);
+          
+          await db.query(`
+            ALTER TABLE payment_plans 
+            ALTER COLUMN customer_id TYPE VARCHAR(8)
+          `);
+
+          // Revert constraints
+          await db.query(`
+            ALTER TABLE accounts DROP CONSTRAINT IF EXISTS chk_currency_updated
+          `);
+          
+          await db.query(`
+            ALTER TABLE accounts ADD CONSTRAINT chk_currency CHECK (currency IN ('USD', 'EUR', 'NOK'))
+          `);
+
+          await db.query(`
+            ALTER TABLE payment_plans DROP CONSTRAINT IF EXISTS chk_payment_frequency_updated
+          `);
+          
+          await db.query(`
+            ALTER TABLE payment_plans ADD CONSTRAINT chk_payment_frequency CHECK (payment_frequency IN ('WEEKLY', 'BI_WEEKLY', 'MONTHLY'))
+          `);
+        },
+      },
     ];
   }
 }

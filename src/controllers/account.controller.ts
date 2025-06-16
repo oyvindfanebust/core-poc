@@ -10,6 +10,7 @@ import {
   CreateCreditAccountRequest,
   TransferRequest,
   CreateInvoiceRequest,
+  CustomerIdParam,
 } from '../validation/schemas.js';
 import { logger } from '../utils/logger.js';
 
@@ -315,6 +316,41 @@ export class AccountController {
         error 
       });
       res.status(500).json({ error: 'Failed to get amortization schedule' });
+    }
+  }
+
+  async getAccountsByCustomer(req: Request, res: Response): Promise<void> {
+    try {
+      const { customerId } = req.params;
+      
+      logger.debug('Getting accounts for customer', { customerId });
+      
+      const accounts = await this.accountService.getAccountsByCustomer(
+        new CustomerId(customerId)
+      );
+      
+      logger.debug('Found accounts for customer', { 
+        customerId,
+        accountCount: accounts.length 
+      });
+      
+      // Convert BigInt fields to strings for JSON serialization
+      const serializedAccounts = accounts.map(account => ({
+        accountId: account.accountId.toString(),
+        customerId: account.customerId,
+        accountType: account.accountType,
+        currency: account.currency,
+        createdAt: account.createdAt.toISOString(),
+        updatedAt: account.updatedAt.toISOString(),
+      }));
+      
+      res.json(serializedAccounts);
+    } catch (error) {
+      logger.error('Failed to get accounts by customer', { 
+        customerId: req.params.customerId,
+        error 
+      });
+      res.status(500).json({ error: 'Failed to get accounts by customer' });
     }
   }
 }

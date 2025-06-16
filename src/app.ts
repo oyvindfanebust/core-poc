@@ -18,7 +18,8 @@ import {
   CreateAccountSchema, 
   TransferSchema, 
   CreateInvoiceSchema,
-  AccountIdParamSchema 
+  AccountIdParamSchema,
+  CustomerIdParamSchema
 } from './validation/schemas.js';
 import { specs } from './docs/swagger.js';
 import { logger, httpLogStream } from './utils/logger.js';
@@ -106,6 +107,12 @@ async function createApp(): Promise<express.Application> {
       accountController.getAmortizationSchedule.bind(accountController)
     );
 
+    // Customer accounts route
+    app.get('/customers/:customerId/accounts',
+      validateRequest(CustomerIdParamSchema, 'params'),
+      accountController.getAccountsByCustomer.bind(accountController)
+    );
+
     // API info endpoint
     app.get('/api/info', (req, res) => {
       res.json({
@@ -153,6 +160,7 @@ async function createApp(): Promise<express.Application> {
         'GET /accounts/:accountId/invoices',
         'GET /accounts/:accountId/payment-plan',
         'GET /accounts/:accountId/amortization-schedule',
+        'GET /customers/:customerId/accounts',
         'GET /health',
         'GET /metrics',
         'GET /api-docs',

@@ -28,11 +28,16 @@ A comprehensive banking ledger API built with Node.js, TypeScript, TigerBeetle, 
 
 ### Payment Plan Features
 - **Multiple Loan Types**: Support for annuity and serial loan structures
-- **Flexible Payment Frequencies**: Weekly, bi-weekly, and monthly payment options
-- **Fee Management**: Comprehensive fee structures (origination, processing, insurance, late fees)
+- **Flexible Payment Frequencies**: Weekly, bi-weekly, monthly, quarterly, semi-annually, and annually
+- **Fee Management**: Comprehensive fee structures (origination, processing, insurance, late payment, prepayment, appraisal, administration)
 - **Automated Invoice Generation**: Scheduled payment invoice creation
 - **Amortization Schedules**: Complete payment breakdowns with principal/interest calculations
 - **Payment Processing Integration**: Direct TigerBeetle transfer processing for loan payments
+
+### Multi-Currency Support
+- **10 Supported Currencies**: USD, EUR, GBP, NOK, SEK, DKK, JPY, CAD, AUD, CHF
+- **ISO 4217 Standards**: All currencies mapped to standard ISO codes
+- **Currency-Specific Accounts**: Each account tied to a single currency for compliance
 
 ## Quick Start
 
@@ -142,8 +147,8 @@ curl -X POST http://localhost:3002/accounts \
   -H "Content-Type: application/json" \
   -d '{
     "type": "DEPOSIT",
-    "customerId": "CUST001",
-    "currency": "USD",
+    "customerId": "CUSTOMER-ABC-123",
+    "currency": "EUR",
     "initialBalance": "100000"
   }'
 ```
@@ -154,18 +159,23 @@ curl -X POST http://localhost:3002/accounts \
   -H "Content-Type: application/json" \
   -d '{
     "type": "LOAN", 
-    "customerId": "CUST001",
-    "currency": "USD",
+    "customerId": "CUSTOMER-ABC-123",
+    "currency": "GBP",
     "principalAmount": "20000000",
     "interestRate": "4.5",
     "termMonths": "360",
     "loanType": "ANNUITY",
-    "paymentFrequency": "MONTHLY",
+    "paymentFrequency": "QUARTERLY",
     "fees": [
       {
         "type": "ORIGINATION",
         "amount": "50000",
-        "description": "Origination fee"
+        "description": "Loan origination fee"
+      },
+      {
+        "type": "INSURANCE",
+        "amount": "25000", 
+        "description": "Loan protection insurance"
       }
     ]
   }'
@@ -203,6 +213,57 @@ curl -X GET http://localhost:3002/accounts/1234567890/payment-plan
 ```bash
 curl -X GET http://localhost:3002/accounts/1234567890/amortization-schedule
 ```
+
+### List Customer Accounts
+```bash
+# Get all accounts for a specific customer
+curl -X GET http://localhost:3002/customers/CUSTOMER-ABC-123/accounts
+
+# Example response:
+# [
+#   {
+#     "accountId": "1234567890123456789",
+#     "customerId": "CUSTOMER-ABC-123",
+#     "accountType": "DEPOSIT",
+#     "currency": "EUR",
+#     "createdAt": "2024-01-01T12:00:00.000Z",
+#     "updatedAt": "2024-01-01T12:00:00.000Z"
+#   },
+#   {
+#     "accountId": "9876543210987654321",
+#     "customerId": "CUSTOMER-ABC-123",
+#     "accountType": "LOAN",
+#     "currency": "GBP",
+#     "createdAt": "2024-01-02T10:30:00.000Z",
+#     "updatedAt": "2024-01-02T10:30:00.000Z"
+#   }
+# ]
+```
+
+## Validation Rules and Constraints
+
+### Customer IDs
+- **Length**: 1-50 characters
+- **Format**: Letters, numbers, hyphens, and underscores only (`[A-Za-z0-9\-_]+`)
+- **Examples**: `CUSTOMER-ABC-123`, `CUST001`, `User_12345`
+
+### Currencies
+- **Supported**: USD, EUR, GBP, NOK, SEK, DKK, JPY, CAD, AUD, CHF
+- **Standard**: ISO 4217 currency codes
+- **Validation**: Currency must be supported and valid for the operation
+
+### Money Amounts
+- **Format**: Positive integers as strings (representing cents/smallest unit)
+- **Examples**: `"100000"` = $1,000.00, `"50000"` = $500.00
+- **Validation**: Must be valid BigInt values >= 0
+
+### Payment Frequencies
+- **Supported**: WEEKLY, BI_WEEKLY, MONTHLY, QUARTERLY, SEMI_ANNUALLY, ANNUALLY
+- **Use Cases**: Flexible loan payment schedules and invoice generation
+
+### Fee Types
+- **Supported**: ORIGINATION, PROCESSING, INSURANCE, LATE_PAYMENT, PREPAYMENT, APPRAISAL, ADMINISTRATION
+- **Structure**: Each fee includes type, amount (in cents), and description
 
 ## Testing
 

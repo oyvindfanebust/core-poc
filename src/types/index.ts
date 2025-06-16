@@ -12,6 +12,12 @@ export interface LedgerCode {
   EUR: number;
   GBP: number;
   NOK: number;
+  SEK: number;
+  DKK: number;
+  JPY: number;
+  CAD: number;
+  AUD: number;
+  CHF: number;
 }
 
 export type Currency = keyof LedgerCode;
@@ -32,7 +38,7 @@ export interface CreateTransferRequest {
 }
 
 export type LoanType = 'ANNUITY' | 'SERIAL';
-export type PaymentFrequency = 'MONTHLY' | 'BI_WEEKLY' | 'WEEKLY';
+export type PaymentFrequency = 'WEEKLY' | 'BI_WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'SEMI_ANNUALLY' | 'ANNUALLY';
 
 export interface LoanFee {
   type: string;

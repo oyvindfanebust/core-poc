@@ -128,14 +128,14 @@ const options: swaggerJSDoc.Options = {
             },
             customerId: {
               type: 'string',
-              maxLength: 8,
-              pattern: '^[A-Z0-9_]+$',
-              description: 'Customer identifier (max 8 chars, uppercase alphanumeric and underscore)',
-              example: 'CUST001',
+              maxLength: 50,
+              pattern: '^[A-Za-z0-9\\-_]+$',
+              description: 'Customer identifier (max 50 chars, letters, numbers, hyphens, underscores)',
+              example: 'CUST-001',
             },
             currency: {
               type: 'string',
-              enum: ['USD', 'EUR', 'NOK'],
+              enum: ['USD', 'EUR', 'GBP', 'NOK', 'SEK', 'DKK', 'JPY', 'CAD', 'AUD', 'CHF'],
               example: 'USD',
             },
             initialBalance: {
@@ -156,14 +156,14 @@ const options: swaggerJSDoc.Options = {
             },
             customerId: {
               type: 'string',
-              maxLength: 8,
-              pattern: '^[A-Z0-9_]+$',
-              description: 'Customer identifier (max 8 chars, uppercase alphanumeric and underscore)',
-              example: 'CUST001',
+              maxLength: 50,
+              pattern: '^[A-Za-z0-9\\-_]+$',
+              description: 'Customer identifier (max 50 chars, letters, numbers, hyphens, underscores)',
+              example: 'CUST-001',
             },
             currency: {
               type: 'string',
-              enum: ['USD', 'EUR', 'NOK'],
+              enum: ['USD', 'EUR', 'GBP', 'NOK', 'SEK', 'DKK', 'JPY', 'CAD', 'AUD', 'CHF'],
               example: 'USD',
             },
             principalAmount: {
@@ -189,7 +189,7 @@ const options: swaggerJSDoc.Options = {
             },
             paymentFrequency: {
               type: 'string',
-              enum: ['WEEKLY', 'BI_WEEKLY', 'MONTHLY'],
+              enum: ['WEEKLY', 'BI_WEEKLY', 'MONTHLY', 'QUARTERLY', 'SEMI_ANNUALLY', 'ANNUALLY'],
               description: 'How often payments are due',
               example: 'MONTHLY',
             },
@@ -201,7 +201,7 @@ const options: swaggerJSDoc.Options = {
                 properties: {
                   type: {
                     type: 'string',
-                    enum: ['ORIGINATION', 'PROCESSING', 'INSURANCE', 'LATE_PAYMENT'],
+                    enum: ['ORIGINATION', 'PROCESSING', 'INSURANCE', 'LATE_PAYMENT', 'PREPAYMENT', 'APPRAISAL', 'ADMINISTRATION'],
                     example: 'ORIGINATION',
                   },
                   amount: {
@@ -231,14 +231,14 @@ const options: swaggerJSDoc.Options = {
             },
             customerId: {
               type: 'string',
-              maxLength: 8,
-              pattern: '^[A-Z0-9_]+$',
-              description: 'Customer identifier (max 8 chars, uppercase alphanumeric and underscore)',
-              example: 'CUST001',
+              maxLength: 50,
+              pattern: '^[A-Za-z0-9\\-_]+$',
+              description: 'Customer identifier (max 50 chars, letters, numbers, hyphens, underscores)',
+              example: 'CUST-001',
             },
             currency: {
               type: 'string',
-              enum: ['USD', 'EUR', 'NOK'],
+              enum: ['USD', 'EUR', 'GBP', 'NOK', 'SEK', 'DKK', 'JPY', 'CAD', 'AUD', 'CHF'],
               example: 'USD',
             },
             creditLimit: {
@@ -338,7 +338,7 @@ const options: swaggerJSDoc.Options = {
             },
             paymentFrequency: {
               type: 'string',
-              enum: ['WEEKLY', 'BI_WEEKLY', 'MONTHLY'],
+              enum: ['WEEKLY', 'BI_WEEKLY', 'MONTHLY', 'QUARTERLY', 'SEMI_ANNUALLY', 'ANNUALLY'],
               description: 'How often payments are due',
               example: 'MONTHLY',
             },
@@ -350,7 +350,7 @@ const options: swaggerJSDoc.Options = {
                 properties: {
                   type: {
                     type: 'string',
-                    enum: ['ORIGINATION', 'PROCESSING', 'INSURANCE', 'LATE_PAYMENT'],
+                    enum: ['ORIGINATION', 'PROCESSING', 'INSURANCE', 'LATE_PAYMENT', 'PREPAYMENT', 'APPRAISAL', 'ADMINISTRATION'],
                     example: 'ORIGINATION',
                   },
                   amount: {
@@ -962,6 +962,149 @@ const options: swaggerJSDoc.Options = {
                 'application/json': {
                   schema: {
                     $ref: '#/components/schemas/Error',
+                  },
+                },
+              },
+            },
+            '500': {
+              description: 'Internal server error',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/Error',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      '/customers/{customerId}/accounts': {
+        get: {
+          tags: ['Customers'],
+          summary: 'Get customer accounts',
+          description: 'Retrieves all accounts associated with the specified customer',
+          parameters: [
+            {
+              name: 'customerId',
+              in: 'path',
+              required: true,
+              schema: {
+                type: 'string',
+                maxLength: 50,
+                pattern: '^[A-Za-z0-9\\-_]+$',
+              },
+              description: 'The customer identifier (max 50 chars, letters, numbers, hyphens, underscores)',
+              example: 'CUST-001',
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'Customer accounts retrieved successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        accountId: {
+                          type: 'string',
+                          description: 'Unique account identifier',
+                          example: '1234567890123456789',
+                        },
+                        customerId: {
+                          type: 'string',
+                          description: 'Customer identifier',
+                          example: 'CUST001',
+                        },
+                        accountType: {
+                          type: 'string',
+                          enum: ['DEPOSIT', 'LOAN', 'CREDIT'],
+                          description: 'Type of account',
+                          example: 'DEPOSIT',
+                        },
+                        currency: {
+                          type: 'string',
+                          enum: ['USD', 'EUR', 'NOK'],
+                          description: 'Account currency',
+                          example: 'USD',
+                        },
+                        createdAt: {
+                          type: 'string',
+                          format: 'date-time',
+                          description: 'Account creation timestamp',
+                          example: '2024-01-01T12:00:00.000Z',
+                        },
+                        updatedAt: {
+                          type: 'string',
+                          format: 'date-time',
+                          description: 'Account last update timestamp',
+                          example: '2024-01-01T12:00:00.000Z',
+                        },
+                      },
+                      required: ['accountId', 'customerId', 'accountType', 'currency', 'createdAt', 'updatedAt'],
+                    },
+                  },
+                  examples: {
+                    multipleAccounts: {
+                      summary: 'Customer with multiple accounts',
+                      value: [
+                        {
+                          accountId: '1234567890123456789',
+                          customerId: 'CUST-001',
+                          accountType: 'DEPOSIT',
+                          currency: 'USD',
+                          createdAt: '2024-01-01T12:00:00.000Z',
+                          updatedAt: '2024-01-01T12:00:00.000Z',
+                        },
+                        {
+                          accountId: '9876543210987654321',
+                          customerId: 'CUST-001',
+                          accountType: 'LOAN',
+                          currency: 'USD',
+                          createdAt: '2024-01-02T10:30:00.000Z',
+                          updatedAt: '2024-01-02T10:30:00.000Z',
+                        },
+                        {
+                          accountId: '5555666677778888999',
+                          customerId: 'CUST-001',
+                          accountType: 'CREDIT',
+                          currency: 'USD',
+                          createdAt: '2024-01-03T14:15:00.000Z',
+                          updatedAt: '2024-01-03T14:15:00.000Z',
+                        },
+                      ],
+                    },
+                    noAccounts: {
+                      summary: 'Customer with no accounts',
+                      value: [],
+                    },
+                  },
+                },
+              },
+            },
+            '400': {
+              description: 'Invalid customer ID',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/Error',
+                  },
+                  examples: {
+                    invalidCustomerId: {
+                      summary: 'Invalid customer ID format',
+                      value: {
+                        error: 'Validation failed',
+                        details: [
+                          {
+                            field: 'customerId',
+                            message: 'Customer ID must contain only uppercase letters, numbers, and underscores',
+                            code: 'invalid_string',
+                          },
+                        ],
+                      },
+                    },
                   },
                 },
               },

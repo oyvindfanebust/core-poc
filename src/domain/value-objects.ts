@@ -186,8 +186,11 @@ export class CustomerId {
     if (!value || value.trim().length === 0) {
       throw new Error('Customer ID cannot be empty');
     }
-    if (value.length > 8) {
-      throw new Error('Customer ID cannot be longer than 8 characters (TigerBeetle limitation)');
+    if (value.length > 50) {
+      throw new Error('Customer ID cannot be longer than 50 characters');
+    }
+    if (!/^[A-Za-z0-9\-_]+$/.test(value)) {
+      throw new Error('Customer ID must contain only letters, numbers, hyphens, and underscores');
     }
     this._value = value.trim();
   }

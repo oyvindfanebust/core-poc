@@ -88,10 +88,10 @@ npm start
 ## API Documentation
 
 Once running, visit:
-- **API Documentation**: http://localhost:3001/api-docs
-- **Health Checks**: http://localhost:3001/health
-- **Metrics**: http://localhost:3001/metrics
-- **API Info**: http://localhost:3001/api/info
+- **API Documentation**: http://localhost:3002/api-docs
+- **Health Checks**: http://localhost:3002/health
+- **Metrics**: http://localhost:3002/metrics
+- **API Info**: http://localhost:3002/api/info
 
 ## Configuration
 
@@ -102,7 +102,7 @@ The application uses direnv to manage environment variables. Copy `.envrc.templa
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `NODE_ENV` | Environment (development/production/test) | development |
-| `PORT` | Server port | 3001 |
+| `PORT` | Server port | 3002 |
 | `DB_HOST` | PostgreSQL host | localhost |
 | `DB_PORT` | PostgreSQL port | 5432 |
 | `DB_NAME` | Database name | banking_poc |
@@ -130,7 +130,7 @@ The application uses direnv to manage environment variables. Copy `.envrc.templa
 
 ### Create a Deposit Account
 ```bash
-curl -X POST http://localhost:3001/accounts \
+curl -X POST http://localhost:3002/accounts \
   -H "Content-Type: application/json" \
   -d '{
     "type": "DEPOSIT",
@@ -142,7 +142,7 @@ curl -X POST http://localhost:3001/accounts \
 
 ### Create a Loan Account
 ```bash
-curl -X POST http://localhost:3001/accounts \
+curl -X POST http://localhost:3002/accounts \
   -H "Content-Type: application/json" \
   -d '{
     "type": "LOAN", 
@@ -156,7 +156,7 @@ curl -X POST http://localhost:3001/accounts \
 
 ### Transfer Money
 ```bash
-curl -X POST http://localhost:3001/transfers \
+curl -X POST http://localhost:3002/transfers \
   -H "Content-Type: application/json" \
   -d '{
     "fromAccountId": "1234567890",
@@ -168,7 +168,7 @@ curl -X POST http://localhost:3001/transfers \
 
 ### Create Invoice
 ```bash
-curl -X POST http://localhost:3001/invoices \
+curl -X POST http://localhost:3002/invoices \
   -H "Content-Type: application/json" \
   -d '{
     "accountId": "1234567890",

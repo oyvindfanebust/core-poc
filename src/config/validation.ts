@@ -19,7 +19,7 @@ const ConfigSchema = z.object({
 
   // Application
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  PORT: z.string().transform(val => parseInt(val)).pipe(z.number().min(1).max(65535)).default('3001'),
+  PORT: z.string().transform(val => parseInt(val)).pipe(z.number().min(1).max(65535)).default('3002'),
 
   // CDC/AMQP
   CDC_ENABLED: z.string().transform(val => val.toLowerCase() === 'true').pipe(z.boolean()).default('false'),

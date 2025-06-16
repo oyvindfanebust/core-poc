@@ -143,10 +143,10 @@ npm run dev
 
 ### Accessing Services
 
-- **Application**: http://localhost:3001
-- **API Docs**: http://localhost:3001/api-docs
+- **Application**: http://localhost:3002
+- **API Docs**: http://localhost:3002/api-docs
 - **RabbitMQ Management**: http://localhost:15672 (guest/guest)
-- **Health Check**: http://localhost:3001/health
+- **Health Check**: http://localhost:3002/health
 
 ### Monitoring Events
 

@@ -208,7 +208,7 @@ process.on('unhandledRejection', (reason, promise) => {
 
 // Start the server
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const port = parseInt(process.env.PORT || '3001');
+  const port = parseInt(process.env.PORT || '3002');
   
   createApp().then(app => {
     app.listen(port, () => {

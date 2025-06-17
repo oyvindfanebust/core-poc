@@ -1,0 +1,10 @@
+{
+  "name": "@core-poc/frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Customer-facing web application for banking ledger PoC",
+  "scripts": {
+    "dev": "echo 'Frontend not yet implemented'",
+    "build": "echo 'Frontend not yet implemented'"
+  }
+}

@@ -67,3 +67,14 @@ temp/
 tigerbeetle
 tigerbeetle.exe
 *.tigerbeetle
+
+# Next.js
+.next/
+out/
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+
+# Misc
+.cache/

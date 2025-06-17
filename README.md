@@ -1,6 +1,17 @@
-# Banking Ledger API
+# Banking Ledger POC
 
-A comprehensive banking ledger API built with Node.js, TypeScript, TigerBeetle, and PostgreSQL. This system provides enterprise-grade banking functionality including account management, transfers, loans, and invoice processing.
+A comprehensive banking ledger proof-of-concept built with Node.js, TypeScript, TigerBeetle, and PostgreSQL. This monorepo contains both the backend API and frontend applications for enterprise-grade banking functionality including account management, transfers, loans, and invoice processing.
+
+## Repository Structure
+
+```
+yet-another-core-poc/
+├── backend/          # Backend API server
+├── frontend/         # Customer-facing web application (Next.js)
+├── shared/           # Shared types and utilities
+├── docker-compose.yml
+└── package.json      # Root workspace configuration
+```
 
 ## Features
 
@@ -51,7 +62,7 @@ A comprehensive banking ledger API built with Node.js, TypeScript, TigerBeetle, 
 ```bash
 git clone <repository-url>
 cd yet-another-core-poc
-npm install
+npm install  # This will install all workspace dependencies
 ```
 
 ### 2. Environment Setup with direnv
@@ -66,7 +77,7 @@ npm install
 # For zsh: echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
 
 # Copy the template and customize for your environment
-cp .envrc.template .envrc
+cp .envrc.example .envrc
 # Edit .envrc with your configuration
 
 # Allow direnv to load the environment variables
@@ -81,36 +92,67 @@ createdb banking_poc
 # Database schema will be automatically created on first run
 ```
 
-### 4. TigerBeetle Setup
+### 4. Infrastructure Setup
 ```bash
-# Download and extract TigerBeetle binary
-# Place the tigerbeetle binary in the project root
-# Or follow TigerBeetle installation instructions
+# Start all required services (PostgreSQL, TigerBeetle, RabbitMQ)
+docker-compose up -d
+
+# Verify services are running
+docker-compose ps
 ```
 
 ### 5. Start the Application
+
+#### Backend Only
 ```bash
 # Development with auto-reload
-npm run dev
+npm run dev:backend
 
-# Production build and start
+# Or from the root
+npm run dev  # Defaults to backend
+```
+
+#### Frontend Only
+```bash
+# Development server
+npm run dev:frontend
+```
+
+#### Both Backend and Frontend
+```bash
+# Run both concurrently
+npm run dev:all
+```
+
+#### Production Build
+```bash
+# Build all workspaces
 npm run build
-npm start
+
+# Build specific workspace
+npm run build:backend
+npm run build:frontend
 ```
 
 ## API Documentation
 
-Once running, visit:
+### Backend API
+Once the backend is running, visit:
 - **API Documentation**: http://localhost:3002/api-docs
 - **Health Checks**: http://localhost:3002/health
 - **Metrics**: http://localhost:3002/metrics
 - **API Info**: http://localhost:3002/api/info
 
+### Frontend Application
+Once the frontend is running:
+- **Customer Banking**: http://localhost:3000
+- **Next.js Dev Tools**: Available in development mode
+
 ## Configuration
 
 ### Environment Variables (managed with direnv)
 
-The application uses direnv to manage environment variables. Copy `.envrc.template` to `.envrc` and customize as needed.
+The application uses direnv to manage environment variables. Copy `.envrc.example` to `.envrc` and customize as needed.
 
 | Variable | Description | Default |
 |----------|-------------|---------|

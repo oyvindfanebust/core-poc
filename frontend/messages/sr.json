@@ -1,0 +1,133 @@
+{
+  "common": {
+    "appName": "Основно банкарство",
+    "signOut": "Одјави се",
+    "cancel": "Откажи",
+    "save": "Сачувај",
+    "delete": "Обриши",
+    "edit": "Измени",
+    "back": "Назад",
+    "loading": "Учитавање...",
+    "error": "Грешка",
+    "success": "Успех",
+    "currency": "Валута"
+  },
+  "navigation": {
+    "dashboard": "Контролна табла",
+    "accounts": "Рачуни",
+    "transfer": "Пренос",
+    "newAccount": "Нови рачун"
+  },
+  "login": {
+    "title": "Основно банкарство",
+    "subtitle": "Пријавите се да бисте приступили својим рачунима",
+    "customerIdLabel": "ИД корисника",
+    "customerIdPlaceholder": "Унесите свој ИД корисника",
+    "signInButton": "Пријави се",
+    "useTestCustomer": "Користи тест корисника (CUSTOMER-ABC-123)",
+    "demoText": "Ово је демо апликација.",
+    "instructionText": "Унесите било који ИД корисника или користите тест корисника.",
+    "errors": {
+      "customerIdRequired": "Молимо унесите ИД корисника",
+      "invalidFormat": "ИД корисника мора садржати само слова, бројеве, цртице и доње црте"
+    }
+  },
+  "dashboard": {
+    "title": "Контролна табла",
+    "totalBalance": "Укупно стање",
+    "totalBalanceDescription": "На свим депозитним рачунима",
+    "noAccounts": "Нема рачуна",
+    "noAccountsDescription": "Започните креирањем новог рачуна.",
+    "createAccount": "Креирај рачун",
+    "accountId": "ИД рачуна",
+    "accountType": {
+      "DEPOSIT": "Депозитни рачун",
+      "LOAN": "Кредитни рачун",
+      "CREDIT": "Кредитни рачун"
+    },
+    "errors": {
+      "loadFailed": "Неуспешно учитавање рачуна. Молимо покушајте поново."
+    }
+  },
+  "createAccount": {
+    "title": "Креирај нови рачун",
+    "accountType": "Тип рачуна",
+    "initialBalance": "Почетно стање (опционо)",
+    "initialBalanceHint": "Унесите износ за депозит приликом креирања рачуна",
+    "createButton": "Креирај рачун",
+    "creating": "Креирање...",
+    "backToDashboard": "Назад на контролну таблу",
+    "accountTypes": {
+      "DEPOSIT": "Депозитни рачун",
+      "LOAN": "Кредитни рачун (Ускоро)",
+      "CREDIT": "Кредитни рачун (Ускоро)"
+    },
+    "currencies": {
+      "USD": "USD - Амерички долар",
+      "EUR": "EUR - Евро",
+      "GBP": "GBP - Британска фунта",
+      "NOK": "NOK - Норвешка круна",
+      "SEK": "SEK - Шведска круна",
+      "DKK": "DKK - Данска круна",
+      "JPY": "JPY - Јапански јен",
+      "CAD": "CAD - Канадски долар",
+      "AUD": "AUD - Аустралијски долар",
+      "CHF": "CHF - Швајцарски франак"
+    },
+    "errors": {
+      "createFailed": "Неуспешно креирање рачуна. Молимо покушајте поново."
+    }
+  },
+  "transfer": {
+    "title": "Пренос новца",
+    "fromAccount": "Са рачуна",
+    "toAccount": "На рачун",
+    "amount": "Износ",
+    "transferButton": "Пренеси новац",
+    "processing": "Обрада...",
+    "selectSource": "Изаберите изворни рачун",
+    "selectDestination": "Изаберите одредишни рачун",
+    "needTwoAccounts": "Потребна су вам најмање два рачуна за пренос.",
+    "createAnother": "Креирај још један рачун",
+    "backToDashboard": "Назад на контролну таблу",
+    "success": "Пренос је успешно завршен! Преусмеравање на контролну таблу...",
+    "errors": {
+      "transferFailed": "Неуспешна обрада преноса. Молимо покушајте поново.",
+      "sameAccount": "Изворни и одредишни рачун морају бити различити",
+      "amountRequired": "Износ мора бити већи од 0",
+      "loadFailed": "Неуспешно учитавање рачуна. Молимо покушајте поново."
+    }
+  },
+  "accounts": {
+    "title": "Сви рачуни",
+    "noAccounts": "Нема рачуна",
+    "noAccountsDescription": "Започните креирањем новог рачуна.",
+    "createFirst": "Креирајте свој први рачун",
+    "currentBalance": "Тренутно стање",
+    "accountId": "ИД рачуна",
+    "errors": {
+      "loadFailed": "Неуспешно учитавање рачуна. Молимо покушајте поново."
+    }
+  },
+  "accountDetails": {
+    "backToAccounts": "Назад на рачуне",
+    "accountId": "ИД рачуна",
+    "created": "Креиран",
+    "currentBalance": "Тренутно стање",
+    "totalCredits": "Укупни кредити",
+    "totalDebits": "Укупни дебити",
+    "transactionHistory": "Историја трансакција",
+    "transactionHistoryComingSoon": "Историја трансакција ускоро...",
+    "transactionHistoryDescription": "Ова функција ће приказати све кредите и дебите за овај рачун.",
+    "transferButton": "Пренос",
+    "accountType": {
+      "DEPOSIT": "Депозитни рачун",
+      "LOAN": "Кредитни рачун",
+      "CREDIT": "Кредитни рачун"
+    },
+    "errors": {
+      "loadFailed": "Неуспешно учитавање детаља рачуна. Молимо покушајте поново.",
+      "notFound": "Рачун није пронађен"
+    }
+  }
+}

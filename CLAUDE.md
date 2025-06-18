@@ -33,6 +33,15 @@ Always run: `npm run build && npm test`
 3. Write tests
 4. Update API docs if adding endpoints
 
+## Frontend Development
+- Frontend runs on port 3003: `npm run dev:frontend`
+- Next.js 15 with App Router
+- Internationalization with next-intl (English, Norwegian, Serbian)
+- All client components need NextIntlClientProvider context
+- Use `useTranslations` hook for i18n in components
+- Language switching via URL: `/en`, `/no`, `/sr` (always prefixed)
+- Middleware uses localePrefix: 'always' for consistent routing
+
 ## Environment
 - See .envrc.example for required variables
 - Migrations run automatically on startup

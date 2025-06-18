@@ -145,7 +145,7 @@ Once the backend is running, visit:
 
 ### Frontend Application
 Once the frontend is running:
-- **Customer Banking**: http://localhost:3000
+- **Customer Banking**: http://localhost:3003
 - **Next.js Dev Tools**: Available in development mode
 
 ## Configuration
@@ -411,6 +411,40 @@ await migrationRunner.rollbackMigration('migration_id');
 - **Metrics Collection**: Performance monitoring and alerting
 - **Graceful Shutdown**: Clean resource cleanup
 - **Memory Management**: Monitoring and alerting for memory usage
+
+## Internationalization (i18n)
+
+The frontend application supports multiple languages with full internationalization using next-intl.
+
+### Supported Languages
+- **English**: Default language (`en`)
+- **Norwegian**: Complete translations (`no`)
+- **Serbian**: Complete translations with Cyrillic script (`sr`)
+
+### Features
+- **Language Switching**: Dynamic language switching via dropdown in navigation
+- **URL-based Locale**: Language preference reflected in URL (`/en`, `/no`, `/sr`)
+- **Complete Coverage**: All UI text, navigation, forms, and messages translated
+- **Type-safe Translations**: TypeScript integration for translation keys
+- **Fallback Support**: Graceful fallback to English if translations missing
+
+### Usage
+1. **Language Switcher**: Click the globe icon in the top navigation
+2. **Direct URL Access**: Navigate directly to `/en`, `/no`, or `/sr` for specific languages
+3. **Persistent State**: Language preference maintained across page navigation
+4. **Root URL**: Automatically redirects to user's preferred language based on browser settings
+
+### Translation Files
+Translation files are located in `frontend/messages/`:
+- `en.json` - English (default)
+- `no.json` - Norwegian (Norsk)
+- `sr.json` - Serbian (Српски)
+
+### Adding New Languages
+1. Create new translation file in `frontend/messages/[locale].json`
+2. Add locale to `frontend/i18n/config.ts` locales array
+3. Add locale name to `localeNames` mapping
+4. Update middleware pattern if needed
 
 ## Contributing
 

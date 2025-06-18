@@ -1,0 +1,133 @@
+{
+  "common": {
+    "appName": "Core Banking",
+    "signOut": "Sign Out",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "currency": "Currency"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "accounts": "Accounts",
+    "transfer": "Transfer",
+    "newAccount": "New Account"
+  },
+  "login": {
+    "title": "Core Banking",
+    "subtitle": "Sign in to access your accounts",
+    "customerIdLabel": "Customer ID",
+    "customerIdPlaceholder": "Enter your Customer ID",
+    "signInButton": "Sign in",
+    "useTestCustomer": "Use test customer (CUSTOMER-ABC-123)",
+    "demoText": "This is a demo application.",
+    "instructionText": "Enter any customer ID or use the test customer.",
+    "errors": {
+      "customerIdRequired": "Please enter a customer ID",
+      "invalidFormat": "Customer ID must contain only letters, numbers, hyphens, and underscores"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "totalBalance": "Total Balance",
+    "totalBalanceDescription": "Across all deposit accounts",
+    "noAccounts": "No accounts",
+    "noAccountsDescription": "Get started by creating a new account.",
+    "createAccount": "Create Account",
+    "accountId": "Account ID",
+    "accountType": {
+      "DEPOSIT": "Deposit Account",
+      "LOAN": "Loan Account",
+      "CREDIT": "Credit Account"
+    },
+    "errors": {
+      "loadFailed": "Failed to load accounts. Please try again."
+    }
+  },
+  "createAccount": {
+    "title": "Create New Account",
+    "accountType": "Account Type",
+    "initialBalance": "Initial Balance (Optional)",
+    "initialBalanceHint": "Enter an amount to deposit when creating the account",
+    "createButton": "Create Account",
+    "creating": "Creating...",
+    "backToDashboard": "Back to Dashboard",
+    "accountTypes": {
+      "DEPOSIT": "Deposit Account",
+      "LOAN": "Loan Account (Coming Soon)",
+      "CREDIT": "Credit Account (Coming Soon)"
+    },
+    "currencies": {
+      "USD": "USD - US Dollar",
+      "EUR": "EUR - Euro",
+      "GBP": "GBP - British Pound",
+      "NOK": "NOK - Norwegian Krone",
+      "SEK": "SEK - Swedish Krona",
+      "DKK": "DKK - Danish Krone",
+      "JPY": "JPY - Japanese Yen",
+      "CAD": "CAD - Canadian Dollar",
+      "AUD": "AUD - Australian Dollar",
+      "CHF": "CHF - Swiss Franc"
+    },
+    "errors": {
+      "createFailed": "Failed to create account. Please try again."
+    }
+  },
+  "transfer": {
+    "title": "Transfer Money",
+    "fromAccount": "From Account",
+    "toAccount": "To Account",
+    "amount": "Amount",
+    "transferButton": "Transfer Money",
+    "processing": "Processing...",
+    "selectSource": "Select source account",
+    "selectDestination": "Select destination account",
+    "needTwoAccounts": "You need at least two accounts to make a transfer.",
+    "createAnother": "Create Another Account",
+    "backToDashboard": "Back to Dashboard",
+    "success": "Transfer completed successfully! Redirecting to dashboard...",
+    "errors": {
+      "transferFailed": "Failed to process transfer. Please try again.",
+      "sameAccount": "Source and destination accounts must be different",
+      "amountRequired": "Amount must be greater than 0",
+      "loadFailed": "Failed to load accounts. Please try again."
+    }
+  },
+  "accounts": {
+    "title": "All Accounts",
+    "noAccounts": "No accounts",
+    "noAccountsDescription": "Get started by creating a new account.",
+    "createFirst": "Create Your First Account",
+    "currentBalance": "Current Balance",
+    "accountId": "Account ID",
+    "errors": {
+      "loadFailed": "Failed to load accounts. Please try again."
+    }
+  },
+  "accountDetails": {
+    "backToAccounts": "Back to Accounts",
+    "accountId": "Account ID",
+    "created": "Created",
+    "currentBalance": "Current Balance",
+    "totalCredits": "Total Credits",
+    "totalDebits": "Total Debits",
+    "transactionHistory": "Transaction History",
+    "transactionHistoryComingSoon": "Transaction history coming soon...",
+    "transactionHistoryDescription": "This feature will show all credits and debits for this account.",
+    "transferButton": "Transfer",
+    "accountType": {
+      "DEPOSIT": "Deposit Account",
+      "LOAN": "Loan Account",
+      "CREDIT": "Credit Account"
+    },
+    "errors": {
+      "loadFailed": "Failed to load account details. Please try again.",
+      "notFound": "Account not found"
+    }
+  }
+}

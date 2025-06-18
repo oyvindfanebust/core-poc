@@ -1,0 +1,133 @@
+{
+  "common": {
+    "appName": "Kjernebank",
+    "signOut": "Logg ut",
+    "cancel": "Avbryt",
+    "save": "Lagre",
+    "delete": "Slett",
+    "edit": "Rediger",
+    "back": "Tilbake",
+    "loading": "Laster...",
+    "error": "Feil",
+    "success": "Suksess",
+    "currency": "Valuta"
+  },
+  "navigation": {
+    "dashboard": "Oversikt",
+    "accounts": "Kontoer",
+    "transfer": "Overfør",
+    "newAccount": "Ny konto"
+  },
+  "login": {
+    "title": "Kjernebank",
+    "subtitle": "Logg inn for å få tilgang til kontoene dine",
+    "customerIdLabel": "Kunde-ID",
+    "customerIdPlaceholder": "Skriv inn din kunde-ID",
+    "signInButton": "Logg inn",
+    "useTestCustomer": "Bruk testkunde (CUSTOMER-ABC-123)",
+    "demoText": "Dette er en demoapplikasjon.",
+    "instructionText": "Skriv inn en hvilken som helst kunde-ID eller bruk testkunden.",
+    "errors": {
+      "customerIdRequired": "Vennligst skriv inn en kunde-ID",
+      "invalidFormat": "Kunde-ID må kun inneholde bokstaver, tall, bindestreker og understreker"
+    }
+  },
+  "dashboard": {
+    "title": "Oversikt",
+    "totalBalance": "Total saldo",
+    "totalBalanceDescription": "På tvers av alle innskuddskontoer",
+    "noAccounts": "Ingen kontoer",
+    "noAccountsDescription": "Kom i gang ved å opprette en ny konto.",
+    "createAccount": "Opprett konto",
+    "accountId": "Konto-ID",
+    "accountType": {
+      "DEPOSIT": "Innskuddskonto",
+      "LOAN": "Lånekonto",
+      "CREDIT": "Kredittkonto"
+    },
+    "errors": {
+      "loadFailed": "Kunne ikke laste kontoer. Vennligst prøv igjen."
+    }
+  },
+  "createAccount": {
+    "title": "Opprett ny konto",
+    "accountType": "Kontotype",
+    "initialBalance": "Startsaldo (valgfritt)",
+    "initialBalanceHint": "Skriv inn et beløp å sette inn ved opprettelse av kontoen",
+    "createButton": "Opprett konto",
+    "creating": "Oppretter...",
+    "backToDashboard": "Tilbake til oversikt",
+    "accountTypes": {
+      "DEPOSIT": "Innskuddskonto",
+      "LOAN": "Lånekonto (Kommer snart)",
+      "CREDIT": "Kredittkonto (Kommer snart)"
+    },
+    "currencies": {
+      "USD": "USD - Amerikanske dollar",
+      "EUR": "EUR - Euro",
+      "GBP": "GBP - Britiske pund",
+      "NOK": "NOK - Norske kroner",
+      "SEK": "SEK - Svenske kroner",
+      "DKK": "DKK - Danske kroner",
+      "JPY": "JPY - Japanske yen",
+      "CAD": "CAD - Kanadiske dollar",
+      "AUD": "AUD - Australske dollar",
+      "CHF": "CHF - Sveitsiske franc"
+    },
+    "errors": {
+      "createFailed": "Kunne ikke opprette konto. Vennligst prøv igjen."
+    }
+  },
+  "transfer": {
+    "title": "Overfør penger",
+    "fromAccount": "Fra konto",
+    "toAccount": "Til konto",
+    "amount": "Beløp",
+    "transferButton": "Overfør penger",
+    "processing": "Behandler...",
+    "selectSource": "Velg kildekonto",
+    "selectDestination": "Velg destinasjonskonto",
+    "needTwoAccounts": "Du trenger minst to kontoer for å gjøre en overføring.",
+    "createAnother": "Opprett en konto til",
+    "backToDashboard": "Tilbake til oversikt",
+    "success": "Overføring fullført! Omdirigerer til oversikt...",
+    "errors": {
+      "transferFailed": "Kunne ikke behandle overføring. Vennligst prøv igjen.",
+      "sameAccount": "Kilde- og destinasjonskonto må være forskjellige",
+      "amountRequired": "Beløp må være større enn 0",
+      "loadFailed": "Kunne ikke laste kontoer. Vennligst prøv igjen."
+    }
+  },
+  "accounts": {
+    "title": "Alle kontoer",
+    "noAccounts": "Ingen kontoer",
+    "noAccountsDescription": "Kom i gang ved å opprette en ny konto.",
+    "createFirst": "Opprett din første konto",
+    "currentBalance": "Nåværende saldo",
+    "accountId": "Konto-ID",
+    "errors": {
+      "loadFailed": "Kunne ikke laste kontoer. Vennligst prøv igjen."
+    }
+  },
+  "accountDetails": {
+    "backToAccounts": "Tilbake til kontoer",
+    "accountId": "Konto-ID",
+    "created": "Opprettet",
+    "currentBalance": "Nåværende saldo",
+    "totalCredits": "Totale krediteringer",
+    "totalDebits": "Totale debiteringer",
+    "transactionHistory": "Transaksjonshistorikk",
+    "transactionHistoryComingSoon": "Transaksjonshistorikk kommer snart...",
+    "transactionHistoryDescription": "Denne funksjonen vil vise alle krediteringer og debiteringer for denne kontoen.",
+    "transferButton": "Overfør",
+    "accountType": {
+      "DEPOSIT": "Innskuddskonto",
+      "LOAN": "Lånekonto",
+      "CREDIT": "Kredittkonto"
+    },
+    "errors": {
+      "loadFailed": "Kunne ikke laste kontodetaljer. Vennligst prøv igjen.",
+      "notFound": "Konto ikke funnet"
+    }
+  }
+}

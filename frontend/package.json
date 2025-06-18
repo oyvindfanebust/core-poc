@@ -2,9 +2,31 @@
   "name": "@core-poc/frontend",
   "version": "0.1.0",
   "private": true,
-  "description": "Customer-facing web application for banking ledger PoC",
   "scripts": {
-    "dev": "echo 'Frontend not yet implemented'",
-    "build": "echo 'Frontend not yet implemented'"
+    "dev": "next dev -p 3003",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@core-poc/shared": "file:../shared",
+    "@hookform/resolvers": "^3.3.4",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.454.0",
+    "next": "15.3.3",
+    "next-intl": "^4.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.51.5",
+    "swr": "^2.2.5",
+    "zod": "^3.25.64"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

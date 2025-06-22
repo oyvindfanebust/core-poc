@@ -58,7 +58,7 @@ Banking ledger PoC with Node.js, TypeScript, TigerBeetle, and PostgreSQL.
 ## Repository Etiquette
 - Always run `npm run build && npm test` before committing
 - Write descriptive commit messages (see git log for style)
-- Don't reference "Claude" or "AI" in commit messages
+- NEVER add "Co-Authored-By: Claude" or "Generated with Claude Code" to commits
 - Stage all changes: `git add -A`
 - Push to main branch after commits
 

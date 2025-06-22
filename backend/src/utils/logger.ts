@@ -23,7 +23,7 @@ const productionFormat = winston.format.combine(
 export const logger = winston.createLogger({
   level: isDevelopment ? 'debug' : 'info',
   format: isDevelopment ? developmentFormat : productionFormat,
-  defaultMeta: { service: 'yet-another-core-poc' },
+  defaultMeta: { service: 'core-poc' },
   transports: [
     // Console transport (always present)
     new winston.transports.Console({

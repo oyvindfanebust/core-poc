@@ -5,7 +5,7 @@ A comprehensive banking ledger proof-of-concept built with Node.js, TypeScript, 
 ## Repository Structure
 
 ```
-yet-another-core-poc/
+core-poc/
 ├── backend/          # Backend API server
 ├── frontend/         # Customer-facing web application (Next.js)
 ├── shared/           # Shared types and utilities
@@ -61,7 +61,7 @@ yet-another-core-poc/
 ### 1. Installation
 ```bash
 git clone <repository-url>
-cd yet-another-core-poc
+cd core-poc
 npm install  # This will install all workspace dependencies
 ```
 

@@ -10,11 +10,11 @@ export DB_CONNECTION_TIMEOUT=2000
 
 # TigerBeetle Configuration
 export TIGERBEETLE_CLUSTER_ID=0
-export TIGERBEETLE_ADDRESSES=3000
+export TIGERBEETLE_ADDRESSES=6000
 
 # Application Configuration
 export NODE_ENV=development
-export PORT=3002
+export PORT=7001
 
 # Logging Configuration
 export LOG_LEVEL=debug

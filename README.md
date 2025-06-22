@@ -138,14 +138,14 @@ npm run build:frontend
 
 ### Backend API
 Once the backend is running, visit:
-- **API Documentation**: http://localhost:3002/api-docs
-- **Health Checks**: http://localhost:3002/health
-- **Metrics**: http://localhost:3002/metrics
-- **API Info**: http://localhost:3002/api/info
+- **API Documentation**: http://localhost:7001/api-docs
+- **Health Checks**: http://localhost:7001/health
+- **Metrics**: http://localhost:7001/metrics
+- **API Info**: http://localhost:7001/api/info
 
 ### Frontend Application
 Once the frontend is running:
-- **Customer Banking**: http://localhost:3003
+- **Customer Banking**: http://localhost:7002
 - **Next.js Dev Tools**: Available in development mode
 
 ## Configuration
@@ -157,7 +157,7 @@ The application uses direnv to manage environment variables. Copy `.envrc.exampl
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `NODE_ENV` | Environment (development/production/test) | development |
-| `PORT` | Server port | 3002 |
+| `PORT` | Server port | 7001 |
 | `DB_HOST` | PostgreSQL host | localhost |
 | `DB_PORT` | PostgreSQL port | 5432 |
 | `DB_NAME` | Database name | banking_poc |
@@ -185,7 +185,7 @@ The application uses direnv to manage environment variables. Copy `.envrc.exampl
 
 ### Create a Deposit Account
 ```bash
-curl -X POST http://localhost:3002/accounts \
+curl -X POST http://localhost:7001/accounts \
   -H "Content-Type: application/json" \
   -d '{
     "type": "DEPOSIT",
@@ -197,7 +197,7 @@ curl -X POST http://localhost:3002/accounts \
 
 ### Create a Loan Account
 ```bash
-curl -X POST http://localhost:3002/accounts \
+curl -X POST http://localhost:7001/accounts \
   -H "Content-Type: application/json" \
   -d '{
     "type": "LOAN", 
@@ -225,7 +225,7 @@ curl -X POST http://localhost:3002/accounts \
 
 ### Transfer Money
 ```bash
-curl -X POST http://localhost:3002/transfers \
+curl -X POST http://localhost:7001/transfers \
   -H "Content-Type: application/json" \
   -d '{
     "fromAccountId": "1234567890",
@@ -237,7 +237,7 @@ curl -X POST http://localhost:3002/transfers \
 
 ### Create Invoice
 ```bash
-curl -X POST http://localhost:3002/invoices \
+curl -X POST http://localhost:7001/invoices \
   -H "Content-Type: application/json" \
   -d '{
     "accountId": "1234567890",
@@ -248,18 +248,18 @@ curl -X POST http://localhost:3002/invoices \
 
 ### Get Payment Plan
 ```bash
-curl -X GET http://localhost:3002/accounts/1234567890/payment-plan
+curl -X GET http://localhost:7001/accounts/1234567890/payment-plan
 ```
 
 ### Get Amortization Schedule
 ```bash
-curl -X GET http://localhost:3002/accounts/1234567890/amortization-schedule
+curl -X GET http://localhost:7001/accounts/1234567890/amortization-schedule
 ```
 
 ### List Customer Accounts
 ```bash
 # Get all accounts for a specific customer
-curl -X GET http://localhost:3002/customers/CUSTOMER-ABC-123/accounts
+curl -X GET http://localhost:7001/customers/CUSTOMER-ABC-123/accounts
 
 # Example response:
 # [

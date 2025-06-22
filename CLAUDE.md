@@ -34,7 +34,7 @@ Always run: `npm run build && npm test`
 4. Update API docs if adding endpoints
 
 ## Frontend Development
-- Frontend runs on port 3003: `npm run dev:frontend`
+- Frontend runs on port 7002: `npm run dev:frontend`
 - Next.js 15 with App Router
 - Internationalization with next-intl (English, Norwegian, Serbian)
 - All client components need NextIntlClientProvider context

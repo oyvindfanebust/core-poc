@@ -18,7 +18,7 @@ The test suite requires the following containerized services:
 
 ### TigerBeetle Ledger
 - **Container**: `ghcr.io/tigerbeetle/tigerbeetle:0.16.44`
-- **Port**: 3001 (test), 3000 (dev)
+- **Port**: 6001 (test), 6000 (dev)
 - **Manual start required**: Must be started before running tests
 
 ## Running Tests
@@ -72,13 +72,13 @@ npm run docker:test:down
 | `npm run docker:test:down` | Stop all test containers |
 | `npm run docker:tigerbeetle:up` | Start TigerBeetle test container only |
 | `npm run docker:tigerbeetle:down` | Stop TigerBeetle test container only |
-| `npm run docker:dev:up` | Start development containers (ports 5432, 3000) |
+| `npm run docker:dev:up` | Start development containers (ports 5432, 6000) |
 | `npm run docker:dev:down` | Stop development containers |
 
 ## Test Architecture
 
 - **Database**: PostgreSQL container managed automatically by Jest setup
-- **TigerBeetle**: External container that must be started manually
+- **TigerBeetle**: External container on port 6001 for testing
 - **No Local Binaries**: All services run in containers for consistency
 - **ES Modules**: Uses `tsx` for TypeScript execution with ES module support
 
@@ -100,8 +100,8 @@ npm run docker:tigerbeetle:up
 ### Port Conflicts
 If you encounter port conflicts, check for existing services:
 ```bash
-# Check what's using ports 3001, 5433
-lsof -i :3001
+# Check what's using ports 6001, 5433
+lsof -i :6001
 lsof -i :5433
 ```
 

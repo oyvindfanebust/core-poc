@@ -15,11 +15,11 @@ const ConfigSchema = z.object({
 
   // TigerBeetle
   TIGERBEETLE_CLUSTER_ID: z.string().transform(val => parseInt(val)).pipe(z.number().min(0)).default('0'),
-  TIGERBEETLE_ADDRESSES: z.string().min(1).default('3000'),
+  TIGERBEETLE_ADDRESSES: z.string().min(1).default('6000'),
 
   // Application
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  PORT: z.string().transform(val => parseInt(val)).pipe(z.number().min(1).max(65535)).default('3002'),
+  PORT: z.string().transform(val => parseInt(val)).pipe(z.number().min(1).max(65535)).default('7001'),
 
   // CDC/AMQP
   CDC_ENABLED: z.string().transform(val => val.toLowerCase() === 'true').pipe(z.boolean()).default('false'),

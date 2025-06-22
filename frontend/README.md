@@ -25,7 +25,7 @@ A modern customer-facing web application built with Next.js 14, TypeScript, and 
 
 ### Prerequisites
 
-- Backend API must be running on port 3002
+- Backend API must be running on port 7001
 - Node.js 18+ and npm
 
 ### Development
@@ -46,7 +46,7 @@ npm run dev:frontend
 npm run dev:all
 ```
 
-The application will be available at http://localhost:3003
+The application will be available at http://localhost:7002
 
 ### Test Credentials
 
@@ -97,7 +97,7 @@ hooks/
 ## API Integration
 
 The frontend communicates with the backend API through:
-- Direct API calls to `http://localhost:3002`
+- Direct API calls to `http://localhost:7001`
 - Proper error handling
 - BigInt serialization support
 - Type-safe API client

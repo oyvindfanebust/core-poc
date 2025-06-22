@@ -8,7 +8,7 @@ export class TigerBeetleService {
   private clusterId: bigint;
   private addresses: string[];
 
-  constructor(client: any, clusterId: bigint = 0n, addresses: string[] = ['localhost:3000']) {
+  constructor(client: any, clusterId: bigint = 0n, addresses: string[] = ['localhost:6000']) {
     this.client = client;
     this.clusterId = clusterId;
     this.addresses = addresses;

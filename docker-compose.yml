@@ -61,7 +61,7 @@ services:
       - -c
       - |
         /tigerbeetle format --cluster=0 --replica=0 --replica-count=1 --development /data/${TB_FILE:-app}.tigerbeetle
-        exec /tigerbeetle start --addresses=127.0.0.1:3000 --development /data/${TB_FILE:-app}.tigerbeetle
+        exec /tigerbeetle start --addresses=127.0.0.1:6000 --development /data/${TB_FILE:-app}.tigerbeetle
     security_opt:
       - seccomp:unconfined
     cap_add:
@@ -85,7 +85,7 @@ services:
       - -c
       - |
         sleep 5
-        exec /tigerbeetle amqp --addresses=127.0.0.1:3000 --cluster=0 --host=127.0.0.1 --user=${RABBITMQ_USER:-guest} --password=${RABBITMQ_PASS:-guest} --vhost=/ --publish-exchange=banking-events
+        exec /tigerbeetle amqp --addresses=127.0.0.1:6000 --cluster=0 --host=127.0.0.1 --user=${RABBITMQ_USER:-guest} --password=${RABBITMQ_PASS:-guest} --vhost=/ --publish-exchange=banking-events
 
 volumes:
   postgres_data:

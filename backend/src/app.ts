@@ -48,7 +48,7 @@ async function createApp(): Promise<express.Application> {
     // Global middleware
     app.use(helmet());
     app.use(cors({
-      origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3003'], // Allow frontend dev server
+      origin: ['http://localhost:7002'], // Allow frontend dev server
       credentials: true,
     }));
     app.use(morgan('combined', { stream: httpLogStream }));

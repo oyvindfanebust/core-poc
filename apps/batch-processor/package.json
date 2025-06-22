@@ -1,0 +1,33 @@
+{
+  "name": "@core-poc/batch-processor",
+  "version": "1.0.0",
+  "description": "Batch processor for scheduled payments and background jobs",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch src/app.ts",
+    "start": "tsx src/app.ts",
+    "build": "tsc --outDir dist",
+    "test": "jest --forceExit --detectOpenHandles",
+    "docker:up": "cd ../.. && docker-compose up -d",
+    "docker:down": "cd ../.. && docker-compose down"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@core-poc/core-services": "*",
+    "@core-poc/domain": "*",
+    "@core-poc/shared": "*",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.1",
+    "express": "^5.1.0",
+    "typescript": "^5.8.3",
+    "tsx": "^4.7.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "jest": "^30.0.0",
+    "ts-jest": "^29.4.0"
+  }
+}

@@ -6,11 +6,17 @@ A comprehensive banking ledger proof-of-concept built with Node.js, TypeScript, 
 
 ```
 core-poc/
-├── backend/          # Backend API server
-├── frontend/         # Customer-facing web application (Next.js)
-├── shared/           # Shared types and utilities
+├── apps/
+│   ├── core-api/           # Core API server (port 7001)
+│   ├── batch-processor/   # Background job processor (port 7003)  
+│   └── customer-frontend/ # Customer web application (port 7002)
+├── packages/
+│   ├── core-services/     # Database, TigerBeetle, repositories
+│   ├── domain/           # Domain logic and services
+│   └── shared/           # Shared types and utilities
+├── docs/                 # Documentation
 ├── docker-compose.yml
-└── package.json      # Root workspace configuration
+└── package.json          # Root workspace configuration
 ```
 
 ## Features

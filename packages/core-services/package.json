@@ -1,0 +1,25 @@
+{
+  "name": "@core-poc/core-services",
+  "version": "1.0.0",
+  "description": "Core services for TigerBeetle, database, and repositories",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc --outDir dist",
+    "dev": "tsc --watch --outDir dist"
+  },
+  "dependencies": {
+    "@types/node": "^24.0.1",
+    "@types/pg": "^8.15.4",
+    "pg": "^8.16.0",
+    "tigerbeetle-node": "^0.16.44",
+    "typescript": "^5.8.3",
+    "winston": "^3.17.0",
+    "zod": "^3.25.64"
+  },
+  "devDependencies": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

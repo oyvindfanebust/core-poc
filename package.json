@@ -4,20 +4,23 @@
   "private": true,
   "description": "Banking ledger PoC with Node.js, TypeScript, TigerBeetle, and PostgreSQL",
   "workspaces": [
-    "backend",
-    "frontend",
-    "shared"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace=backend",
-    "dev:backend": "npm run dev --workspace=backend",
-    "dev:frontend": "npm run dev --workspace=frontend",
-    "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev": "npm run dev --workspace=@core-poc/core-api",
+    "dev:core-api": "npm run dev --workspace=@core-poc/core-api",
+    "dev:batch-processor": "npm run dev --workspace=@core-poc/batch-processor",
+    "dev:customer-frontend": "npm run dev --workspace=@core-poc/customer-frontend",
+    "dev:all": "concurrently \"npm run dev:core-api\" \"npm run dev:batch-processor\" \"npm run dev:customer-frontend\"",
+    "dev:backend": "concurrently \"npm run dev:core-api\" \"npm run dev:batch-processor\"",
     "build": "NODE_ENV=production npm run build --workspaces",
-    "build:backend": "npm run build --workspace=backend",
-    "build:frontend": "NODE_ENV=production npm run build --workspace=frontend",
+    "build:core-api": "npm run build --workspace=@core-poc/core-api",
+    "build:batch-processor": "npm run build --workspace=@core-poc/batch-processor",
+    "build:customer-frontend": "NODE_ENV=production npm run build --workspace=@core-poc/customer-frontend",
     "test": "npm run test --workspaces",
-    "test:backend": "npm run test --workspace=backend",
+    "test:core-api": "npm run test --workspace=@core-poc/core-api",
+    "test:batch-processor": "npm run test --workspace=@core-poc/batch-processor",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down"
   },

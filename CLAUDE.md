@@ -3,22 +3,26 @@
 Banking ledger PoC with Node.js, TypeScript, TigerBeetle, and PostgreSQL.
 
 ## Bash Commands
-- `npm run dev`: Start backend development server (port 7001)
-- `npm run dev:frontend`: Start frontend development server (port 7002)
-- `npm run dev:all`: Start both backend and frontend concurrently
+- `npm run dev:core-api`: Start core API development server (port 7001)
+- `npm run dev:batch-processor`: Start batch processor development server (port 7003)
+- `npm run dev:customer-frontend`: Start customer frontend development server (port 7002)
+- `npm run dev:backend`: Start both core API and batch processor concurrently
+- `npm run dev:all`: Start all services concurrently
 - `npm run build`: TypeScript compilation check (always run before committing)
-- `npm test`: Run all tests
-- `npm run test:unit --workspace=backend`: Run unit tests only
+- `npm run test:core-api`: Run core API tests
+- `npm run test:batch-processor`: Run batch processor tests
 - `docker-compose up -d`: Start infrastructure services
 - `docker-compose down`: Stop all services
 - `direnv allow`: Reload environment variables after .envrc changes
 
 ## Core Files
-- `src/utils/errors.ts`: Custom error classes for the application
-- `src/validation/schemas.ts`: Zod schemas for API input validation
-- `backend/src/services/factory.ts`: Service container and dependency injection
-- `shared/src/types/index.ts`: Shared TypeScript type definitions
-- `backend/src/config/validation.ts`: Environment configuration validation
+- `packages/core-services/src/value-objects.ts`: Money, AccountId, CustomerId type-safe wrappers
+- `packages/core-services/src/repositories/`: Database repositories
+- `packages/core-services/src/tigerbeetle.service.ts`: TigerBeetle client wrapper
+- `packages/domain/src/services/`: Domain services (account, loan, payment processing)
+- `packages/shared/src/types/index.ts`: Shared TypeScript type definitions
+- `apps/core-api/src/services/factory.ts`: Core API service container
+- `apps/batch-processor/src/services/factory.ts`: Batch processor service container
 - `docker-compose.yml`: Infrastructure service definitions
 - `.envrc`: Environment variables (use .envrc.example as template)
 
@@ -27,7 +31,10 @@ Banking ledger PoC with Node.js, TypeScript, TigerBeetle, and PostgreSQL.
 - PostgreSQL is for metadata only, never financial data
 - Use Zod schemas for all API input validation
 - Follow domain-driven design: Domain → Repository → Service → Controller
-- Keep domain logic in `src/domain/`, services in `src/services/`
+- Core services (`packages/core-services/`): Database, TigerBeetle, repositories
+- Domain logic (`packages/domain/`): Business logic, domain services
+- Core API (`apps/core-api/`): Customer and admin APIs
+- Batch processor (`apps/batch-processor/`): Background jobs only
 
 ## Code Style
 - TypeScript strict mode enabled
@@ -39,7 +46,7 @@ Banking ledger PoC with Node.js, TypeScript, TigerBeetle, and PostgreSQL.
 
 ## Port Management
 - **600x range**: Database/ledger services (6000: TigerBeetle dev, 6001: TigerBeetle test)
-- **700x range**: Application services (7001: Backend API, 7002: Frontend)
+- **700x range**: Application services (7001: Core API, 7002: Customer Frontend, 7003: Batch Processor, 7005: Admin Frontend)
 - **5xxx range**: Infrastructure (5432: PostgreSQL, 5672: RabbitMQ)
 
 ## Frontend Development
@@ -56,7 +63,7 @@ Banking ledger PoC with Node.js, TypeScript, TigerBeetle, and PostgreSQL.
 - Use test customer: `CUSTOMER-ABC-123`
 
 ## Repository Etiquette
-- Always run `npm run build && npm test` before committing
+- Always run `npm run build && npm run test` before committing
 - Write descriptive commit messages (see git log for style)
 - NEVER add "Co-Authored-By: Claude" or "Generated with Claude Code" to commits
 - Stage all changes: `git add -A`

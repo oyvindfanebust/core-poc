@@ -38,7 +38,8 @@ async function createApp(): Promise<express.Application> {
     const accountController = new AccountController(
       services.accountService,
       services.loanService,
-      services.invoiceService
+      services.invoiceService,
+      services.transferRepository
     );
     
     const healthController = new HealthController(services.database);
@@ -81,6 +82,11 @@ async function createApp(): Promise<express.Application> {
     app.get('/accounts/:accountId/balance', 
       validateRequest(AccountIdParamSchema, 'params'),
       accountController.getAccountBalance.bind(accountController)
+    );
+    
+    app.get('/accounts/:accountId/transactions', 
+      validateRequest(AccountIdParamSchema, 'params'),
+      accountController.getAccountTransactions.bind(accountController)
     );
     
     app.patch('/accounts/:accountId/name', 
@@ -165,6 +171,7 @@ async function createApp(): Promise<express.Application> {
       routes: [
         'POST /accounts',
         'GET /accounts/:accountId/balance',
+        'GET /accounts/:accountId/transactions',
         'POST /transfers',
         'POST /invoices',
         'GET /accounts/:accountId/invoices',

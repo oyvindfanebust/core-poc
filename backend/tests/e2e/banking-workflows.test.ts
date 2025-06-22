@@ -20,7 +20,8 @@ describe('Banking Workflows E2E', () => {
     const accountController = new AccountController(
       context.services.accountService,
       context.services.loanService,
-      context.services.invoiceService
+      context.services.invoiceService,
+      context.services.transferRepository
     );
 
     app = express();

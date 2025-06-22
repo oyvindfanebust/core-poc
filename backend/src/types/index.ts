@@ -34,6 +34,7 @@ export interface CreateTransferRequest {
   toAccountId: bigint;
   amount: bigint;
   currency: keyof LedgerCode;
+  transferType?: number; // TransferType enum value
   description?: string;
 }
 

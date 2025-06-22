@@ -1,13 +1,16 @@
 import { TigerBeetleService } from './tigerbeetle.service.js';
 import { AccountRepository, AccountMetadata } from '../repositories/account.repository.js';
+import { TransferRepository, TransferWithAccounts } from '../repositories/transfer.repository.js';
 import { CreateAccountRequest, Currency } from '../types/index.js';
 import { CustomerId, AccountId } from '../domain/value-objects.js';
 
 export class AccountService {
   private accountRepository: AccountRepository;
+  private transferRepository: TransferRepository;
 
   constructor(private tigerBeetleService: TigerBeetleService) {
     this.accountRepository = new AccountRepository();
+    this.transferRepository = new TransferRepository();
   }
   async createLoanAccount(customerId: string, currency: Currency, principalAmount: bigint, accountName?: string): Promise<bigint> {
     const accountId = await this.tigerBeetleService.createAccount({
@@ -73,13 +76,16 @@ export class AccountService {
     return await this.tigerBeetleService.getAccountBalance(accountId);
   }
 
-  async transfer(fromAccountId: bigint, toAccountId: bigint, amount: bigint, currency: Currency) {
-    return await this.tigerBeetleService.createTransfer({
+  async transfer(fromAccountId: bigint, toAccountId: bigint, amount: bigint, currency: Currency, description?: string) {
+    const transferId = await this.tigerBeetleService.createTransfer({
       fromAccountId,
       toAccountId,
       amount,
       currency,
     });
+
+    // Transfer record will be saved via CDC events - no direct database dependency
+    return transferId;
   }
 
   async getAccountsByCustomer(customerId: CustomerId): Promise<AccountMetadata[]> {

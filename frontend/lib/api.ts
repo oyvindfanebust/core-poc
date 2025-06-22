@@ -21,6 +21,20 @@ export interface Transfer {
   transferId: string;
 }
 
+export interface Transaction {
+  transferId: string;
+  fromAccountId: string;
+  toAccountId: string;
+  fromAccountName?: string;
+  toAccountName?: string;
+  fromAccountType: string;
+  toAccountType: string;
+  amount: string;
+  currency: string;
+  description?: string;
+  createdAt: string;
+}
+
 export interface CreateAccountRequest {
   type: 'DEPOSIT' | 'LOAN' | 'CREDIT';
   customerId: string;
@@ -56,6 +70,11 @@ export const accountsApi = {
 
   async updateAccountName(accountId: string, accountName: string | null): Promise<{ success: boolean }> {
     return apiClient.patch(`/accounts/${accountId}/name`, { accountName });
+  },
+
+  async getAccountTransactions(accountId: string, limit?: number): Promise<Transaction[]> {
+    const params = limit ? `?limit=${limit}` : '';
+    return apiClient.get(`/accounts/${accountId}/transactions${params}`);
   },
 };
 

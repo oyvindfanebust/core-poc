@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { AccountService } from '../services/account.service.js';
 import { LoanService } from '../domain/services/loan.service.js';
 import { InvoiceService } from '../domain/services/invoice.service.js';
+import { TransferRepository } from '../repositories/transfer.repository.js';
 import { Money, AccountId, CustomerId } from '../domain/value-objects.js';
 import { 
   CreateAccountRequest, 
@@ -19,7 +20,8 @@ export class AccountController {
   constructor(
     private accountService: AccountService,
     private loanService: LoanService,
-    private invoiceService: InvoiceService
+    private invoiceService: InvoiceService,
+    private transferRepository: TransferRepository
   ) {}
 
   async createAccount(req: Request, res: Response): Promise<void> {
@@ -383,6 +385,43 @@ export class AccountController {
         error 
       });
       res.status(500).json({ error: 'Failed to update account name' });
+    }
+  }
+
+  async getAccountTransactions(req: Request, res: Response): Promise<void> {
+    try {
+      const { accountId } = req.params;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      
+      logger.debug('Getting transactions for account', { accountId, limit });
+      
+      const transfers = await this.transferRepository.findByAccountId(
+        new AccountId(accountId),
+        limit
+      );
+      
+      // Convert BigInt fields to strings for JSON serialization
+      const serializedTransfers = transfers.map(transfer => ({
+        transferId: transfer.transferId,
+        fromAccountId: transfer.fromAccountId,
+        toAccountId: transfer.toAccountId,
+        fromAccountName: transfer.fromAccountName,
+        toAccountName: transfer.toAccountName,
+        fromAccountType: transfer.fromAccountType,
+        toAccountType: transfer.toAccountType,
+        amount: transfer.amount.toString(),
+        currency: transfer.currency,
+        description: transfer.description,
+        createdAt: transfer.createdAt.toISOString(),
+      }));
+      
+      res.json(serializedTransfers);
+    } catch (error) {
+      logger.error('Failed to get account transactions', { 
+        accountId: req.params.accountId,
+        error 
+      });
+      res.status(500).json({ error: 'Failed to get account transactions' });
     }
   }
 }

@@ -469,6 +469,40 @@ export class MigrationRunner {
           await db.query('ALTER TABLE accounts DROP COLUMN IF EXISTS account_name');
         },
       },
+      {
+        id: '011_create_transfers_table',
+        name: 'Create transfers table for transaction history',
+        up: async (db: DatabaseConnection) => {
+          await db.query(`
+            CREATE TABLE IF NOT EXISTS transfers (
+              transfer_id VARCHAR(20) PRIMARY KEY,
+              from_account_id VARCHAR(20) NOT NULL,
+              to_account_id VARCHAR(20) NOT NULL,
+              amount BIGINT NOT NULL,
+              currency VARCHAR(3) NOT NULL,
+              description VARCHAR(500),
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              FOREIGN KEY (from_account_id) REFERENCES accounts(account_id),
+              FOREIGN KEY (to_account_id) REFERENCES accounts(account_id)
+            )
+          `);
+          
+          await db.query(`
+            CREATE INDEX IF NOT EXISTS idx_transfers_from_account ON transfers(from_account_id, created_at DESC)
+          `);
+          
+          await db.query(`
+            CREATE INDEX IF NOT EXISTS idx_transfers_to_account ON transfers(to_account_id, created_at DESC)
+          `);
+          
+          await db.query(`
+            CREATE INDEX IF NOT EXISTS idx_transfers_created ON transfers(created_at DESC)
+          `);
+        },
+        down: async (db: DatabaseConnection) => {
+          await db.query('DROP TABLE IF EXISTS transfers');
+        },
+      },
     ];
   }
 }

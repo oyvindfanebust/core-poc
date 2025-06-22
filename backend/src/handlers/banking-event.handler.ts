@@ -1,8 +1,16 @@
 import { CDCEventHandler, TransferEvent } from '../types/cdc.js';
 import { logger } from '../utils/logger.js';
 import { Money } from '../domain/value-objects.js';
+import { TransferRepository } from '../repositories/transfer.repository.js';
+import { LEDGER_CODES } from '../config/tigerbeetle.js';
+import { TransferType } from '../../../shared/src/types/index.js';
 
 export class BankingEventHandler implements CDCEventHandler {
+  private transferRepository: TransferRepository;
+
+  constructor() {
+    this.transferRepository = new TransferRepository();
+  }
   
   async handleTransferEvent(event: TransferEvent): Promise<void> {
     logger.info('Processing banking event', {
@@ -42,6 +50,31 @@ export class BankingEventHandler implements CDCEventHandler {
       to: event.transfer.credit_account_id
     });
 
+    // Save transfer record to PostgreSQL for transaction history
+    try {
+      // Extract currency from ledger code (assuming ledger codes follow pattern like USD_LEDGER)
+      const currency = this.extractCurrencyFromLedger(event.transfer.ledger);
+      
+      await this.transferRepository.save({
+        transferId: event.transfer.id,
+        fromAccountId: event.transfer.debit_account_id,
+        toAccountId: event.transfer.credit_account_id,
+        amount: BigInt(event.transfer.amount),
+        currency,
+        description: this.extractDescription(event),
+      });
+      
+      logger.info('Transfer record saved to database', {
+        transferId: event.transfer.id
+      });
+    } catch (error) {
+      logger.error('Failed to save transfer record', {
+        transferId: event.transfer.id,
+        error
+      });
+      // Don't throw - we don't want to block CDC processing
+    }
+
     // Example: Send real-time notification
     await this.sendTransferNotification(event, 'Transfer completed');
     
@@ -72,6 +105,30 @@ export class BankingEventHandler implements CDCEventHandler {
       pendingId: event.transfer.pending_id,
       amount: event.transfer.amount
     });
+
+    // Save transfer record to PostgreSQL for transaction history
+    try {
+      const currency = this.extractCurrencyFromLedger(event.transfer.ledger);
+      
+      await this.transferRepository.save({
+        transferId: event.transfer.id,
+        fromAccountId: event.transfer.debit_account_id,
+        toAccountId: event.transfer.credit_account_id,
+        amount: BigInt(event.transfer.amount),
+        currency,
+        description: this.extractDescription(event),
+      });
+      
+      logger.info('Transfer record saved to database', {
+        transferId: event.transfer.id
+      });
+    } catch (error) {
+      logger.error('Failed to save transfer record', {
+        transferId: event.transfer.id,
+        error
+      });
+      // Don't throw - we don't want to block CDC processing
+    }
 
     // Example: Send completion notification
     await this.sendTransferNotification(event, 'Transfer completed');
@@ -206,5 +263,32 @@ export class BankingEventHandler implements CDCEventHandler {
       transferId: event.transfer.id,
       pendingId: event.transfer.pending_id
     });
+  }
+
+  private extractCurrencyFromLedger(ledger: string): string {
+    // Convert ledger code back to currency symbol
+    const ledgerCode = parseInt(ledger);
+    for (const [currency, code] of Object.entries(LEDGER_CODES)) {
+      if (code === ledgerCode) {
+        return currency;
+      }
+    }
+    
+    // Fallback to USD if ledger code not found
+    logger.warn('Unknown ledger code, defaulting to USD', { ledger });
+    return 'USD';
+  }
+
+  private extractDescription(event: TransferEvent): string | undefined {
+    // Extract transfer type from user_data_32 and create description
+    const transferType = event.transfer.user_data_32 ? parseInt(event.transfer.user_data_32) : TransferType.CUSTOMER_TRANSFER;
+    
+    switch (transferType) {
+      case TransferType.INITIAL_DEPOSIT:
+        return 'Initial account deposit';
+      case TransferType.CUSTOMER_TRANSFER:
+      default:
+        return 'Customer transfer';
+    }
   }
 }

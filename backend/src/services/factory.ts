@@ -8,6 +8,7 @@ import { LoanService } from '../domain/services/loan.service.js';
 import { InvoiceService } from '../domain/services/invoice.service.js';
 import { PaymentPlanRepository } from '../repositories/payment-plan.repository.js';
 import { InvoiceRepository } from '../repositories/invoice.repository.js';
+import { TransferRepository } from '../repositories/transfer.repository.js';
 import { DatabaseConnection } from '../database/connection.js';
 import { createClient } from 'tigerbeetle-node';
 import { readFileSync } from 'fs';
@@ -24,6 +25,7 @@ export interface ServiceContainer {
   database: DatabaseConnection;
   tigerBeetleService: TigerBeetleService;
   cdcManager: CDCManagerService;
+  transferRepository: TransferRepository;
 }
 
 export class ServiceFactory {
@@ -89,6 +91,7 @@ export class ServiceFactory {
       // Create repositories
       const paymentPlanRepository = new PaymentPlanRepository();
       const invoiceRepository = new InvoiceRepository();
+      const transferRepository = new TransferRepository();
 
       // Create domain services
       const loanService = new LoanService(accountService, paymentPlanRepository);
@@ -119,6 +122,7 @@ export class ServiceFactory {
         database,
         tigerBeetleService,
         cdcManager,
+        transferRepository,
       };
 
       logger.info('Services initialized successfully');
@@ -156,6 +160,7 @@ export class ServiceFactory {
       // Create repositories
       const paymentPlanRepository = new PaymentPlanRepository();
       const invoiceRepository = new InvoiceRepository();
+      const transferRepository = new TransferRepository();
 
       // Create domain services
       const loanService = new LoanService(accountService, paymentPlanRepository);
@@ -186,6 +191,7 @@ export class ServiceFactory {
         database,
         tigerBeetleService,
         cdcManager,
+        transferRepository,
       };
 
       logger.info('Test services initialized successfully');

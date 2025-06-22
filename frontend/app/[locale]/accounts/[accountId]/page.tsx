@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ProtectedLayout } from '@/components/protected-layout';
-import { accountsApi, Account, Balance } from '@/lib/api';
-import { ArrowLeft, CreditCard, TrendingUp, Download, Send } from 'lucide-react';
+import { accountsApi, Account, Balance, Transaction } from '@/lib/api';
+import { ArrowLeft, CreditCard, TrendingUp, Download, Send, ArrowUpRight, ArrowDownLeft, Clock } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AccountDetailsPage() {
@@ -17,7 +17,9 @@ export default function AccountDetailsPage() {
   
   const [account, setAccount] = useState<Account | null>(null);
   const [balance, setBalance] = useState<Balance | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [transactionsLoading, setTransactionsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -48,6 +50,18 @@ export default function AccountDetailsPage() {
       // Load balance
       const accountBalance = await accountsApi.getAccountBalance(accountId);
       setBalance(accountBalance);
+
+      // Load transactions
+      setTransactionsLoading(true);
+      try {
+        const accountTransactions = await accountsApi.getAccountTransactions(accountId, 20);
+        setTransactions(accountTransactions);
+      } catch (transactionError) {
+        console.error('Failed to load transactions:', transactionError);
+        // Don't fail the whole page if transactions fail
+      } finally {
+        setTransactionsLoading(false);
+      }
     } catch (err) {
       console.error('Failed to load account details:', err);
       setError(t('errors.loadFailed'));
@@ -83,6 +97,34 @@ export default function AccountDetailsPage() {
       month: 'long',
       day: 'numeric',
     });
+  };
+
+  const formatTransactionDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
+
+  const formatTransactionTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const getTransactionDirection = (transaction: Transaction): 'incoming' | 'outgoing' => {
+    return transaction.toAccountId === accountId ? 'incoming' : 'outgoing';
+  };
+
+  const getTransactionDisplayName = (transaction: Transaction): string => {
+    const direction = getTransactionDirection(transaction);
+    if (direction === 'incoming') {
+      return transaction.fromAccountName || `Account ${transaction.fromAccountId}`;
+    } else {
+      return transaction.toAccountName || `Account ${transaction.toAccountId}`;
+    }
   };
 
   if (loading) {
@@ -236,12 +278,72 @@ export default function AccountDetailsPage() {
 
         <div className="bg-white shadow rounded-lg p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">{t('transactionHistory')}</h2>
-          <div className="text-center py-8 text-gray-500">
-            <p>{t('transactionHistoryComingSoon')}</p>
-            <p className="text-sm mt-2">
-              {t('transactionHistoryDescription')}
-            </p>
-          </div>
+          
+          {transactionsLoading ? (
+            <div className="text-center py-8">
+              <Clock className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+              <p className="text-gray-500">{tCommon('loadingTransactions')}</p>
+            </div>
+          ) : transactions.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <p>{t('noTransactions')}</p>
+              <p className="text-sm mt-2">
+                {t('noTransactionsDescription')}
+              </p>
+            </div>
+          ) : (
+            <div className="flow-root">
+              <ul className="-my-5 divide-y divide-gray-200">
+                {transactions.map((transaction) => {
+                  const direction = getTransactionDirection(transaction);
+                  const isIncoming = direction === 'incoming';
+                  const displayName = getTransactionDisplayName(transaction);
+                  
+                  return (
+                    <li key={transaction.transferId} className="py-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex-shrink-0">
+                          <div className={`rounded-full p-2 ${
+                            isIncoming 
+                              ? 'bg-green-100 text-green-600' 
+                              : 'bg-red-100 text-red-600'
+                          }`}>
+                            {isIncoming ? (
+                              <ArrowDownLeft className="h-4 w-4" />
+                            ) : (
+                              <ArrowUpRight className="h-4 w-4" />
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 truncate">
+                                {transaction.description || (isIncoming ? t('receivedFrom') : t('sentTo'))} {displayName}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                {formatTransactionDate(transaction.createdAt)} • {formatTransactionTime(transaction.createdAt)}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className={`text-sm font-medium ${
+                                isIncoming ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                {isIncoming ? '+' : '-'}{formatCurrency(transaction.amount, transaction.currency)}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {transaction.transferId.slice(-8)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </ProtectedLayout>

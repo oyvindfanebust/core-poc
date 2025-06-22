@@ -8,6 +8,7 @@ export interface AccountMetadata {
   customerId: string;
   accountType: 'DEPOSIT' | 'LOAN' | 'CREDIT';
   currency: Currency;
+  accountName?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -22,18 +23,20 @@ export class AccountRepository {
   async save(accountMetadata: Omit<AccountMetadata, 'createdAt' | 'updatedAt'>): Promise<void> {
     try {
       await this.db.query(
-        `INSERT INTO accounts (account_id, customer_id, account_type, currency)
-         VALUES ($1, $2, $3, $4)
+        `INSERT INTO accounts (account_id, customer_id, account_type, currency, account_name)
+         VALUES ($1, $2, $3, $4, $5)
          ON CONFLICT (account_id) DO UPDATE SET
          customer_id = EXCLUDED.customer_id,
          account_type = EXCLUDED.account_type,
          currency = EXCLUDED.currency,
+         account_name = EXCLUDED.account_name,
          updated_at = CURRENT_TIMESTAMP`,
         [
           accountMetadata.accountId.toString(),
           accountMetadata.customerId,
           accountMetadata.accountType,
           accountMetadata.currency,
+          accountMetadata.accountName || null,
         ]
       );
       
@@ -63,6 +66,7 @@ export class AccountRepository {
         customerId: row.customer_id,
         accountType: row.account_type,
         currency: row.currency,
+        accountName: row.account_name,
         createdAt: new Date(row.created_at),
         updatedAt: new Date(row.updated_at),
       }));
@@ -92,6 +96,7 @@ export class AccountRepository {
         customerId: row.customer_id,
         accountType: row.account_type,
         currency: row.currency,
+        accountName: row.account_name,
         createdAt: new Date(row.created_at),
         updatedAt: new Date(row.updated_at),
       };
@@ -116,6 +121,7 @@ export class AccountRepository {
         customerId: row.customer_id,
         accountType: row.account_type,
         currency: row.currency,
+        accountName: row.account_name,
         createdAt: new Date(row.created_at),
         updatedAt: new Date(row.updated_at),
       }));
@@ -123,6 +129,29 @@ export class AccountRepository {
       logger.error('Failed to find accounts by customer and type', { 
         customerId: customerId.value,
         accountType,
+        error 
+      });
+      throw error;
+    }
+  }
+
+  async updateAccountName(accountId: AccountId, accountName: string | null): Promise<boolean> {
+    try {
+      const result = await this.db.query(
+        'UPDATE accounts SET account_name = $1, updated_at = CURRENT_TIMESTAMP WHERE account_id = $2',
+        [accountName, accountId.toString()]
+      );
+
+      logger.debug('Account name updated', { 
+        accountId: accountId.toString(),
+        accountName 
+      });
+
+      return (result.rowCount ?? 0) > 0;
+    } catch (error) {
+      logger.error('Failed to update account name', { 
+        accountId: accountId.toString(),
+        accountName,
         error 
       });
       throw error;

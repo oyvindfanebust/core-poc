@@ -11,6 +11,7 @@ import {
   TransferRequest,
   CreateInvoiceRequest,
   CustomerIdParam,
+  UpdateAccountNameRequest,
 } from '../validation/schemas.js';
 import { logger } from '../utils/logger.js';
 
@@ -71,6 +72,7 @@ export class AccountController {
       loanType: data.loanType,
       paymentFrequency: data.paymentFrequency,
       fees,
+      accountName: data.accountName,
     });
 
     res.status(201).json({
@@ -94,7 +96,8 @@ export class AccountController {
     const accountId = await this.accountService.createDepositAccount(
       data.customerId,
       data.currency,
-      initialBalance?.amount
+      initialBalance?.amount,
+      data.accountName
     );
 
     res.status(201).json({
@@ -112,7 +115,8 @@ export class AccountController {
     const accountId = await this.accountService.createCreditAccount(
       data.customerId,
       data.currency,
-      creditLimit.amount
+      creditLimit.amount,
+      data.accountName
     );
 
     res.status(201).json({
@@ -340,6 +344,7 @@ export class AccountController {
         customerId: account.customerId,
         accountType: account.accountType,
         currency: account.currency,
+        accountName: account.accountName,
         createdAt: account.createdAt.toISOString(),
         updatedAt: account.updatedAt.toISOString(),
       }));
@@ -351,6 +356,33 @@ export class AccountController {
         error 
       });
       res.status(500).json({ error: 'Failed to get accounts by customer' });
+    }
+  }
+
+  async updateAccountName(req: Request, res: Response): Promise<void> {
+    try {
+      const { accountId } = req.params;
+      const validatedData = req.body as UpdateAccountNameRequest;
+      
+      logger.debug('Updating account name', { accountId, accountName: validatedData.accountName });
+      
+      const success = await this.accountService.updateAccountName(
+        new AccountId(accountId),
+        validatedData.accountName
+      );
+      
+      if (!success) {
+        res.status(404).json({ error: 'Account not found' });
+        return;
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      logger.error('Failed to update account name', { 
+        accountId: req.params.accountId,
+        error 
+      });
+      res.status(500).json({ error: 'Failed to update account name' });
     }
   }
 }

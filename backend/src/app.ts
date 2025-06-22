@@ -19,7 +19,8 @@ import {
   TransferSchema, 
   CreateInvoiceSchema,
   AccountIdParamSchema,
-  CustomerIdParamSchema
+  CustomerIdParamSchema,
+  UpdateAccountNameSchema
 } from './validation/schemas.js';
 import { specs } from './docs/swagger.js';
 import { logger, httpLogStream } from './utils/logger.js';
@@ -80,6 +81,12 @@ async function createApp(): Promise<express.Application> {
     app.get('/accounts/:accountId/balance', 
       validateRequest(AccountIdParamSchema, 'params'),
       accountController.getAccountBalance.bind(accountController)
+    );
+    
+    app.patch('/accounts/:accountId/name', 
+      validateRequest(AccountIdParamSchema, 'params'),
+      validateRequest(UpdateAccountNameSchema),
+      accountController.updateAccountName.bind(accountController)
     );
 
     // Transfer routes with validation

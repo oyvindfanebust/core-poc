@@ -42,6 +42,7 @@ export const CreateDepositAccountSchema = z.object({
   type: z.literal('DEPOSIT'),
   customerId: CustomerIdSchema,
   currency: CurrencySchema,
+  accountName: z.string().max(100, 'Account name cannot exceed 100 characters').optional(),
   initialBalance: MoneyAmountSchema.optional(),
 });
 
@@ -62,6 +63,7 @@ export const CreateLoanAccountSchema = z.object({
   type: z.literal('LOAN'),
   customerId: CustomerIdSchema,
   currency: CurrencySchema,
+  accountName: z.string().max(100, 'Account name cannot exceed 100 characters').optional(),
   principalAmount: MoneyAmountSchema,
   interestRate: z.string().refine(
     (val) => {
@@ -86,6 +88,7 @@ export const CreateCreditAccountSchema = z.object({
   type: z.literal('CREDIT'),
   customerId: CustomerIdSchema,
   currency: CurrencySchema,
+  accountName: z.string().max(100, 'Account name cannot exceed 100 characters').optional(),
   creditLimit: MoneyAmountSchema,
 });
 
@@ -126,6 +129,14 @@ export const CustomerIdParamSchema = z.object({
   customerId: CustomerIdSchema,
 });
 
+// Account name update schema
+export const UpdateAccountNameSchema = z.object({
+  accountName: z.string()
+    .min(1, 'Account name cannot be empty')
+    .max(100, 'Account name cannot exceed 100 characters')
+    .nullable(),
+});
+
 // Type exports for use in controllers
 export type CreateAccountRequest = z.infer<typeof CreateAccountSchema>;
 export type CreateDepositAccountRequest = z.infer<typeof CreateDepositAccountSchema>;
@@ -135,3 +146,4 @@ export type TransferRequest = z.infer<typeof TransferSchema>;
 export type CreateInvoiceRequest = z.infer<typeof CreateInvoiceSchema>;
 export type AccountIdParam = z.infer<typeof AccountIdParamSchema>;
 export type CustomerIdParam = z.infer<typeof CustomerIdParamSchema>;
+export type UpdateAccountNameRequest = z.infer<typeof UpdateAccountNameSchema>;

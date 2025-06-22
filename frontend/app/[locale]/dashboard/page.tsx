@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ProtectedLayout } from '@/components/protected-layout';
 import { accountsApi, Account, Balance } from '@/lib/api';
+import { getAccountShortName, maskAccountId } from '@/lib/account-utils';
 import { CreditCard, TrendingUp, ArrowUpRight, Plus } from 'lucide-react';
 import Link from 'next/link';
 
@@ -153,7 +154,7 @@ export default function DashboardPage() {
                       <div className="ml-5 w-0 flex-1">
                         <dl>
                           <dt className="text-sm font-medium text-gray-500 truncate">
-                            {getAccountTypeLabel(account.accountType)}
+                            {getAccountShortName(account)}
                           </dt>
                           <dd className="flex items-baseline">
                             <div className="text-2xl font-semibold text-gray-900">
@@ -168,10 +169,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="mt-3">
                       <p className="text-sm text-gray-500">
-                        {t('accountId')}: {account.accountId}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {tCommon('currency')}: {account.currency}
+                        {maskAccountId(account.accountId)} • {account.currency}
                       </p>
                     </div>
                   </div>

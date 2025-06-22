@@ -9,7 +9,7 @@ export class AccountService {
   constructor(private tigerBeetleService: TigerBeetleService) {
     this.accountRepository = new AccountRepository();
   }
-  async createLoanAccount(customerId: string, currency: Currency, principalAmount: bigint): Promise<bigint> {
+  async createLoanAccount(customerId: string, currency: Currency, principalAmount: bigint, accountName?: string): Promise<bigint> {
     const accountId = await this.tigerBeetleService.createAccount({
       type: 'LOAN',
       customerId,
@@ -23,12 +23,13 @@ export class AccountService {
       customerId,
       accountType: 'LOAN',
       currency: currency as Currency,
+      accountName,
     });
 
     return accountId;
   }
 
-  async createDepositAccount(customerId: string, currency: Currency, initialBalance?: bigint): Promise<bigint> {
+  async createDepositAccount(customerId: string, currency: Currency, initialBalance?: bigint, accountName?: string): Promise<bigint> {
     const accountId = await this.tigerBeetleService.createAccount({
       type: 'DEPOSIT',
       customerId,
@@ -42,12 +43,13 @@ export class AccountService {
       customerId,
       accountType: 'DEPOSIT',
       currency: currency as Currency,
+      accountName,
     });
 
     return accountId;
   }
 
-  async createCreditAccount(customerId: string, currency: Currency, creditLimit: bigint): Promise<bigint> {
+  async createCreditAccount(customerId: string, currency: Currency, creditLimit: bigint, accountName?: string): Promise<bigint> {
     const accountId = await this.tigerBeetleService.createAccount({
       type: 'CREDIT',
       customerId,
@@ -61,6 +63,7 @@ export class AccountService {
       customerId,
       accountType: 'CREDIT',
       currency: currency as Currency,
+      accountName,
     });
 
     return accountId;
@@ -85,6 +88,10 @@ export class AccountService {
 
   async getAccountMetadata(accountId: bigint): Promise<AccountMetadata | null> {
     return await this.accountRepository.findByAccountId(new AccountId(accountId));
+  }
+
+  async updateAccountName(accountId: AccountId, accountName: string | null): Promise<boolean> {
+    return await this.accountRepository.updateAccountName(accountId, accountName);
   }
 }
 

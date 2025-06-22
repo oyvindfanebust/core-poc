@@ -6,6 +6,7 @@ export interface Account {
   customerId: string;
   accountType: 'DEPOSIT' | 'LOAN' | 'CREDIT';
   currency: string;
+  accountName?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -24,6 +25,7 @@ export interface CreateAccountRequest {
   type: 'DEPOSIT' | 'LOAN' | 'CREDIT';
   customerId: string;
   currency: string;
+  accountName?: string;
   initialBalance?: string;
   principalAmount?: string;
   interestRate?: string;
@@ -50,6 +52,10 @@ export const accountsApi = {
 
   async getAccountBalance(accountId: string): Promise<Balance> {
     return apiClient.get(`/accounts/${accountId}/balance`);
+  },
+
+  async updateAccountName(accountId: string, accountName: string | null): Promise<{ success: boolean }> {
+    return apiClient.patch(`/accounts/${accountId}/name`, { accountName });
   },
 };
 

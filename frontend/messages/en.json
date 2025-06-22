@@ -54,6 +54,9 @@
   "createAccount": {
     "title": "Create New Account",
     "accountType": "Account Type",
+    "accountNickname": "Account Nickname (Optional)",
+    "accountNicknameHint": "Give your account a friendly name to easily identify it",
+    "accountNicknamePlaceholder": "e.g. My Savings Account",
     "initialBalance": "Initial Balance (Optional)",
     "initialBalanceHint": "Enter an amount to deposit when creating the account",
     "createButton": "Create Account",
@@ -107,8 +110,13 @@
     "createFirst": "Create Your First Account",
     "currentBalance": "Current Balance",
     "accountId": "Account ID",
+    "editName": "Edit account name",
+    "saveName": "Save account name",
+    "cancelEdit": "Cancel editing",
+    "accountNamePlaceholder": "Enter account name",
     "errors": {
-      "loadFailed": "Failed to load accounts. Please try again."
+      "loadFailed": "Failed to load accounts. Please try again.",
+      "updateNameFailed": "Failed to update account name. Please try again."
     }
   },
   "accountDetails": {

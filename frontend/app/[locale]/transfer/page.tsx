@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ProtectedLayout } from '@/components/protected-layout';
 import { accountsApi, transfersApi, Account, TransferRequest } from '@/lib/api';
+import { formatAccountOption } from '@/lib/account-utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -93,10 +94,10 @@ export default function TransferPage() {
       };
 
       await transfersApi.createTransfer(request);
-      
+
       setSuccess(true);
       reset();
-      
+
       // Redirect to dashboard after a short delay
       setTimeout(() => {
         router.push('/dashboard');
@@ -107,10 +108,6 @@ export default function TransferPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatAccountOption = (account: Account) => {
-    return `${account.accountType} ${tCommon('account')} - ${account.currency} (ID: ${account.accountId})`;
   };
 
   if (loadingAccounts) {

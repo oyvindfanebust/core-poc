@@ -13,6 +13,7 @@ export interface CreateLoanParams {
   loanType: LoanType;
   paymentFrequency: PaymentFrequency;
   fees: LoanFee[];
+  accountName?: string;
 }
 
 export interface LoanAccount {
@@ -47,7 +48,8 @@ export class LoanService {
       const accountId = await this.accountService.createLoanAccount(
         params.customerId.value,
         params.currency,
-        totalLoanAmount.amount
+        totalLoanAmount.amount,
+        params.accountName
       );
 
       // Calculate payment amount based on loan type

@@ -446,6 +446,29 @@ export class MigrationRunner {
           `);
         },
       },
+      {
+        id: '010_add_account_name',
+        name: 'Add account_name column for user-friendly account nicknames',
+        up: async (db: DatabaseConnection) => {
+          // Add account_name column to accounts table
+          await db.query(`
+            DO $$ 
+            BEGIN
+              IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='accounts' AND column_name='account_name') THEN
+                ALTER TABLE accounts ADD COLUMN account_name VARCHAR(100);
+              END IF;
+            END $$;
+          `);
+
+          // Add index for account name searches
+          await db.query(`
+            CREATE INDEX IF NOT EXISTS idx_accounts_name ON accounts(account_name)
+          `);
+        },
+        down: async (db: DatabaseConnection) => {
+          await db.query('ALTER TABLE accounts DROP COLUMN IF EXISTS account_name');
+        },
+      },
     ];
   }
 }

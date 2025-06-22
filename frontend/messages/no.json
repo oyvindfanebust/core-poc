@@ -54,6 +54,9 @@
   "createAccount": {
     "title": "Opprett ny konto",
     "accountType": "Kontotype",
+    "accountNickname": "Kontonavn (valgfritt)",
+    "accountNicknameHint": "Gi kontoen din et vennlig navn for å gjenkjenne den enkelt",
+    "accountNicknamePlaceholder": "f.eks. Min sparekonto",
     "initialBalance": "Startsaldo (valgfritt)",
     "initialBalanceHint": "Skriv inn et beløp å sette inn ved opprettelse av kontoen",
     "createButton": "Opprett konto",
@@ -107,8 +110,13 @@
     "createFirst": "Opprett din første konto",
     "currentBalance": "Nåværende saldo",
     "accountId": "Konto-ID",
+    "editName": "Rediger kontonavn",
+    "saveName": "Lagre kontonavn",
+    "cancelEdit": "Avbryt redigering",
+    "accountNamePlaceholder": "Skriv inn kontonavn",
     "errors": {
-      "loadFailed": "Kunne ikke laste kontoer. Vennligst prøv igjen."
+      "loadFailed": "Kunne ikke laste kontoer. Vennligst prøv igjen.",
+      "updateNameFailed": "Kunne ikke oppdatere kontonavn. Vennligst prøv igjen."
     }
   },
   "accountDetails": {

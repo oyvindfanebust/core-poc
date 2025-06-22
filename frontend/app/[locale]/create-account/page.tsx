@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ProtectedLayout } from '@/components/protected-layout';
 import { accountsApi, CreateAccountRequest } from '@/lib/api';
 import { useForm } from 'react-hook-form';
@@ -20,6 +21,8 @@ type FormData = z.infer<typeof createAccountSchema>;
 
 export default function CreateAccountPage() {
   const router = useRouter();
+  const t = useTranslations('createAccount');
+  const tCommon = useTranslations('common');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,7 +69,7 @@ export default function CreateAccountPage() {
       router.push('/dashboard');
     } catch (err: any) {
       console.error('Failed to create account:', err);
-      setError(err.message || 'Failed to create account. Please try again.');
+      setError(err.message || t('errors.createFailed'));
     } finally {
       setLoading(false);
     }
@@ -81,25 +84,25 @@ export default function CreateAccountPage() {
             className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to Dashboard
+            {t('backToDashboard')}
           </Link>
         </div>
 
         <div className="bg-white shadow rounded-lg p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">Create New Account</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('title')}</h1>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
               <label htmlFor="type" className="block text-sm font-medium text-gray-700">
-                Account Type
+                {t('accountType')}
               </label>
               <select
                 {...register('type')}
                 className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
               >
-                <option value="DEPOSIT">Deposit Account</option>
-                <option value="LOAN" disabled>Loan Account (Coming Soon)</option>
-                <option value="CREDIT" disabled>Credit Account (Coming Soon)</option>
+                <option value="DEPOSIT">{t('accountTypes.DEPOSIT')}</option>
+                <option value="LOAN" disabled>{t('accountTypes.LOAN')}</option>
+                <option value="CREDIT" disabled>{t('accountTypes.CREDIT')}</option>
               </select>
               {errors.type && (
                 <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>
@@ -108,22 +111,22 @@ export default function CreateAccountPage() {
 
             <div>
               <label htmlFor="currency" className="block text-sm font-medium text-gray-700">
-                Currency
+                {tCommon('currency')}
               </label>
               <select
                 {...register('currency')}
                 className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
               >
-                <option value="USD">USD - US Dollar</option>
-                <option value="EUR">EUR - Euro</option>
-                <option value="GBP">GBP - British Pound</option>
-                <option value="NOK">NOK - Norwegian Krone</option>
-                <option value="SEK">SEK - Swedish Krona</option>
-                <option value="DKK">DKK - Danish Krone</option>
-                <option value="JPY">JPY - Japanese Yen</option>
-                <option value="CAD">CAD - Canadian Dollar</option>
-                <option value="AUD">AUD - Australian Dollar</option>
-                <option value="CHF">CHF - Swiss Franc</option>
+                <option value="USD">{t('currencies.USD')}</option>
+                <option value="EUR">{t('currencies.EUR')}</option>
+                <option value="GBP">{t('currencies.GBP')}</option>
+                <option value="NOK">{t('currencies.NOK')}</option>
+                <option value="SEK">{t('currencies.SEK')}</option>
+                <option value="DKK">{t('currencies.DKK')}</option>
+                <option value="JPY">{t('currencies.JPY')}</option>
+                <option value="CAD">{t('currencies.CAD')}</option>
+                <option value="AUD">{t('currencies.AUD')}</option>
+                <option value="CHF">{t('currencies.CHF')}</option>
               </select>
               {errors.currency && (
                 <p className="mt-1 text-sm text-red-600">{errors.currency.message}</p>
@@ -133,7 +136,7 @@ export default function CreateAccountPage() {
             {accountType === 'DEPOSIT' && (
               <div>
                 <label htmlFor="initialBalance" className="block text-sm font-medium text-gray-700">
-                  Initial Balance (Optional)
+                  {t('initialBalance')}
                 </label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -148,7 +151,7 @@ export default function CreateAccountPage() {
                   />
                 </div>
                 <p className="mt-1 text-sm text-gray-500">
-                  Enter an amount to deposit when creating the account
+                  {t('initialBalanceHint')}
                 </p>
               </div>
             )}
@@ -164,14 +167,14 @@ export default function CreateAccountPage() {
                 href="/dashboard"
                 className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
               >
-                Cancel
+                {tCommon('cancel')}
               </Link>
               <button
                 type="submit"
                 disabled={loading}
                 className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
-                {loading ? 'Creating...' : 'Create Account'}
+                {loading ? t('creating') : t('createButton')}
               </button>
             </div>
           </form>

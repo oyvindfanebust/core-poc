@@ -8,9 +8,11 @@
     "edit": "Edit",
     "back": "Back",
     "loading": "Loading...",
+    "loadingDetails": "Loading account details...",
     "error": "Error",
     "success": "Success",
-    "currency": "Currency"
+    "currency": "Currency",
+    "account": "Account"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -113,6 +115,7 @@
     "backToAccounts": "Back to Accounts",
     "accountId": "Account ID",
     "created": "Created",
+    "currency": "Currency",
     "currentBalance": "Current Balance",
     "totalCredits": "Total Credits",
     "totalDebits": "Total Debits",

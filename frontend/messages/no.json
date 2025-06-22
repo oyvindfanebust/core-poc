@@ -8,9 +8,11 @@
     "edit": "Rediger",
     "back": "Tilbake",
     "loading": "Laster...",
+    "loadingDetails": "Laster kontodetaljer...",
     "error": "Feil",
     "success": "Suksess",
-    "currency": "Valuta"
+    "currency": "Valuta",
+    "account": "Konto"
   },
   "navigation": {
     "dashboard": "Oversikt",
@@ -113,6 +115,7 @@
     "backToAccounts": "Tilbake til kontoer",
     "accountId": "Konto-ID",
     "created": "Opprettet",
+    "currency": "Valuta",
     "currentBalance": "Nåværende saldo",
     "totalCredits": "Totale krediteringer",
     "totalDebits": "Totale debiteringer",

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ProtectedLayout } from '@/components/protected-layout';
 import { accountsApi, transfersApi, Account, TransferRequest } from '@/lib/api';
 import { useForm } from 'react-hook-form';
@@ -26,6 +27,8 @@ type FormData = z.infer<typeof transferSchema>;
 
 export default function TransferPage() {
   const router = useRouter();
+  const t = useTranslations('transfer');
+  const tCommon = useTranslations('common');
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingAccounts, setLoadingAccounts] = useState(true);
@@ -64,7 +67,7 @@ export default function TransferPage() {
       setAccounts(depositAccounts);
     } catch (err) {
       console.error('Failed to load accounts:', err);
-      setError('Failed to load accounts. Please try again.');
+      setError(t('errors.loadFailed'));
     } finally {
       setLoadingAccounts(false);
     }
@@ -100,21 +103,21 @@ export default function TransferPage() {
       }, 2000);
     } catch (err: any) {
       console.error('Failed to create transfer:', err);
-      setError(err.message || 'Failed to process transfer. Please try again.');
+      setError(err.message || t('errors.transferFailed'));
     } finally {
       setLoading(false);
     }
   };
 
   const formatAccountOption = (account: Account) => {
-    return `${account.accountType} Account - ${account.currency} (ID: ${account.accountId})`;
+    return `${account.accountType} ${tCommon('account')} - ${account.currency} (ID: ${account.accountId})`;
   };
 
   if (loadingAccounts) {
     return (
       <ProtectedLayout>
         <div className="flex justify-center items-center h-64">
-          <div className="text-gray-500">Loading accounts...</div>
+          <div className="text-gray-500">{tCommon('loading')}</div>
         </div>
       </ProtectedLayout>
     );
@@ -129,39 +132,39 @@ export default function TransferPage() {
             className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to Dashboard
+            {t('backToDashboard')}
           </Link>
         </div>
 
         <div className="bg-white shadow rounded-lg p-6">
           <div className="flex items-center mb-6">
             <Send className="h-6 w-6 text-blue-600 mr-2" />
-            <h1 className="text-2xl font-bold text-gray-900">Transfer Money</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
           </div>
 
           {accounts.length < 2 ? (
             <div className="text-center py-8">
               <p className="text-gray-500 mb-4">
-                You need at least two accounts to make a transfer.
+                {t('needTwoAccounts')}
               </p>
               <Link
                 href="/create-account"
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
               >
-                Create Another Account
+                {t('createAnother')}
               </Link>
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div>
                 <label htmlFor="fromAccountId" className="block text-sm font-medium text-gray-700">
-                  From Account
+                  {t('fromAccount')}
                 </label>
                 <select
                   {...register('fromAccountId')}
                   className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                 >
-                  <option value="">Select source account</option>
+                  <option value="">{t('selectSource')}</option>
                   {accounts.map((account) => (
                     <option key={account.accountId} value={account.accountId}>
                       {formatAccountOption(account)}
@@ -181,13 +184,13 @@ export default function TransferPage() {
 
               <div>
                 <label htmlFor="toAccountId" className="block text-sm font-medium text-gray-700">
-                  To Account
+                  {t('toAccount')}
                 </label>
                 <select
                   {...register('toAccountId')}
                   className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                 >
-                  <option value="">Select destination account</option>
+                  <option value="">{t('selectDestination')}</option>
                   {accounts
                     .filter((account) => account.accountId !== fromAccountId)
                     .map((account) => (
@@ -203,7 +206,7 @@ export default function TransferPage() {
 
               <div>
                 <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
-                  Amount
+                  {t('amount')}
                 </label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -230,7 +233,7 @@ export default function TransferPage() {
 
               {success && (
                 <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-                  Transfer completed successfully! Redirecting to dashboard...
+                  {t('success')}
                 </div>
               )}
 
@@ -239,14 +242,14 @@ export default function TransferPage() {
                   href="/dashboard"
                   className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                 >
-                  Cancel
+                  {tCommon('cancel')}
                 </Link>
                 <button
                   type="submit"
                   disabled={loading || success}
                   className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                 >
-                  {loading ? 'Processing...' : 'Transfer Money'}
+                  {loading ? t('processing') : t('transferButton')}
                 </button>
               </div>
             </form>

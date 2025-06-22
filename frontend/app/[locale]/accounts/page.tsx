@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ProtectedLayout } from '@/components/protected-layout';
 import { accountsApi, Account, Balance } from '@/lib/api';
 import { CreditCard, TrendingUp, ArrowRight } from 'lucide-react';
@@ -13,6 +14,8 @@ interface AccountWithBalance extends Account {
 
 export default function AccountsPage() {
   const router = useRouter();
+  const t = useTranslations('accounts');
+  const tCommon = useTranslations('common');
   const [accounts, setAccounts] = useState<AccountWithBalance[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +51,7 @@ export default function AccountsPage() {
       setAccounts(accountsWithBalances);
     } catch (err) {
       console.error('Failed to load accounts:', err);
-      setError('Failed to load accounts. Please try again.');
+      setError(t('errors.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -78,11 +81,11 @@ export default function AccountsPage() {
   return (
     <ProtectedLayout>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-gray-900">All Accounts</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
 
         {loading ? (
           <div className="flex justify-center items-center h-64">
-            <div className="text-gray-500">Loading accounts...</div>
+            <div className="text-gray-500">{tCommon('loading')}</div>
           </div>
         ) : error ? (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
@@ -91,14 +94,14 @@ export default function AccountsPage() {
         ) : accounts.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg shadow">
             <CreditCard className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No accounts</h3>
-            <p className="mt-1 text-sm text-gray-500">Get started by creating a new account.</p>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">{t('noAccounts')}</h3>
+            <p className="mt-1 text-sm text-gray-500">{t('noAccountsDescription')}</p>
             <div className="mt-6">
               <Link
                 href="/create-account"
                 className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
               >
-                Create Your First Account
+                {t('createFirst')}
               </Link>
             </div>
           </div>
@@ -119,13 +122,13 @@ export default function AccountsPage() {
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">
-                              {account.accountType} Account
+                              {account.accountType} {tCommon('account')}
                             </div>
                             <div className="text-sm text-gray-500">
-                              Account ID: {account.accountId}
+                              {t('accountId')}: {account.accountId}
                             </div>
                             <div className="text-sm text-gray-500">
-                              Currency: {account.currency}
+                              {tCommon('currency')}: {account.currency}
                             </div>
                           </div>
                         </div>
@@ -137,7 +140,7 @@ export default function AccountsPage() {
                                 : formatCurrency('0', account.currency)}
                             </div>
                             <div className="text-sm text-gray-500">
-                              Current Balance
+                              {t('currentBalance')}
                             </div>
                           </div>
                           <ArrowRight className="h-5 w-5 text-gray-400" />

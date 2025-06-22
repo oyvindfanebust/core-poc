@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ProtectedLayout } from '@/components/protected-layout';
 import { accountsApi, Account, Balance } from '@/lib/api';
 import { ArrowLeft, CreditCard, TrendingUp, Download, Send } from 'lucide-react';
@@ -11,6 +12,8 @@ export default function AccountDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const accountId = params.accountId as string;
+  const t = useTranslations('accountDetails');
+  const tCommon = useTranslations('common');
   
   const [account, setAccount] = useState<Account | null>(null);
   const [balance, setBalance] = useState<Balance | null>(null);
@@ -36,7 +39,7 @@ export default function AccountDetailsPage() {
       const currentAccount = accounts.find(acc => acc.accountId === accountId);
       
       if (!currentAccount) {
-        setError('Account not found');
+        setError(t('errors.notFound'));
         return;
       }
       
@@ -47,7 +50,7 @@ export default function AccountDetailsPage() {
       setBalance(accountBalance);
     } catch (err) {
       console.error('Failed to load account details:', err);
-      setError('Failed to load account details. Please try again.');
+      setError(t('errors.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -86,7 +89,7 @@ export default function AccountDetailsPage() {
     return (
       <ProtectedLayout>
         <div className="flex justify-center items-center h-64">
-          <div className="text-gray-500">Loading account details...</div>
+          <div className="text-gray-500">{tCommon('loadingDetails')}</div>
         </div>
       </ProtectedLayout>
     );
@@ -102,11 +105,11 @@ export default function AccountDetailsPage() {
               className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
             >
               <ArrowLeft className="h-4 w-4 mr-1" />
-              Back to Accounts
+              {t('backToAccounts')}
             </Link>
           </div>
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-            {error || 'Account not found'}
+            {error || t('errors.notFound')}
           </div>
         </div>
       </ProtectedLayout>
@@ -122,7 +125,7 @@ export default function AccountDetailsPage() {
             className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to Accounts
+            {t('backToAccounts')}
           </Link>
         </div>
 
@@ -134,16 +137,16 @@ export default function AccountDetailsPage() {
               </div>
               <div className="ml-4">
                 <h1 className="text-2xl font-bold text-gray-900">
-                  {account.accountType} Account
+                  {t(`accountType.${account.accountType}`)}
                 </h1>
                 <p className="text-sm text-gray-500 mt-1">
-                  Account ID: {account.accountId}
+                  {t('accountId')}: {account.accountId}
                 </p>
                 <p className="text-sm text-gray-500">
-                  Currency: {account.currency}
+                  {t('currency')}: {account.currency}
                 </p>
                 <p className="text-sm text-gray-500">
-                  Created: {formatDate(account.createdAt)}
+                  {t('created')}: {formatDate(account.createdAt)}
                 </p>
               </div>
             </div>
@@ -154,7 +157,7 @@ export default function AccountDetailsPage() {
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                 >
                   <Send className="h-4 w-4 mr-2" />
-                  Transfer
+                  {t('transferButton')}
                 </Link>
               )}
             </div>
@@ -174,7 +177,7 @@ export default function AccountDetailsPage() {
                   <div className="ml-5 w-0 flex-1">
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">
-                        Current Balance
+                        {t('currentBalance')}
                       </dt>
                       <dd className="text-lg font-semibold text-gray-900">
                         {formatCurrency(balance.balance, account.currency)}
@@ -196,7 +199,7 @@ export default function AccountDetailsPage() {
                   <div className="ml-5 w-0 flex-1">
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">
-                        Total Credits
+                        {t('totalCredits')}
                       </dt>
                       <dd className="text-lg font-semibold text-gray-900">
                         {formatCurrency(balance.credits, account.currency)}
@@ -218,7 +221,7 @@ export default function AccountDetailsPage() {
                   <div className="ml-5 w-0 flex-1">
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">
-                        Total Debits
+                        {t('totalDebits')}
                       </dt>
                       <dd className="text-lg font-semibold text-gray-900">
                         {formatCurrency(balance.debits, account.currency)}
@@ -232,11 +235,11 @@ export default function AccountDetailsPage() {
         )}
 
         <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Transaction History</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">{t('transactionHistory')}</h2>
           <div className="text-center py-8 text-gray-500">
-            <p>Transaction history coming soon...</p>
+            <p>{t('transactionHistoryComingSoon')}</p>
             <p className="text-sm mt-2">
-              This feature will show all credits and debits for this account.
+              {t('transactionHistoryDescription')}
             </p>
           </div>
         </div>

@@ -8,9 +8,11 @@
     "edit": "Измени",
     "back": "Назад",
     "loading": "Учитавање...",
+    "loadingDetails": "Учитавање детаља рачуна...",
     "error": "Грешка",
     "success": "Успех",
-    "currency": "Валута"
+    "currency": "Валута",
+    "account": "Рачун"
   },
   "navigation": {
     "dashboard": "Контролна табла",
@@ -113,6 +115,7 @@
     "backToAccounts": "Назад на рачуне",
     "accountId": "ИД рачуна",
     "created": "Креиран",
+    "currency": "Валута",
     "currentBalance": "Тренутно стање",
     "totalCredits": "Укупни кредити",
     "totalDebits": "Укупни дебити",

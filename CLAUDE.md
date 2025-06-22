@@ -2,96 +2,61 @@
 
 Banking ledger PoC with Node.js, TypeScript, TigerBeetle, and PostgreSQL.
 
-## Bash Commands
-- `npm run dev:core-api`: Start core API development server (port 7001)
-- `npm run dev:batch-processor`: Start batch processor development server (port 7003)
-- `npm run dev:customer-frontend`: Start customer frontend development server (port 7002)
-- `npm run dev:backend`: Start both core API and batch processor concurrently
-- `npm run dev:all`: Start all services concurrently
-- `npm run build`: TypeScript compilation check (always run before committing)
-- `npm run test:core-api`: Run core API tests
-- `npm run test:batch-processor`: Run batch processor tests
-- `docker-compose up -d`: Start infrastructure services
-- `docker-compose down`: Stop all services
-- `direnv allow`: Reload environment variables after .envrc changes
+## 🚀 Quick Commands
+```bash
+npm run dev:all          # Start all services
+npm run build            # TypeScript check (run before commits)
+npm run test:core-api    # Test core API
+npm run test:batch-processor  # Test batch processor
+docker-compose up -d     # Start infrastructure
+direnv allow            # Reload env after .envrc changes
+```
 
-## Core Files
-- `packages/core-services/src/value-objects.ts`: Money, AccountId, CustomerId type-safe wrappers
-- `packages/core-services/src/repositories/`: Database repositories
-- `packages/core-services/src/tigerbeetle.service.ts`: TigerBeetle client wrapper
-- `packages/domain/src/services/`: Domain services (account, loan, payment processing)
-- `packages/shared/src/types/index.ts`: Shared TypeScript type definitions
-- `apps/core-api/src/services/factory.ts`: Core API service container
-- `apps/batch-processor/src/services/factory.ts`: Batch processor service container
-- `docker-compose.yml`: Infrastructure service definitions
-- `.envrc`: Environment variables (use .envrc.example as template)
+## ✅ Task Completion Checklist
+**Before marking ANY task complete:**
+1. `npm run build` - TypeScript compiles
+2. `npm run test:*` - All tests pass
+3. Frontend changes → Add translations (`/en`, `/no`, `/sr`)
+4. API changes → Update docs
+5. TodoWrite tasks → Mark complete
 
-## Architecture Rules
-- All financial transactions MUST go through TigerBeetle (port 6000)
-- PostgreSQL is for metadata only, never financial data
-- Use Zod schemas for all API input validation
-- Follow domain-driven design: Domain → Repository → Service → Controller
-- Core services (`packages/core-services/`): Database, TigerBeetle, repositories
-- Domain logic (`packages/domain/`): Business logic, domain services
-- Core API (`apps/core-api/`): Customer and admin APIs
-- Batch processor (`apps/batch-processor/`): Background jobs only
+## 🏗️ Architecture
+- **TigerBeetle (6000)**: ALL financial transactions
+- **PostgreSQL**: Metadata only, NEVER financial data
+- **Validation**: Zod schemas for all API inputs
+- **Money**: Always integers (cents), never decimals
+- **Design**: Domain → Repository → Service → Controller
 
-## Code Style
-- TypeScript strict mode enabled
-- Use async/await over callbacks
-- Handle errors with try/catch blocks
-- Use existing error classes from `src/utils/errors.ts`
-- Test files co-located as `*.test.ts`
-- No comments unless explicitly requested
+## 📁 Key Files
+- `packages/core-services/src/value-objects.ts` - Money, AccountId types
+- `packages/domain/src/services/` - Business logic
+- `apps/*/src/services/factory.ts` - Service containers
+- `.envrc.example` - Environment template
 
-## Port Management
-- **600x range**: Database/ledger services (6000: TigerBeetle dev, 6001: TigerBeetle test)
-- **700x range**: Application services (7001: Core API, 7002: Customer Frontend, 7003: Batch Processor, 7005: Admin Frontend)
-- **5xxx range**: Infrastructure (5432: PostgreSQL, 5672: RabbitMQ)
+## 🔧 Development Workflow
+1. **Explore** - Read files, understand context
+2. **Plan** - Use TodoWrite for complex tasks
+3. **Code** - Follow existing patterns, check package.json
+4. **Test** - TDD when possible, verify with curl
+5. **Commit** - Clear messages, no Claude attribution
 
-## Frontend Development
-- Next.js 15 with App Router on port 7002
-- Internationalization: English, Norwegian, Serbian (`/en`, `/no`, `/sr`)
-- All client components need NextIntlClientProvider context
-- Use `useTranslations` hook for i18n in components
-- Language switching always uses URL prefixes
+## 🎨 Frontend
+- Next.js 15, App Router (port 7002)
+- i18n required: English, Norwegian, Serbian
+- `useTranslations` hook for all text
+- Components need `NextIntlClientProvider`
 
-## Environment Setup
-- Copy `.envrc.example` to `.envrc` and customize
-- Run `direnv allow` after changes
-- Database migrations run automatically on startup
-- Use test customer: `CUSTOMER-ABC-123`
+## ⚠️ Critical Rules
+- Financial data → TigerBeetle ONLY
+- New library → Check package.json first
+- Frontend text → Add ALL translations
+- Commits → Run build & tests first
+- Batch ops → Must be idempotent
+- Test customer: `CUSTOMER-ABC-123`
 
-## Repository Etiquette
-- Always run `npm run build && npm run test` before committing
-- Write descriptive commit messages (see git log for style)
-- NEVER add "Co-Authored-By: Claude" or "Generated with Claude Code" to commits
-- Stage all changes: `git add -A`
-- Push to main branch after commits
-
-## Testing Strategy
-- Run unit tests first: `npm run test:unit --workspace=backend`
-- Stop/restart services for clean testing environment
-- Test API endpoints with curl before frontend testing
-- Use Puppeteer for end-to-end frontend testing
-- Verify service connectivity and port bindings
-
-## Unexpected Behaviors
-- **direnv**: Must run `direnv allow` after .envrc changes, environment won't update automatically
-- **TigerBeetle**: Uses BigInt for IDs, requires special JSON serialization (handled in app.ts)
-- **Docker**: Services may need restart after port changes, use `docker-compose down && docker-compose up -d`
-- **Frontend CORS**: Backend only allows frontend on port 7002, update CORS if frontend port changes
-- **Money amounts**: Always integers representing cents, never decimals
-- **CDC events**: Must be idempotent, can be replayed
-
-## Security Notes
-- Never log sensitive financial data
-- CDC events may contain financial information
-- Use secure AMQP connections in production
-- Money amounts in cents prevent floating-point errors
-
-## Key Utilities
-- `src/domain/value-objects.ts`: Money, AccountId, CustomerId type-safe wrappers
-- `src/services/tigerbeetle.service.ts`: TigerBeetle client wrapper
-- `src/middleware/validation.ts`: Request validation middleware
-- `backend/src/utils/logger.ts`: Winston structured logging
+## 🔌 Ports
+- 6000-6001: TigerBeetle (dev/test)
+- 7001: Core API
+- 7002: Customer Frontend  
+- 7003: Batch Processor
+- 5432: PostgreSQL

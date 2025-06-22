@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ProtectedLayout } from '@/components/protected-layout';
-import { accountsApi, transfersApi, Account, TransferRequest } from '@/lib/api';
+import { accountsApi, transfersApi, Account, TransferRequest, Balance } from '@/lib/api';
 import { formatAccountOption } from '@/lib/account-utils';
+import { TransferConfirmationDialog, TransferSummary } from '@/components/transfer-confirmation-dialog';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -35,6 +36,9 @@ export default function TransferPage() {
   const [loadingAccounts, setLoadingAccounts] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [transferSummary, setTransferSummary] = useState<TransferSummary | null>(null);
+  const [loadingBalances, setLoadingBalances] = useState(false);
 
   const {
     register,
@@ -76,26 +80,61 @@ export default function TransferPage() {
 
   const onSubmit = async (data: FormData) => {
     const fromAccount = accounts.find(acc => acc.accountId === data.fromAccountId);
-    if (!fromAccount) return;
+    const toAccount = accounts.find(acc => acc.accountId === data.toAccountId);
+    
+    if (!fromAccount || !toAccount) return;
 
     try {
-      setLoading(true);
+      setLoadingBalances(true);
       setError(null);
-      setSuccess(false);
 
       // Convert dollars to cents
       const cents = Math.round(parseFloat(data.amount) * 100);
 
-      const request: TransferRequest = {
-        fromAccountId: data.fromAccountId,
-        toAccountId: data.toAccountId,
-        amount: cents.toString(),
+      // Load current balances for both accounts
+      const [fromBalance, toBalance] = await Promise.all([
+        accountsApi.getAccountBalance(data.fromAccountId),
+        accountsApi.getAccountBalance(data.toAccountId)
+      ]);
+
+      // Create transfer summary
+      const summary: TransferSummary = {
+        fromAccount,
+        toAccount,
+        fromBalance,
+        toBalance,
+        amount: cents,
         currency: fromAccount.currency,
+      };
+
+      setTransferSummary(summary);
+      setShowConfirmation(true);
+    } catch (err: any) {
+      console.error('Failed to load account balances:', err);
+      setError(err.message || t('errors.loadFailed'));
+    } finally {
+      setLoadingBalances(false);
+    }
+  };
+
+  const handleConfirmTransfer = async () => {
+    if (!transferSummary) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const request: TransferRequest = {
+        fromAccountId: transferSummary.fromAccount.accountId,
+        toAccountId: transferSummary.toAccount.accountId,
+        amount: transferSummary.amount.toString(),
+        currency: transferSummary.currency,
       };
 
       await transfersApi.createTransfer(request);
 
       setSuccess(true);
+      setShowConfirmation(false);
       reset();
 
       // Redirect to dashboard after a short delay
@@ -105,9 +144,15 @@ export default function TransferPage() {
     } catch (err: any) {
       console.error('Failed to create transfer:', err);
       setError(err.message || t('errors.transferFailed'));
+      setShowConfirmation(false);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCancelConfirmation = () => {
+    setShowConfirmation(false);
+    setTransferSummary(null);
   };
 
   if (loadingAccounts) {
@@ -243,16 +288,27 @@ export default function TransferPage() {
                 </Link>
                 <button
                   type="submit"
-                  disabled={loading || success}
+                  disabled={loadingBalances || loading || success}
                   className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                 >
-                  {loading ? t('processing') : t('transferButton')}
+                  {loadingBalances ? t('loadingBalances') : t('reviewTransfer')}
                 </button>
               </div>
             </form>
           )}
         </div>
       </div>
+
+      {/* Transfer Confirmation Dialog */}
+      {transferSummary && (
+        <TransferConfirmationDialog
+          isOpen={showConfirmation}
+          onClose={handleCancelConfirmation}
+          onConfirm={handleConfirmTransfer}
+          transferSummary={transferSummary}
+          loading={loading}
+        />
+      )}
     </ProtectedLayout>
   );
 }

@@ -32,16 +32,13 @@ export class PaymentPlanJob {
       // Use the payment processing service to handle all the logic
       const results = await this.paymentProcessingService.processScheduledPayments();
       
-      const successful = results.filter(r => r.invoiceCreated && r.paymentProcessed).length;
-      const invoiceOnly = results.filter(r => r.invoiceCreated && !r.paymentProcessed).length;
-      const failed = results.filter(r => !r.invoiceCreated).length;
+      const successful = results.filter(r => r.paymentProcessed).length;
+      const failed = results.filter(r => !r.paymentProcessed).length;
 
       logger.info('Scheduled payment processing completed', {
         total: results.length,
         successful,
-        invoiceOnly,
         failed,
-        invoicesCreated: results.filter(r => r.invoiceCreated).map(r => r.invoiceId),
         transfers: results.filter(r => r.transferId).map(r => r.transferId?.toString()),
       });
 
@@ -49,7 +46,7 @@ export class PaymentPlanJob {
       const failures = results.filter(r => r.error);
       if (failures.length > 0) {
         logger.warn('Some payments failed to process', {
-          failures: failures.map(f => ({ invoiceId: f.invoiceId, error: f.error })),
+          failures: failures.map(f => ({ error: f.error })),
         });
       }
 

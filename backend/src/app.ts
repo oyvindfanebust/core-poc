@@ -17,7 +17,6 @@ import { validateRequest, errorHandler, requestLogger } from './middleware/valid
 import { 
   CreateAccountSchema, 
   TransferSchema, 
-  CreateInvoiceSchema,
   AccountIdParamSchema,
   CustomerIdParamSchema,
   UpdateAccountNameSchema
@@ -38,7 +37,6 @@ async function createApp(): Promise<express.Application> {
     const accountController = new AccountController(
       services.accountService,
       services.loanService,
-      services.invoiceService,
       services.transferRepository
     );
     
@@ -101,16 +99,6 @@ async function createApp(): Promise<express.Application> {
       accountController.transfer.bind(accountController)
     );
 
-    // Invoice routes with validation
-    app.post('/invoices', 
-      validateRequest(CreateInvoiceSchema),
-      accountController.createInvoice.bind(accountController)
-    );
-    
-    app.get('/accounts/:accountId/invoices', 
-      validateRequest(AccountIdParamSchema, 'params'),
-      accountController.getInvoices.bind(accountController)
-    );
 
     // Payment plan routes
     app.get('/accounts/:accountId/payment-plan', 
@@ -155,7 +143,6 @@ async function createApp(): Promise<express.Application> {
           metrics: '/metrics',
           accounts: '/accounts',
           transfers: '/transfers',
-          invoices: '/invoices',
         },
       });
     });
@@ -165,7 +152,6 @@ async function createApp(): Promise<express.Application> {
 
     // Start background jobs
     services.paymentPlanJob.startMonthlyJob();
-    services.invoiceJob.startOverdueJob();
 
     logger.info('Application initialized successfully', {
       routes: [
@@ -173,8 +159,6 @@ async function createApp(): Promise<express.Application> {
         'GET /accounts/:accountId/balance',
         'GET /accounts/:accountId/transactions',
         'POST /transfers',
-        'POST /invoices',
-        'GET /accounts/:accountId/invoices',
         'GET /accounts/:accountId/payment-plan',
         'GET /accounts/:accountId/amortization-schedule',
         'GET /customers/:customerId/accounts',

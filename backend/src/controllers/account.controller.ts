@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { AccountService } from '../services/account.service.js';
 import { LoanService } from '../domain/services/loan.service.js';
-import { InvoiceService } from '../domain/services/invoice.service.js';
 import { TransferRepository } from '../repositories/transfer.repository.js';
 import { Money, AccountId, CustomerId } from '../domain/value-objects.js';
 import { 
@@ -10,7 +9,6 @@ import {
   CreateLoanAccountRequest, 
   CreateCreditAccountRequest,
   TransferRequest,
-  CreateInvoiceRequest,
   CustomerIdParam,
   UpdateAccountNameRequest,
 } from '../validation/schemas.js';
@@ -20,7 +18,6 @@ export class AccountController {
   constructor(
     private accountService: AccountService,
     private loanService: LoanService,
-    private invoiceService: InvoiceService,
     private transferRepository: TransferRepository
   ) {}
 
@@ -178,69 +175,6 @@ export class AccountController {
     }
   }
 
-  async createInvoice(req: Request, res: Response): Promise<void> {
-    try {
-      const data = req.body as CreateInvoiceRequest;
-      
-      logger.info('Creating invoice', {
-        accountId: data.accountId,
-        amount: data.amount,
-        dueDate: data.dueDate,
-      });
-      
-      const invoice = await this.invoiceService.createInvoice({
-        accountId: new AccountId(data.accountId),
-        amount: new Money(data.amount, 'USD'), // TODO: Get currency from request or account
-        dueDate: new Date(data.dueDate),
-      });
-
-      // Convert BigInt fields to strings for JSON serialization
-      const serializedInvoice = {
-        id: invoice.id,
-        accountId: invoice.accountId.toString(),
-        amount: invoice.amount.toString(),
-        dueDate: invoice.dueDate,
-        status: invoice.status,
-      };
-
-      res.status(201).json(serializedInvoice);
-    } catch (error) {
-      logger.error('Failed to create invoice', { 
-        body: req.body,
-        error 
-      });
-      res.status(500).json({ error: 'Failed to create invoice' });
-    }
-  }
-
-  async getInvoices(req: Request, res: Response): Promise<void> {
-    try {
-      const { accountId } = req.params;
-      
-      logger.debug('Getting invoices for account', { accountId });
-      
-      const invoices = await this.invoiceService.getInvoicesByAccount(
-        new AccountId(accountId)
-      );
-      
-      // Convert BigInt fields to strings for JSON serialization
-      const serializedInvoices = invoices.map(invoice => ({
-        id: invoice.id,
-        accountId: invoice.accountId.toString(),
-        amount: invoice.amount.toString(),
-        dueDate: invoice.dueDate,
-        status: invoice.status,
-      }));
-      
-      res.json(serializedInvoices);
-    } catch (error) {
-      logger.error('Failed to get invoices', { 
-        accountId: req.params.accountId,
-        error 
-      });
-      res.status(500).json({ error: 'Failed to get invoices' });
-    }
-  }
 
   async getPaymentPlan(req: Request, res: Response): Promise<void> {
     try {

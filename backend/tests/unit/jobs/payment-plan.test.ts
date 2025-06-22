@@ -20,7 +20,7 @@ describe('PaymentPlanJob', () => {
   beforeEach(() => {
     mockPaymentPlanRepository = new PaymentPlanRepository() as jest.Mocked<PaymentPlanRepository>;
     mockAccountService = new AccountService({} as any) as jest.Mocked<AccountService>;
-    mockPaymentProcessingService = new PaymentProcessingService({} as any, {} as any, {} as any) as jest.Mocked<PaymentProcessingService>;
+    mockPaymentProcessingService = new PaymentProcessingService({} as any, {} as any) as jest.Mocked<PaymentProcessingService>;
     paymentPlanJob = new PaymentPlanJob(mockPaymentPlanRepository, mockAccountService, mockPaymentProcessingService);
   });
 
@@ -33,9 +33,7 @@ describe('PaymentPlanJob', () => {
     it('should process scheduled payments using payment processing service', async () => {
       const mockResults = [
         {
-          invoiceCreated: true,
           paymentProcessed: true,
-          invoiceId: 'test-invoice-1',
           transferId: 123n,
         },
       ];
@@ -75,7 +73,7 @@ describe('PaymentPlanJob', () => {
 
       // This test is now obsolete since the job uses PaymentProcessingService
       // But we'll keep it for compatibility
-      const mockResults = [{ invoiceCreated: true, paymentProcessed: true }];
+      const mockResults = [{ paymentProcessed: true }];
       mockPaymentProcessingService.processScheduledPayments.mockResolvedValue(mockResults);
 
       await paymentPlanJob.processMonthlyPayments();
@@ -101,7 +99,7 @@ describe('PaymentPlanJob', () => {
         },
       ];
 
-      const mockResults = [{ invoiceCreated: true, paymentProcessed: true }];
+      const mockResults = [{ paymentProcessed: true }];
       mockPaymentProcessingService.processScheduledPayments.mockResolvedValue(mockResults);
 
       await paymentPlanJob.processMonthlyPayments();

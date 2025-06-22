@@ -1,14 +1,11 @@
 import { PaymentPlanRepository } from '../repositories/payment-plan.repository.js';
-import { InvoiceService } from '../domain/services/invoice.service.js';
 import { AccountService } from './account.service.js';
 import { Money, AccountId, CustomerId } from '../domain/value-objects.js';
 import { PaymentPlan } from '../types/index.js';
 import { logger } from '../utils/logger.js';
 
 export interface PaymentProcessingResult {
-  invoiceCreated: boolean;
   paymentProcessed: boolean;
-  invoiceId?: string;
   transferId?: bigint;
   error?: string;
 }
@@ -16,7 +13,6 @@ export interface PaymentProcessingResult {
 export class PaymentProcessingService {
   constructor(
     private paymentPlanRepository: PaymentPlanRepository,
-    private invoiceService: InvoiceService,
     private accountService: AccountService
   ) {}
 
@@ -48,8 +44,8 @@ export class PaymentProcessingService {
         results.push(result);
       }
 
-      const successful = results.filter(r => r.invoiceCreated && r.paymentProcessed).length;
-      const failed = results.filter(r => !r.invoiceCreated || !r.paymentProcessed).length;
+      const successful = results.filter(r => r.paymentProcessed).length;
+      const failed = results.filter(r => !r.paymentProcessed).length;
 
       logger.info('Scheduled payment processing completed', {
         total: results.length,
@@ -69,7 +65,6 @@ export class PaymentProcessingService {
    */
   async processPaymentPlan(paymentPlan: PaymentPlan, processDate: Date = new Date()): Promise<PaymentProcessingResult> {
     const result: PaymentProcessingResult = {
-      invoiceCreated: false,
       paymentProcessed: false,
     };
 
@@ -81,18 +76,7 @@ export class PaymentProcessingService {
         remainingPayments: paymentPlan.remainingPayments,
       });
 
-      // Step 1: Create invoice for the payment
-      const invoice = await this.createPaymentInvoice(paymentPlan, processDate);
-      result.invoiceCreated = true;
-      result.invoiceId = invoice.id;
-
-      logger.info('Invoice created for payment', {
-        invoiceId: invoice.id,
-        accountId: paymentPlan.accountId.toString(),
-        amount: invoice.amount.toString(),
-      });
-
-      // Step 2: Find customer's deposit account
+      // Step 1: Find customer's deposit account
       const customerDepositAccount = await this.findCustomerDepositAccount(paymentPlan.customerId);
       
       if (!customerDepositAccount) {
@@ -104,7 +88,7 @@ export class PaymentProcessingService {
         return result;
       }
 
-      // Step 3: Process the payment transaction
+      // Step 2: Process the payment transaction
       const transferId = await this.processPaymentTransaction(
         customerDepositAccount,
         new AccountId(paymentPlan.accountId),
@@ -121,12 +105,11 @@ export class PaymentProcessingService {
         amount: paymentPlan.monthlyPayment.toString(),
       });
 
-      // Step 4: Update payment plan for next payment
+      // Step 3: Update payment plan for next payment
       await this.updatePaymentPlanAfterPayment(paymentPlan);
 
       logger.info('Payment plan processing completed successfully', {
         accountId: paymentPlan.accountId.toString(),
-        invoiceId: result.invoiceId,
         transferId: result.transferId?.toString(),
       });
 
@@ -141,18 +124,6 @@ export class PaymentProcessingService {
     }
   }
 
-  /**
-   * Create an invoice for a payment plan payment
-   */
-  private async createPaymentInvoice(paymentPlan: PaymentPlan, dueDate: Date) {
-    const invoice = await this.invoiceService.createInvoice({
-      accountId: new AccountId(paymentPlan.accountId),
-      amount: new Money(paymentPlan.monthlyPayment, 'USD'), // TODO: Get currency from payment plan
-      dueDate,
-    });
-
-    return invoice;
-  }
 
   /**
    * Find the customer's primary deposit account for payments
@@ -280,23 +251,4 @@ export class PaymentProcessingService {
     return nextDate;
   }
 
-  /**
-   * Mark an invoice as paid (called when payment is confirmed)
-   */
-  async markInvoicePaid(invoiceId: string): Promise<boolean> {
-    try {
-      const success = await this.invoiceService.markInvoicePaid(invoiceId);
-      
-      if (success) {
-        logger.info('Invoice marked as paid', { invoiceId });
-      } else {
-        logger.warn('Failed to mark invoice as paid', { invoiceId });
-      }
-
-      return success;
-    } catch (error) {
-      logger.error('Error marking invoice as paid', { invoiceId, error });
-      return false;
-    }
-  }
 }

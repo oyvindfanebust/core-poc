@@ -2,7 +2,7 @@ import request from 'supertest';
 import express from 'express';
 import { AccountController } from '../../src/controllers/account.controller';
 import { validateRequest } from '../../src/middleware/validation';
-import { CreateAccountSchema, TransferSchema, CreateInvoiceSchema, AccountIdParamSchema, CustomerIdParamSchema } from '../../src/validation/schemas';
+import { CreateAccountSchema, TransferSchema, AccountIdParamSchema, CustomerIdParamSchema } from '../../src/validation/schemas';
 import { createTestContext, cleanupTestContext, TestContext } from '../helpers/test-utils.js';
 import { setupTestTigerBeetle, teardownTestTigerBeetle } from '../helpers/test-tigerbeetle.js';
 
@@ -20,7 +20,6 @@ describe('Banking Workflows E2E', () => {
     const accountController = new AccountController(
       context.services.accountService,
       context.services.loanService,
-      context.services.invoiceService,
       context.services.transferRepository
     );
 
@@ -39,14 +38,6 @@ describe('Banking Workflows E2E', () => {
     app.post('/transfers', 
       validateRequest(TransferSchema),
       accountController.transfer.bind(accountController)
-    );
-    app.post('/invoices', 
-      validateRequest(CreateInvoiceSchema),
-      accountController.createInvoice.bind(accountController)
-    );
-    app.get('/accounts/:accountId/invoices', 
-      validateRequest(AccountIdParamSchema, 'params'),
-      accountController.getInvoices.bind(accountController)
     );
     app.get('/customers/:customerId/accounts',
       validateRequest(CustomerIdParamSchema, 'params'),
@@ -174,26 +165,7 @@ describe('Banking Workflows E2E', () => {
 
       expect(creditBalance.body.balance).toBe('22500'); // 25000 - 2500
 
-      // 7. Create monthly payment invoice for loan
-      const futureDate = new Date();
-      futureDate.setDate(futureDate.getDate() + 30);
-      
-      const invoiceResponse = await request(app)
-        .post('/invoices')
-        .send({
-          accountId: loanAccountId.toString(),
-          amount: loanResponse.body.monthlyPayment,
-          dueDate: futureDate.toISOString().split('T')[0], // YYYY-MM-DD format
-        });
-
-      if (invoiceResponse.status !== 201) {
-        console.error('Invoice creation failed:', invoiceResponse.body);
-      }
-      expect(invoiceResponse.status).toBe(201);
-
-      expect(invoiceResponse.body.status).toBe('pending');
-
-      // 8. Pay loan from savings account
+      // 7. Make loan payment from savings account
       const monthlyPayment = loanResponse.body.monthlyPayment;
       
       await request(app)
@@ -206,7 +178,7 @@ describe('Banking Workflows E2E', () => {
         })
         .expect(201);
 
-      // 9. Verify final balances
+      // 8. Verify final balances
       const finalSavingsBalance = await request(app)
         .get(`/accounts/${savingsAccountId}/balance`)
         .expect(200);
@@ -219,13 +191,6 @@ describe('Banking Workflows E2E', () => {
       expect(finalSavingsBalance.body.balance).toBe(expectedSavingsBalance.toString());
       expect(finalLoanBalance.body.balance).toBe(monthlyPayment);
 
-      // 10. Verify invoices
-      const invoices = await request(app)
-        .get(`/accounts/${loanAccountId}/invoices`)
-        .expect(200);
-
-      expect(invoices.body).toHaveLength(1);
-      expect(invoices.body[0].amount).toBe(monthlyPayment);
     });
   });
 
@@ -363,83 +328,6 @@ describe('Banking Workflows E2E', () => {
     });
   });
 
-  describe('Invoice Management Scenario', () => {
-    it('should handle complex invoice workflows', async () => {
-      // Create business account
-      const businessAccount = await request(app)
-        .post('/accounts')
-        .send({
-          type: 'DEPOSIT',
-          customerId: 'BIZ001',
-          currency: 'USD',
-          initialBalance: '0',
-        })
-        .expect(201);
-
-      const accountId = businessAccount.body.accountId;
-
-      // Create future due dates for invoices
-      const futureDate1 = new Date();
-      futureDate1.setDate(futureDate1.getDate() + 15);
-      
-      const futureDate2 = new Date();
-      futureDate2.setDate(futureDate2.getDate() + 45);
-      
-      const futureDate3 = new Date();
-      futureDate3.setDate(futureDate3.getDate() + 75);
-
-      // Create multiple invoices
-      const invoice1 = await request(app)
-        .post('/invoices')
-        .send({
-          accountId: accountId.toString(),
-          amount: '5000',
-          dueDate: futureDate1.toISOString().split('T')[0],
-        });
-
-      if (invoice1.status !== 201) {
-        console.error('Invoice 1 creation failed:', invoice1.body);
-      }
-      expect(invoice1.status).toBe(201);
-
-      const invoice2 = await request(app)
-        .post('/invoices')
-        .send({
-          accountId: accountId.toString(),
-          amount: '3000',
-          dueDate: futureDate2.toISOString().split('T')[0],
-        })
-        .expect(201);
-
-      const invoice3 = await request(app)
-        .post('/invoices')
-        .send({
-          accountId: accountId.toString(),
-          amount: '7500',
-          dueDate: futureDate3.toISOString().split('T')[0],
-        })
-        .expect(201);
-
-      // Verify all invoices were created
-      const invoices = await request(app)
-        .get(`/accounts/${accountId}/invoices`)
-        .expect(200);
-
-      expect(invoices.body).toHaveLength(3);
-      
-      const totalInvoiceAmount = invoices.body.reduce(
-        (sum: number, invoice: any) => sum + parseInt(invoice.amount),
-        0
-      );
-      
-      expect(totalInvoiceAmount).toBe(15500); // 5000 + 3000 + 7500
-
-      // Each invoice should be pending
-      invoices.body.forEach((invoice: any) => {
-        expect(invoice.status).toBe('pending');
-      });
-    });
-  });
 
   describe('Customer Account Management Scenario', () => {
     it('should list all accounts for a specific customer', async () => {

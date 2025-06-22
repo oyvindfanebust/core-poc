@@ -503,6 +503,43 @@ export class MigrationRunner {
           await db.query('DROP TABLE IF EXISTS transfers');
         },
       },
+      {
+        id: '012_remove_invoices_table',
+        name: 'Remove invoices table and related functionality',
+        up: async (db: DatabaseConnection) => {
+          // Drop invoices table and all its indexes
+          await db.query('DROP TABLE IF EXISTS invoices CASCADE');
+        },
+        down: async (db: DatabaseConnection) => {
+          // Recreate invoices table if needed (for rollback)
+          await db.query(`
+            CREATE TABLE IF NOT EXISTS invoices (
+              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+              account_id TEXT NOT NULL,
+              amount BIGINT NOT NULL,
+              due_date DATE NOT NULL,
+              status VARCHAR(20) DEFAULT 'pending',
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              created_by VARCHAR(255),
+              updated_by VARCHAR(255)
+            )
+          `);
+          
+          // Recreate indexes
+          await db.query(`
+            CREATE INDEX IF NOT EXISTS idx_invoices_account_id ON invoices(account_id)
+          `);
+          
+          await db.query(`
+            CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status)
+          `);
+          
+          await db.query(`
+            CREATE INDEX IF NOT EXISTS idx_invoices_due_date ON invoices(due_date)
+          `);
+        },
+      },
     ];
   }
 }

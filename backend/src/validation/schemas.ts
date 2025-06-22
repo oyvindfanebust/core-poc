@@ -107,18 +107,6 @@ export const TransferSchema = z.object({
   currency: CurrencySchema,
 });
 
-// Invoice creation schema
-export const CreateInvoiceSchema = z.object({
-  accountId: AccountIdSchema,
-  amount: MoneyAmountSchema,
-  dueDate: z.string().refine(
-    (val) => {
-      const date = new Date(val);
-      return !isNaN(date.getTime()) && date > new Date();
-    },
-    { message: 'Due date must be a valid future date' }
-  ),
-});
 
 // Request parameter schemas
 export const AccountIdParamSchema = z.object({
@@ -143,7 +131,6 @@ export type CreateDepositAccountRequest = z.infer<typeof CreateDepositAccountSch
 export type CreateLoanAccountRequest = z.infer<typeof CreateLoanAccountSchema>;
 export type CreateCreditAccountRequest = z.infer<typeof CreateCreditAccountSchema>;
 export type TransferRequest = z.infer<typeof TransferSchema>;
-export type CreateInvoiceRequest = z.infer<typeof CreateInvoiceSchema>;
 export type AccountIdParam = z.infer<typeof AccountIdParamSchema>;
 export type CustomerIdParam = z.infer<typeof CustomerIdParamSchema>;
 export type UpdateAccountNameRequest = z.infer<typeof UpdateAccountNameSchema>;

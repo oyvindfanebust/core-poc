@@ -2,21 +2,18 @@ import { Request, Response } from 'express';
 import { AccountController } from '../../../src/controllers/account.controller.js';
 import { AccountService } from '../../../src/services/account.service.js';
 import { LoanService } from '../../../src/domain/services/loan.service.js';
-import { InvoiceService } from '../../../src/domain/services/invoice.service.js';
 import { TransferRepository } from '../../../src/repositories/transfer.repository.js';
 import { AccountId } from '../../../src/domain/value-objects.js';
 
 // Mock the services
 jest.mock('../../../src/services/account.service.js');
 jest.mock('../../../src/domain/services/loan.service.js');
-jest.mock('../../../src/domain/services/invoice.service.js');
 jest.mock('../../../src/repositories/transfer.repository.js');
 
 describe('AccountController', () => {
   let accountController: AccountController;
   let mockAccountService: jest.Mocked<AccountService>;
   let mockLoanService: jest.Mocked<LoanService>;
-  let mockInvoiceService: jest.Mocked<InvoiceService>;
   let mockTransferRepository: jest.Mocked<TransferRepository>;
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
@@ -28,7 +25,6 @@ describe('AccountController', () => {
     } as any;
 
     mockLoanService = {} as any;
-    mockInvoiceService = {} as any;
     mockTransferRepository = {
       findByAccountId: jest.fn(),
     } as any;
@@ -36,7 +32,6 @@ describe('AccountController', () => {
     accountController = new AccountController(
       mockAccountService,
       mockLoanService,
-      mockInvoiceService,
       mockTransferRepository
     );
 

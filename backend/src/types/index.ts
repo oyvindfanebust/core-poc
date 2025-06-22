@@ -78,10 +78,3 @@ export interface AmortizationSchedule {
   totalInterest: bigint;
 }
 
-export interface Invoice {
-  id: string;
-  accountId: bigint;
-  amount: bigint;
-  dueDate: Date;
-  status: 'pending' | 'paid' | 'overdue';
-}

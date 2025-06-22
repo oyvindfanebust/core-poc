@@ -3,11 +3,8 @@ import { TigerBeetleService } from './tigerbeetle.service.js';
 import { CDCManagerService } from './cdc-manager.service.js';
 import { PaymentProcessingService } from './payment-processing.service.js';
 import { PaymentPlanJob } from '../jobs/payment-plan.job.js';
-import { InvoiceJob } from '../jobs/invoice.job.js';
 import { LoanService } from '../domain/services/loan.service.js';
-import { InvoiceService } from '../domain/services/invoice.service.js';
 import { PaymentPlanRepository } from '../repositories/payment-plan.repository.js';
-import { InvoiceRepository } from '../repositories/invoice.repository.js';
 import { TransferRepository } from '../repositories/transfer.repository.js';
 import { DatabaseConnection } from '../database/connection.js';
 import { createClient } from 'tigerbeetle-node';
@@ -18,10 +15,8 @@ import { getConfig, getTestConfig } from '../config/index.js';
 export interface ServiceContainer {
   accountService: AccountService;
   loanService: LoanService;
-  invoiceService: InvoiceService;
   paymentProcessingService: PaymentProcessingService;
   paymentPlanJob: PaymentPlanJob;
-  invoiceJob: InvoiceJob;
   database: DatabaseConnection;
   tigerBeetleService: TigerBeetleService;
   cdcManager: CDCManagerService;
@@ -90,23 +85,19 @@ export class ServiceFactory {
 
       // Create repositories
       const paymentPlanRepository = new PaymentPlanRepository();
-      const invoiceRepository = new InvoiceRepository();
       const transferRepository = new TransferRepository();
 
       // Create domain services
       const loanService = new LoanService(accountService, paymentPlanRepository);
-      const invoiceService = new InvoiceService(invoiceRepository);
 
       // Create payment processing service
       const paymentProcessingService = new PaymentProcessingService(
         paymentPlanRepository,
-        invoiceService,
         accountService
       );
 
       // Create background jobs
       const paymentPlanJob = new PaymentPlanJob(paymentPlanRepository, accountService, paymentProcessingService);
-      const invoiceJob = new InvoiceJob(invoiceService);
 
       // Create CDC Manager
       const cdcManager = new CDCManagerService(config);
@@ -115,10 +106,8 @@ export class ServiceFactory {
       ServiceFactory.instance = {
         accountService,
         loanService,
-        invoiceService,
         paymentProcessingService,
         paymentPlanJob,
-        invoiceJob,
         database,
         tigerBeetleService,
         cdcManager,
@@ -159,23 +148,19 @@ export class ServiceFactory {
 
       // Create repositories
       const paymentPlanRepository = new PaymentPlanRepository();
-      const invoiceRepository = new InvoiceRepository();
       const transferRepository = new TransferRepository();
 
       // Create domain services
       const loanService = new LoanService(accountService, paymentPlanRepository);
-      const invoiceService = new InvoiceService(invoiceRepository);
 
       // Create payment processing service
       const paymentProcessingService = new PaymentProcessingService(
         paymentPlanRepository,
-        invoiceService,
         accountService
       );
 
       // Create background jobs (but don't start them in tests)
       const paymentPlanJob = new PaymentPlanJob(paymentPlanRepository, accountService, paymentProcessingService);
-      const invoiceJob = new InvoiceJob(invoiceService);
 
       // Create CDC Manager (disabled for tests)
       const cdcManager = new CDCManagerService(config);
@@ -184,10 +169,8 @@ export class ServiceFactory {
       const container = {
         accountService,
         loanService,
-        invoiceService,
         paymentProcessingService,
         paymentPlanJob,
-        invoiceJob,
         database,
         tigerBeetleService,
         cdcManager,
@@ -209,7 +192,6 @@ export class ServiceFactory {
         
         // Stop background jobs
         ServiceFactory.instance.paymentPlanJob.stopMonthlyJob();
-        ServiceFactory.instance.invoiceJob.stopOverdueJob();
         
         // Shutdown CDC Manager
         await ServiceFactory.instance.cdcManager.shutdown();

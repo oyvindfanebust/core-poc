@@ -84,40 +84,6 @@ const options: swaggerJSDoc.Options = {
           },
           required: ['transferId'],
         },
-        Invoice: {
-          type: 'object',
-          properties: {
-            id: {
-              type: 'string',
-              format: 'uuid',
-              description: 'Unique invoice identifier',
-              example: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
-            },
-            accountId: {
-              type: 'string',
-              description: 'Associated account identifier',
-              example: '1234567890',
-            },
-            amount: {
-              type: 'string',
-              description: 'Invoice amount in cents',
-              example: '250000',
-            },
-            dueDate: {
-              type: 'string',
-              format: 'date',
-              description: 'Invoice due date',
-              example: '2024-12-01',
-            },
-            status: {
-              type: 'string',
-              enum: ['pending', 'paid', 'overdue'],
-              description: 'Invoice status',
-              example: 'pending',
-            },
-          },
-          required: ['id', 'accountId', 'amount', 'dueDate', 'status'],
-        },
         CreateDepositAccount: {
           type: 'object',
           properties: {
@@ -274,28 +240,6 @@ const options: swaggerJSDoc.Options = {
             },
           },
           required: ['fromAccountId', 'toAccountId', 'amount', 'currency'],
-        },
-        CreateInvoice: {
-          type: 'object',
-          properties: {
-            accountId: {
-              type: 'string',
-              description: 'Associated account identifier',
-              example: '1234567890',
-            },
-            amount: {
-              type: 'string',
-              description: 'Invoice amount in cents',
-              example: '250000',
-            },
-            dueDate: {
-              type: 'string',
-              format: 'date',
-              description: 'Invoice due date (YYYY-MM-DD)',
-              example: '2024-12-01',
-            },
-          },
-          required: ['accountId', 'amount', 'dueDate'],
         },
         PaymentPlan: {
           type: 'object',
@@ -753,109 +697,6 @@ const options: swaggerJSDoc.Options = {
             },
             '400': {
               description: 'Invalid transfer data',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/Error',
-                  },
-                },
-              },
-            },
-            '500': {
-              description: 'Internal server error',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/Error',
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      '/invoices': {
-        post: {
-          tags: ['Invoices'],
-          summary: 'Create an invoice',
-          description: 'Creates a new invoice for an account',
-          requestBody: {
-            required: true,
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/CreateInvoice',
-                },
-              },
-            },
-          },
-          responses: {
-            '201': {
-              description: 'Invoice created successfully',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/Invoice',
-                  },
-                },
-              },
-            },
-            '400': {
-              description: 'Invalid invoice data',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/Error',
-                  },
-                },
-              },
-            },
-            '500': {
-              description: 'Internal server error',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/Error',
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      '/accounts/{accountId}/invoices': {
-        get: {
-          tags: ['Invoices'],
-          summary: 'Get account invoices',
-          description: 'Retrieves all invoices for the specified account',
-          parameters: [
-            {
-              name: 'accountId',
-              in: 'path',
-              required: true,
-              schema: {
-                type: 'string',
-              },
-              description: 'The account identifier',
-              example: '1234567890',
-            },
-          ],
-          responses: {
-            '200': {
-              description: 'Invoices retrieved successfully',
-              content: {
-                'application/json': {
-                  schema: {
-                    type: 'array',
-                    items: {
-                      $ref: '#/components/schemas/Invoice',
-                    },
-                  },
-                },
-              },
-            },
-            '400': {
-              description: 'Invalid account ID',
               content: {
                 'application/json': {
                   schema: {

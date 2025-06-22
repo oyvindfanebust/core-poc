@@ -521,9 +521,10 @@ describe('Banking Workflows E2E', () => {
     });
 
     it('should handle customer ID validation', async () => {
-      // Test invalid customer ID (too long)
+      // Test invalid customer ID (too long - over 50 characters)
+      const tooLongId = 'A'.repeat(51); // 51 characters, exceeds max of 50
       await request(app)
-        .get('/customers/TOOLONGID/accounts')
+        .get(`/customers/${tooLongId}/accounts`)
         .expect(400);
 
       // Test invalid customer ID (invalid characters)

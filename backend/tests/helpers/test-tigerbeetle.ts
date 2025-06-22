@@ -5,7 +5,7 @@ export class TestTigerBeetle {
   private static instance: TestTigerBeetle | null = null;
   private client: any = null;
   private static readonly HOST = 'localhost';
-  private static readonly PORT = 3001; // Port from docker-compose.test.yml
+  private static readonly PORT = 6000; // Port from docker-compose.yml - tests use same instance as dev
 
   static async getInstance(): Promise<TestTigerBeetle> {
     if (!TestTigerBeetle.instance) {

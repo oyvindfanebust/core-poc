@@ -72,7 +72,7 @@ export const getTestConfig = (tigerbeetlePort?: number): Config => {
   return {
     port: 0, // Random port for tests
     tigerbeetle: {
-      address: tigerbeetlePort ? `${tigerbeetlePort}` : '3000',
+      address: tigerbeetlePort ? `${tigerbeetlePort}` : '6000',
       clusterId: 0n,
     },
     database: {

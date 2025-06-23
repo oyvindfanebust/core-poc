@@ -40,7 +40,6 @@ export interface CreateAccountRequest {
   customerId: string;
   currency: string;
   accountName?: string;
-  initialBalance?: string;
   principalAmount?: string;
   interestRate?: string;
   termMonths?: string;

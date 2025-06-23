@@ -15,7 +15,6 @@ const createAccountSchema = z.object({
   type: z.enum(['DEPOSIT', 'LOAN', 'CREDIT']),
   currency: z.enum(['USD', 'EUR', 'GBP', 'NOK', 'SEK', 'DKK', 'JPY', 'CAD', 'AUD', 'CHF']),
   accountName: z.string().optional(),
-  initialBalance: z.string().optional(),
 });
 
 type FormData = z.infer<typeof createAccountSchema>;
@@ -58,11 +57,6 @@ export default function CreateAccountPage() {
         customerId,
       };
 
-      if (data.initialBalance) {
-        // Convert dollars to cents
-        const cents = Math.round(parseFloat(data.initialBalance) * 100);
-        request.initialBalance = cents.toString();
-      }
 
       const result = await accountsApi.createAccount(request);
       
@@ -153,28 +147,6 @@ export default function CreateAccountPage() {
               )}
             </div>
 
-            {accountType === 'DEPOSIT' && (
-              <div>
-                <label htmlFor="initialBalance" className="block text-sm font-medium text-gray-700">
-                  {t('initialBalance')}
-                </label>
-                <div className="mt-1 relative rounded-md shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500 sm:text-sm">$</span>
-                  </div>
-                  <input
-                    type="number"
-                    step="0.01"
-                    {...register('initialBalance')}
-                    className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
-                    placeholder="0.00"
-                  />
-                </div>
-                <p className="mt-1 text-sm text-gray-500">
-                  {t('initialBalanceHint')}
-                </p>
-              </div>
-            )}
 
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">

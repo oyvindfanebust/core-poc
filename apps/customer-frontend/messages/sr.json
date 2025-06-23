@@ -58,8 +58,6 @@
     "accountNickname": "Назив рачуна (опционо)",
     "accountNicknameHint": "Дајте вашем рачуну пријатељски назив за лакше препознавање",
     "accountNicknamePlaceholder": "нпр. Мој штедни рачун",
-    "initialBalance": "Почетно стање (опционо)",
-    "initialBalanceHint": "Унесите износ за депозит приликом креирања рачуна",
     "createButton": "Креирај рачун",
     "creating": "Креирање...",
     "backToDashboard": "Назад на контролну таблу",

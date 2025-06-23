@@ -58,8 +58,6 @@
     "accountNickname": "Kontonavn (valgfritt)",
     "accountNicknameHint": "Gi kontoen din et vennlig navn for å gjenkjenne den enkelt",
     "accountNicknamePlaceholder": "f.eks. Min sparekonto",
-    "initialBalance": "Startsaldo (valgfritt)",
-    "initialBalanceHint": "Skriv inn et beløp å sette inn ved opprettelse av kontoen",
     "createButton": "Opprett konto",
     "creating": "Oppretter...",
     "backToDashboard": "Tilbake til oversikt",

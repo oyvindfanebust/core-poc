@@ -58,8 +58,6 @@
     "accountNickname": "Account Nickname (Optional)",
     "accountNicknameHint": "Give your account a friendly name to easily identify it",
     "accountNicknamePlaceholder": "e.g. My Savings Account",
-    "initialBalance": "Initial Balance (Optional)",
-    "initialBalanceHint": "Enter an amount to deposit when creating the account",
     "createButton": "Create Account",
     "creating": "Creating...",
     "backToDashboard": "Back to Dashboard",

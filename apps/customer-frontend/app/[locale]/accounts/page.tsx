@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { ProtectedLayout } from '@/components/protected-layout';
-import { accountsApi, Account, Balance } from '@/lib/api';
-import { formatAccountDisplayName, maskAccountId } from '@/lib/account-utils';
 import { CreditCard, TrendingUp, ArrowRight, Edit2, Check, X } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+
+import { ProtectedLayout } from '@/components/protected-layout';
+import { formatAccountDisplayName } from '@/lib/account-utils';
+import { accountsApi, Account, Balance } from '@/lib/api';
 
 interface AccountWithBalance extends Account {
   balance?: Balance;
@@ -37,10 +38,10 @@ export default function AccountsPage() {
     try {
       setLoading(true);
       const accountList = await accountsApi.getAccountsByCustomer(customerId);
-      
+
       // Load balances for each account
       const accountsWithBalances = await Promise.all(
-        accountList.map(async (account) => {
+        accountList.map(async account => {
           try {
             const balance = await accountsApi.getAccountBalance(account.accountId);
             return { ...account, balance };
@@ -48,7 +49,7 @@ export default function AccountsPage() {
             console.error(`Failed to load balance for account ${account.accountId}:`, err);
             return account;
           }
-        })
+        }),
       );
 
       setAccounts(accountsWithBalances);
@@ -76,14 +77,16 @@ export default function AccountsPage() {
   const handleSaveEdit = async (accountId: string) => {
     try {
       await accountsApi.updateAccountName(accountId, editingName.trim() || null);
-      
+
       // Update local state
-      setAccounts(prev => prev.map(account => 
-        account.accountId === accountId 
-          ? { ...account, accountName: editingName.trim() || undefined }
-          : account
-      ));
-      
+      setAccounts(prev =>
+        prev.map(account =>
+          account.accountId === accountId
+            ? { ...account, accountName: editingName.trim() || undefined }
+            : account,
+        ),
+      );
+
       setEditingAccountId(null);
       setEditingName('');
     } catch (error) {
@@ -140,18 +143,13 @@ export default function AccountsPage() {
         ) : (
           <div className="bg-white shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
-              {accounts.map((account) => (
+              {accounts.map(account => (
                 <li key={account.accountId}>
-                  <Link
-                    href={`/accounts/${account.accountId}`}
-                    className="block hover:bg-gray-50"
-                  >
+                  <Link href={`/accounts/${account.accountId}`} className="block hover:bg-gray-50">
                     <div className="px-4 py-4 sm:px-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                          <div className="flex-shrink-0">
-                            {getAccountIcon(account.accountType)}
-                          </div>
+                          <div className="flex-shrink-0">{getAccountIcon(account.accountType)}</div>
                           <div className="ml-4 flex-1">
                             <div className="flex items-center justify-between">
                               <div className="flex-1">
@@ -160,17 +158,17 @@ export default function AccountsPage() {
                                     <input
                                       type="text"
                                       value={editingName}
-                                      onChange={(e) => setEditingName(e.target.value)}
+                                      onChange={e => setEditingName(e.target.value)}
                                       className="text-sm font-medium text-gray-900 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                       placeholder={t('accountNamePlaceholder')}
                                       autoFocus
-                                      onKeyDown={(e) => {
+                                      onKeyDown={e => {
                                         if (e.key === 'Enter') handleSaveEdit(account.accountId);
                                         if (e.key === 'Escape') handleCancelEdit();
                                       }}
                                     />
                                     <button
-                                      onClick={(e) => {
+                                      onClick={e => {
                                         e.preventDefault();
                                         e.stopPropagation();
                                         handleSaveEdit(account.accountId);
@@ -180,7 +178,7 @@ export default function AccountsPage() {
                                       <Check className="h-4 w-4" />
                                     </button>
                                     <button
-                                      onClick={(e) => {
+                                      onClick={e => {
                                         e.preventDefault();
                                         e.stopPropagation();
                                         handleCancelEdit();
@@ -196,7 +194,7 @@ export default function AccountsPage() {
                                       {formatAccountDisplayName(account)}
                                     </span>
                                     <button
-                                      onClick={(e) => {
+                                      onClick={e => {
                                         e.preventDefault();
                                         e.stopPropagation();
                                         handleStartEdit(account);
@@ -221,9 +219,7 @@ export default function AccountsPage() {
                                 ? formatCurrency(account.balance.balance, account.currency)
                                 : formatCurrency('0', account.currency)}
                             </div>
-                            <div className="text-sm text-gray-500">
-                              {t('currentBalance')}
-                            </div>
+                            <div className="text-sm text-gray-500">{t('currentBalance')}</div>
                           </div>
                           <ArrowRight className="h-5 w-5 text-gray-400" />
                         </div>

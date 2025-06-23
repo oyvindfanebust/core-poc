@@ -1,13 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import {
+  ArrowLeft,
+  CreditCard,
+  TrendingUp,
+  Download,
+  Send,
+  ArrowUpRight,
+  ArrowDownLeft,
+  Clock,
+} from 'lucide-react';
+import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+
 import { ProtectedLayout } from '@/components/protected-layout';
-import { accountsApi, Account, Balance, Transaction } from '@/lib/api';
-import { ArrowLeft, CreditCard, TrendingUp, Download, Send, ArrowUpRight, ArrowDownLeft, Clock } from 'lucide-react';
-import Link from 'next/link';
 import { ToggleableId } from '@/components/ToggleableId';
+import { accountsApi, Account, Balance, Transaction } from '@/lib/api';
 
 export default function AccountDetailsPage() {
   const router = useRouter();
@@ -15,7 +25,7 @@ export default function AccountDetailsPage() {
   const accountId = params.accountId as string;
   const t = useTranslations('accountDetails');
   const tCommon = useTranslations('common');
-  
+
   const [account, setAccount] = useState<Account | null>(null);
   const [balance, setBalance] = useState<Balance | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -36,18 +46,18 @@ export default function AccountDetailsPage() {
   const loadAccountDetails = async (customerId: string) => {
     try {
       setLoading(true);
-      
+
       // Load customer accounts to find this specific account
       const accounts = await accountsApi.getAccountsByCustomer(customerId);
       const currentAccount = accounts.find(acc => acc.accountId === accountId);
-      
+
       if (!currentAccount) {
         setError(t('errors.notFound'));
         return;
       }
-      
+
       setAccount(currentAccount);
-      
+
       // Load balance
       const accountBalance = await accountsApi.getAccountBalance(accountId);
       setBalance(accountBalance);
@@ -175,20 +185,14 @@ export default function AccountDetailsPage() {
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <div className="flex items-start justify-between">
             <div className="flex items-start">
-              <div className="flex-shrink-0">
-                {getAccountIcon(account.accountType)}
-              </div>
+              <div className="flex-shrink-0">{getAccountIcon(account.accountType)}</div>
               <div className="ml-4">
                 <h1 className="text-2xl font-bold text-gray-900">
                   {t(`accountType.${account.accountType}`)}
                 </h1>
                 <div className="text-sm text-gray-500 mt-1 flex items-center">
                   <span className="mr-2">{t('accountId')}:</span>
-                  <ToggleableId 
-                    id={account.accountId} 
-                    type="account"
-                    className="text-sm"
-                  />
+                  <ToggleableId id={account.accountId} type="account" className="text-sm" />
                 </div>
                 <p className="text-sm text-gray-500">
                   {t('currency')}: {account.currency}
@@ -284,7 +288,7 @@ export default function AccountDetailsPage() {
 
         <div className="bg-white shadow rounded-lg p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">{t('transactionHistory')}</h2>
-          
+
           {transactionsLoading ? (
             <div className="text-center py-8">
               <Clock className="mx-auto h-8 w-8 text-gray-400 mb-2" />
@@ -293,27 +297,25 @@ export default function AccountDetailsPage() {
           ) : transactions.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <p>{t('noTransactions')}</p>
-              <p className="text-sm mt-2">
-                {t('noTransactionsDescription')}
-              </p>
+              <p className="text-sm mt-2">{t('noTransactionsDescription')}</p>
             </div>
           ) : (
             <div className="flow-root">
               <ul className="-my-5 divide-y divide-gray-200">
-                {transactions.map((transaction) => {
+                {transactions.map(transaction => {
                   const direction = getTransactionDirection(transaction);
                   const isIncoming = direction === 'incoming';
                   const displayName = getTransactionDisplayName(transaction);
-                  
+
                   return (
                     <li key={transaction.transferId} className="py-4">
                       <div className="flex items-center space-x-4">
                         <div className="flex-shrink-0">
-                          <div className={`rounded-full p-2 ${
-                            isIncoming 
-                              ? 'bg-green-100 text-green-600' 
-                              : 'bg-red-100 text-red-600'
-                          }`}>
+                          <div
+                            className={`rounded-full p-2 ${
+                              isIncoming ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                            }`}
+                          >
                             {isIncoming ? (
                               <ArrowDownLeft className="h-4 w-4" />
                             ) : (
@@ -325,21 +327,27 @@ export default function AccountDetailsPage() {
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="text-sm font-medium text-gray-900 truncate">
-                                {transaction.description || (isIncoming ? t('receivedFrom') : t('sentTo'))} {displayName}
+                                {transaction.description ||
+                                  (isIncoming ? t('receivedFrom') : t('sentTo'))}{' '}
+                                {displayName}
                               </p>
                               <p className="text-sm text-gray-500">
-                                {formatTransactionDate(transaction.createdAt)} • {formatTransactionTime(transaction.createdAt)}
+                                {formatTransactionDate(transaction.createdAt)} •{' '}
+                                {formatTransactionTime(transaction.createdAt)}
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className={`text-sm font-medium ${
-                                isIncoming ? 'text-green-600' : 'text-red-600'
-                              }`}>
-                                {isIncoming ? '+' : '-'}{formatCurrency(transaction.amount, transaction.currency)}
+                              <p
+                                className={`text-sm font-medium ${
+                                  isIncoming ? 'text-green-600' : 'text-red-600'
+                                }`}
+                              >
+                                {isIncoming ? '+' : '-'}
+                                {formatCurrency(transaction.amount, transaction.currency)}
                               </p>
                               <div className="text-xs text-gray-500">
-                                <ToggleableId 
-                                  id={transaction.transferId} 
+                                <ToggleableId
+                                  id={transaction.transferId}
                                   type="transaction"
                                   className="text-xs"
                                 />

@@ -1,9 +1,9 @@
-import { 
-  maskSensitiveId, 
+import {
+  maskSensitiveId,
   getMaskingPattern,
   formatMaskedId,
   shouldShowMaskingOption,
-  getSecurityLevel 
+  getSecurityLevel,
 } from '../lib/id-masking-utils';
 
 describe('ID Masking Utils', () => {
@@ -260,7 +260,7 @@ describe('ID Masking Utils', () => {
     it('should maintain consistency between mask and unmask operations', () => {
       const originalId = '309857248261287769321131213262708';
       const masked = maskSensitiveId(originalId, 'account');
-      
+
       // The visible part should match the end of original
       const visiblePart = masked.split(' ')[1];
       expect(originalId.endsWith(visiblePart)).toBe(true);
@@ -271,7 +271,7 @@ describe('ID Masking Utils', () => {
       const accountMask = maskSensitiveId(id, 'account');
       const transactionMask = maskSensitiveId(id, 'transaction');
       const customerMask = maskSensitiveId(id, 'customer');
-      
+
       // They should not all be the same
       const masks = [accountMask, transactionMask, customerMask];
       const uniqueMasks = [...new Set(masks)];

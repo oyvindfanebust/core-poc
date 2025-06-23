@@ -1,9 +1,10 @@
 import { getTranslations } from 'next-intl/server';
+
 import { LoginForm } from './login-form';
 
 export default async function LoginPage() {
   const t = await getTranslations('login');
-  
+
   const translations = {
     title: t('title'),
     subtitle: t('subtitle'),
@@ -15,8 +16,8 @@ export default async function LoginPage() {
     instructionText: t('instructionText'),
     errors: {
       customerIdRequired: t('errors.customerIdRequired'),
-      invalidFormat: t('errors.invalidFormat')
-    }
+      invalidFormat: t('errors.invalidFormat'),
+    },
   };
 
   return <LoginForm translations={translations} />;

@@ -1,14 +1,16 @@
 'use client';
 
-import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { 
-  maskSensitiveId, 
-  shouldShowMaskingOption, 
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+
+import {
+  maskSensitiveId,
+  shouldShowMaskingOption,
   getSecurityLevel,
   type IdType,
-  type MaskingOptions 
+  type MaskingOptions,
 } from '../lib/id-masking-utils';
+
 import { Tooltip } from './Tooltip';
 
 interface ToggleableIdProps {
@@ -20,7 +22,7 @@ interface ToggleableIdProps {
   enableCopy?: boolean;
   className?: string;
   maskingOptions?: Partial<MaskingOptions>;
-  [key: string]: any; // Allow additional props
+  [key: string]: unknown; // Allow additional props
 }
 
 export const ToggleableId: React.FC<ToggleableIdProps> = ({
@@ -57,7 +59,7 @@ export const ToggleableId: React.FC<ToggleableIdProps> = ({
     if (disabled) return;
 
     const newShowFull = !showFull;
-    
+
     if (isControlled) {
       onToggle?.(newShowFull);
     } else {
@@ -78,11 +80,11 @@ export const ToggleableId: React.FC<ToggleableIdProps> = ({
     try {
       await navigator.clipboard.writeText(id);
       setCopyFeedback(true);
-      
+
       if (copyTimeoutRef.current) {
         clearTimeout(copyTimeoutRef.current);
       }
-      
+
       copyTimeoutRef.current = setTimeout(() => {
         setCopyFeedback(false);
       }, 2000);
@@ -91,29 +93,40 @@ export const ToggleableId: React.FC<ToggleableIdProps> = ({
     }
   }, [id]);
 
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      handleToggle();
-    }
-  }, [handleToggle]);
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        handleToggle();
+      }
+    },
+    [handleToggle],
+  );
 
   // Handle cases where ID is empty, null, or undefined
   if (!id) {
-    return <span className={className} {...props}>-</span>;
+    return (
+      <span className={className} {...props}>
+        -
+      </span>
+    );
   }
 
   // Check if ID should be maskable
   const shouldMask = shouldShowMaskingOption(id, type);
-  
+
   // If ID is too short to mask meaningfully, just show it
   if (!shouldMask) {
-    return <span className={className} {...props}>{id}</span>;
+    return (
+      <span className={className} {...props}>
+        {id}
+      </span>
+    );
   }
 
   // Get security level for styling
   const securityLevel = getSecurityLevel(id, type);
-  
+
   // Get appropriate tooltip content
   const getTooltipContent = () => {
     switch (type) {
@@ -141,20 +154,22 @@ export const ToggleableId: React.FC<ToggleableIdProps> = ({
     'toggleable-id',
     showFull ? 'toggleable-id--revealed' : 'toggleable-id--masked',
     `toggleable-id--security-${securityLevel}`,
-    className
-  ].filter(Boolean).join(' ');
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div className="toggleable-id-container" {...props}>
       {/* Live region for screen readers */}
-      <div 
+      <div
         ref={liveRegionRef}
-        role="status" 
-        aria-live="polite" 
+        role="status"
+        aria-live="polite"
         className="sr-only"
         aria-hidden="true"
       />
-      
+
       <Tooltip content={getTooltipContent()}>
         <button
           type="button"

@@ -8,12 +8,16 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "echo 'No tests for shared package'"
+    "test": "echo 'No tests for shared package'",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix"
   },
   "dependencies": {
     "zod": "^3.25.64"
   },
   "devDependencies": {
+    "@core-poc/eslint-config": "*",
+    "eslint": "^8.57.0",
     "typescript": "^5.8.3"
   }
 }

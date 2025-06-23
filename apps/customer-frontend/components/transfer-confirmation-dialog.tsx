@@ -1,7 +1,8 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import { X, ArrowRight, AlertCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+
 import { Account, Balance } from '@/lib/api';
 
 export interface TransferSummary {
@@ -26,7 +27,7 @@ export function TransferConfirmationDialog({
   onClose,
   onConfirm,
   transferSummary,
-  loading = false
+  loading = false,
 }: TransferConfirmationDialogProps) {
   const t = useTranslations('transfer.confirmation');
   const tCommon = useTranslations('common');
@@ -52,7 +53,7 @@ export function TransferConfirmationDialog({
   };
 
   const hasBalanceData = transferSummary.fromBalance && transferSummary.toBalance;
-  const fromNewBalance = hasBalanceData 
+  const fromNewBalance = hasBalanceData
     ? calculateNewBalance(transferSummary.fromBalance!.balance, transferSummary.amount, true)
     : null;
   const toNewBalance = hasBalanceData
@@ -79,7 +80,7 @@ export function TransferConfirmationDialog({
           {/* Transfer Summary */}
           <div className="mb-6">
             <h4 className="text-sm font-medium text-gray-700 mb-3">{t('transferSummary')}</h4>
-            
+
             <div className="space-y-4">
               {/* From Account */}
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -87,12 +88,14 @@ export function TransferConfirmationDialog({
                   <p className="text-sm font-medium text-gray-900">
                     {formatAccountName(transferSummary.fromAccount)}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    {transferSummary.fromAccount.accountId}
-                  </p>
+                  <p className="text-xs text-gray-500">{transferSummary.fromAccount.accountId}</p>
                   {hasBalanceData && (
                     <p className="text-xs text-gray-600 mt-1">
-                      {t('currentBalance')}: {formatCurrency(transferSummary.fromBalance!.balance, transferSummary.currency)}
+                      {t('currentBalance')}:{' '}
+                      {formatCurrency(
+                        transferSummary.fromBalance!.balance,
+                        transferSummary.currency,
+                      )}
                     </p>
                   )}
                 </div>
@@ -101,8 +104,11 @@ export function TransferConfirmationDialog({
                     -{formatCurrency(transferSummary.amount, transferSummary.currency)}
                   </p>
                   {fromNewBalance !== null && (
-                    <p className={`text-xs mt-1 ${fromNewBalance < 0 ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
-                      {t('newBalance')}: {formatCurrency(fromNewBalance * 100, transferSummary.currency)}
+                    <p
+                      className={`text-xs mt-1 ${fromNewBalance < 0 ? 'text-red-600 font-medium' : 'text-gray-600'}`}
+                    >
+                      {t('newBalance')}:{' '}
+                      {formatCurrency(fromNewBalance * 100, transferSummary.currency)}
                     </p>
                   )}
                 </div>
@@ -119,12 +125,11 @@ export function TransferConfirmationDialog({
                   <p className="text-sm font-medium text-gray-900">
                     {formatAccountName(transferSummary.toAccount)}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    {transferSummary.toAccount.accountId}
-                  </p>
+                  <p className="text-xs text-gray-500">{transferSummary.toAccount.accountId}</p>
                   {hasBalanceData && (
                     <p className="text-xs text-gray-600 mt-1">
-                      {t('currentBalance')}: {formatCurrency(transferSummary.toBalance!.balance, transferSummary.currency)}
+                      {t('currentBalance')}:{' '}
+                      {formatCurrency(transferSummary.toBalance!.balance, transferSummary.currency)}
                     </p>
                   )}
                 </div>
@@ -134,7 +139,8 @@ export function TransferConfirmationDialog({
                   </p>
                   {toNewBalance !== null && (
                     <p className="text-xs text-gray-600 mt-1">
-                      {t('newBalance')}: {formatCurrency(toNewBalance * 100, transferSummary.currency)}
+                      {t('newBalance')}:{' '}
+                      {formatCurrency(toNewBalance * 100, transferSummary.currency)}
                     </p>
                   )}
                 </div>
@@ -159,7 +165,9 @@ export function TransferConfirmationDialog({
             <div className="space-y-1 text-sm text-blue-800">
               <div className="flex justify-between">
                 <span>{t('amount')}:</span>
-                <span className="font-medium">{formatCurrency(transferSummary.amount, transferSummary.currency)}</span>
+                <span className="font-medium">
+                  {formatCurrency(transferSummary.amount, transferSummary.currency)}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>{t('currency')}:</span>

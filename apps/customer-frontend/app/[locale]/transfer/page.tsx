@@ -1,29 +1,35 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { ProtectedLayout } from '@/components/protected-layout';
-import { accountsApi, transfersApi, Account, TransferRequest, Balance } from '@/lib/api';
-import { formatAccountOption } from '@/lib/account-utils';
-import { TransferConfirmationDialog, TransferSummary } from '@/components/transfer-confirmation-dialog';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { ArrowLeft, Send, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
-const transferSchema = z.object({
-  fromAccountId: z.string().min(1, 'Please select a source account'),
-  toAccountId: z.string().min(1, 'Please select a destination account'),
-  amount: z.string().refine((val) => {
-    const num = parseFloat(val);
-    return !isNaN(num) && num > 0;
-  }, 'Amount must be greater than 0'),
-}).refine((data) => data.fromAccountId !== data.toAccountId, {
-  message: "Source and destination accounts must be different",
-  path: ["toAccountId"],
-});
+import { ProtectedLayout } from '@/components/protected-layout';
+import {
+  TransferConfirmationDialog,
+  TransferSummary,
+} from '@/components/transfer-confirmation-dialog';
+import { formatAccountOption } from '@/lib/account-utils';
+import { accountsApi, transfersApi, Account, TransferRequest } from '@/lib/api';
+
+const transferSchema = z
+  .object({
+    fromAccountId: z.string().min(1, 'Please select a source account'),
+    toAccountId: z.string().min(1, 'Please select a destination account'),
+    amount: z.string().refine(val => {
+      const num = parseFloat(val);
+      return !isNaN(num) && num > 0;
+    }, 'Amount must be greater than 0'),
+  })
+  .refine(data => data.fromAccountId !== data.toAccountId, {
+    message: 'Source and destination accounts must be different',
+    path: ['toAccountId'],
+  });
 
 type FormData = z.infer<typeof transferSchema>;
 
@@ -81,7 +87,7 @@ export default function TransferPage() {
   const onSubmit = async (data: FormData) => {
     const fromAccount = accounts.find(acc => acc.accountId === data.fromAccountId);
     const toAccount = accounts.find(acc => acc.accountId === data.toAccountId);
-    
+
     if (!fromAccount || !toAccount) return;
 
     try {
@@ -94,7 +100,7 @@ export default function TransferPage() {
       // Load current balances for both accounts
       const [fromBalance, toBalance] = await Promise.all([
         accountsApi.getAccountBalance(data.fromAccountId),
-        accountsApi.getAccountBalance(data.toAccountId)
+        accountsApi.getAccountBalance(data.toAccountId),
       ]);
 
       // Create transfer summary
@@ -109,9 +115,9 @@ export default function TransferPage() {
 
       setTransferSummary(summary);
       setShowConfirmation(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load account balances:', err);
-      setError(err.message || t('errors.loadFailed'));
+      setError(err instanceof Error ? err.message : t('errors.loadFailed'));
     } finally {
       setLoadingBalances(false);
     }
@@ -141,9 +147,9 @@ export default function TransferPage() {
       setTimeout(() => {
         router.push('/dashboard');
       }, 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to create transfer:', err);
-      setError(err.message || t('errors.transferFailed'));
+      setError(err instanceof Error ? err.message : t('errors.transferFailed'));
       setShowConfirmation(false);
     } finally {
       setLoading(false);
@@ -186,9 +192,7 @@ export default function TransferPage() {
 
           {accounts.length < 2 ? (
             <div className="text-center py-8">
-              <p className="text-gray-500 mb-4">
-                {t('needTwoAccounts')}
-              </p>
+              <p className="text-gray-500 mb-4">{t('needTwoAccounts')}</p>
               <Link
                 href="/create-account"
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
@@ -207,7 +211,7 @@ export default function TransferPage() {
                   className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                 >
                   <option value="">{t('selectSource')}</option>
-                  {accounts.map((account) => (
+                  {accounts.map(account => (
                     <option key={account.accountId} value={account.accountId}>
                       {formatAccountOption(account)}
                     </option>
@@ -234,8 +238,8 @@ export default function TransferPage() {
                 >
                   <option value="">{t('selectDestination')}</option>
                   {accounts
-                    .filter((account) => account.accountId !== fromAccountId)
-                    .map((account) => (
+                    .filter(account => account.accountId !== fromAccountId)
+                    .map(account => (
                       <option key={account.accountId} value={account.accountId}>
                         {formatAccountOption(account)}
                       </option>

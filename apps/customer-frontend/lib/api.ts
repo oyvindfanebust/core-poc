@@ -67,7 +67,10 @@ export const accountsApi = {
     return apiClient.get(`/accounts/${accountId}/balance`);
   },
 
-  async updateAccountName(accountId: string, accountName: string | null): Promise<{ success: boolean }> {
+  async updateAccountName(
+    accountId: string,
+    accountName: string | null,
+  ): Promise<{ success: boolean }> {
     return apiClient.patch(`/accounts/${accountId}/name`, { accountName });
   },
 

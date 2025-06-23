@@ -8,6 +8,10 @@ npm run dev:all          # Start all services
 npm run build            # TypeScript check (run before commits)
 npm test                 # Fast tests (unit + fast integration)
 npm run test:all         # All tests including slow integration
+npm run lint             # Lint all workspaces
+npm run lint:fix         # Auto-fix linting issues
+npm run format           # Format code with Prettier
+npm run format:check     # Check code formatting
 docker-compose up -d     # Start infrastructure
 direnv allow            # Reload env after .envrc changes
 ```
@@ -15,10 +19,11 @@ direnv allow            # Reload env after .envrc changes
 ## ✅ Task Completion Checklist
 **Before marking ANY task complete:**
 1. `npm run build` - TypeScript compiles
-2. `npm test` - Fast tests pass (or `npm run test:all` for full coverage)
-3. Frontend changes → Add translations (`/en`, `/no`, `/sr`)
-4. API changes → Update docs
-5. TodoWrite tasks → Mark complete
+2. `npm run lint` - No linting errors
+3. `npm test` - Fast tests pass (or `npm run test:all` for full coverage)
+4. Frontend changes → Add translations (`/en`, `/no`, `/sr`)
+5. API changes → Update docs
+6. TodoWrite tasks → Mark complete
 
 ## 🏗️ Architecture
 - **TigerBeetle (6000)**: ALL financial transactions
@@ -50,7 +55,7 @@ direnv allow            # Reload env after .envrc changes
 - Financial data → TigerBeetle ONLY
 - New library → Check package.json first
 - Frontend text → Add ALL translations
-- Commits → Run build & tests first
+- Commits → Run build, lint & tests first
 - Batch ops → Must be idempotent
 - Test customer: `CUSTOMER-ABC-123`
 - **NEVER add Claude/AI attribution to commits**

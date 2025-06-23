@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useId, cloneElement, isValidElement } from 'react';
+
 import { cn } from '../lib/utils';
 
 export type TooltipPlacement = 'top' | 'bottom' | 'left' | 'right';
@@ -28,7 +29,6 @@ export const Tooltip: React.FC<TooltipProps> = ({
   const [actuallyVisible, setActuallyVisible] = useState(false);
   const showTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const hideTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-  const triggerRef = useRef<HTMLElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const tooltipId = useId();
 
@@ -60,9 +60,9 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
   const showTooltip = () => {
     if (disabled || isControlled) return;
-    
+
     clearTimeouts();
-    
+
     if (showDelay > 0) {
       showTimeoutRef.current = setTimeout(() => {
         setIsVisible(true);
@@ -76,9 +76,9 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
   const hideTooltip = () => {
     if (disabled || isControlled) return;
-    
+
     clearTimeouts();
-    
+
     if (hideDelay > 0) {
       hideTimeoutRef.current = setTimeout(() => {
         setIsVisible(false);
@@ -139,26 +139,31 @@ export const Tooltip: React.FC<TooltipProps> = ({
   const trigger = cloneElement(children, {
     onMouseEnter: (e: React.MouseEvent) => {
       handleMouseEnter();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (children.props as any).onMouseEnter?.(e);
     },
     onMouseLeave: (e: React.MouseEvent) => {
       handleMouseLeave();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (children.props as any).onMouseLeave?.(e);
     },
     onFocus: (e: React.FocusEvent) => {
       handleFocus();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (children.props as any).onFocus?.(e);
     },
     onBlur: (e: React.FocusEvent) => {
       handleBlur();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (children.props as any).onBlur?.(e);
     },
     onKeyDown: (e: React.KeyboardEvent) => {
       handleKeyDown(e);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (children.props as any).onKeyDown?.(e);
     },
     'aria-describedby': isVisible ? tooltipId : undefined,
-  } as any);
+  } as React.ComponentProps<any>);
 
   return (
     <>
@@ -175,7 +180,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
               'tooltip--visible': isVisible,
               'tooltip--hidden': !isVisible,
             },
-            className
+            className,
           )}
           onMouseEnter={handleTooltipMouseEnter}
           onMouseLeave={handleTooltipMouseLeave}

@@ -1,0 +1,8 @@
+.next
+out
+node_modules
+coverage
+jest.config.ts
+.eslintrc.js
+postcss.config.js
+tailwind.config.js

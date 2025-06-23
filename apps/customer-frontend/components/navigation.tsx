@@ -1,12 +1,13 @@
 'use client';
 
+import { clsx } from 'clsx';
+import { Home, CreditCard, Send, Plus, LogOut, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Home, CreditCard, Send, Plus, LogOut, Menu, X } from 'lucide-react';
-import { clsx } from 'clsx';
-import { LanguageSwitcher } from './language-switcher';
 import { useEffect, useState } from 'react';
+
+import { LanguageSwitcher } from './language-switcher';
 
 const navItems = [
   { href: '/dashboard', key: 'dashboard', icon: Home },
@@ -19,40 +20,16 @@ export function Navigation() {
   const pathname = usePathname();
   const [isHydrated, setIsHydrated] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
+
   // Ensure client-side hydration is complete
   useEffect(() => {
     setIsHydrated(true);
   }, []);
-  
-  // Safe translation hooks with try-catch for context errors
-  let t: (key: string) => string;
-  let tCommon: (key: string) => string;
-  
-  try {
-    t = useTranslations('navigation');
-    tCommon = useTranslations('common');
-  } catch (error) {
-    console.warn('Translation context not available, using fallbacks:', error);
-    // Fallback translation function
-    t = (key: string) => {
-      const fallbacks: Record<string, string> = {
-        dashboard: 'Dashboard',
-        accounts: 'Accounts', 
-        transfer: 'Transfer',
-        newAccount: 'New Account'
-      };
-      return fallbacks[key] || key;
-    };
-    tCommon = (key: string) => {
-      const fallbacks: Record<string, string> = {
-        appName: 'Core Banking',
-        signOut: 'Sign Out'
-      };
-      return fallbacks[key] || key;
-    };
-  }
-  
+
+  // Translation hooks must be called unconditionally
+  const t = useTranslations('navigation');
+  const tCommon = useTranslations('common');
+
   // Don't render until hydrated to avoid context issues
   if (!isHydrated) {
     return (
@@ -74,7 +51,7 @@ export function Navigation() {
     // Extract locale from current pathname
     const segments = pathname.split('/');
     const locale = segments[1];
-    return (locale && ['en', 'sr', 'no'].includes(locale)) ? locale : 'en';
+    return locale && ['en', 'sr', 'no'].includes(locale) ? locale : 'en';
   };
 
   const getLocalizedHref = (href: string) => {
@@ -99,7 +76,7 @@ export function Navigation() {
             </div>
             {/* Desktop Navigation */}
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              {navItems.map((item) => {
+              {navItems.map(item => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
 
@@ -111,7 +88,7 @@ export function Navigation() {
                       'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium',
                       active
                         ? 'border-blue-500 text-gray-900'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
                     )}
                   >
                     <Icon className="w-4 h-4 mr-2" />
@@ -144,11 +121,7 @@ export function Navigation() {
                 className="text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700"
                 aria-label="Toggle mobile menu"
               >
-                {isMobileMenuOpen ? (
-                  <X className="h-6 w-6" />
-                ) : (
-                  <Menu className="h-6 w-6" />
-                )}
+                {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
             </div>
           </div>
@@ -158,7 +131,7 @@ export function Navigation() {
         {isMobileMenuOpen && (
           <div className="sm:hidden">
             <div className="pt-2 pb-3 space-y-1">
-              {navItems.map((item) => {
+              {navItems.map(item => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
 
@@ -170,7 +143,7 @@ export function Navigation() {
                       'flex items-center px-3 py-2 text-base font-medium',
                       active
                         ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-600'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50',
                     )}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >

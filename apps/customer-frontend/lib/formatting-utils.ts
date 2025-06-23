@@ -14,7 +14,7 @@ export type SupportedLocale = 'en' | 'no' | 'sr';
 export function formatLocalizedDate(dateString: string, locale: string): string {
   try {
     const date = new Date(dateString);
-    
+
     // Check if date is valid
     if (isNaN(date.getTime())) {
       return 'Invalid Date';
@@ -27,28 +27,33 @@ export function formatLocalizedDate(dateString: string, locale: string): string 
         return date.toLocaleDateString('en-US', {
           year: 'numeric',
           month: '2-digit',
-          day: '2-digit'
+          day: '2-digit',
         });
-      
+
       case 'no':
-        return date.toLocaleDateString('nb-NO', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit'
-        }).replace(/\//g, '.');
-      
-      case 'sr':
-        const formatted = date.toLocaleDateString('sr-RS', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit'
-        }).replace(/\//g, '.');
+        return date
+          .toLocaleDateString('nb-NO', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          })
+          .replace(/\//g, '.');
+
+      case 'sr': {
+        const formatted = date
+          .toLocaleDateString('sr-RS', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          })
+          .replace(/\//g, '.');
         return formatted.endsWith('.') ? formatted : `${formatted}.`;
-      
+      }
+
       default:
         return formatLocalizedDate(dateString, 'en');
     }
-  } catch (error) {
+  } catch {
     return 'Invalid Date';
   }
 }
@@ -64,39 +69,39 @@ export function formatLocalizedNumber(amount: number, locale: string): string {
 
   try {
     let formatted: string;
-    
+
     switch (normalizedLocale) {
       case 'en':
         formatted = new Intl.NumberFormat('en-US', {
           minimumFractionDigits: 0,
-          maximumFractionDigits: 20 // Preserve original precision
+          maximumFractionDigits: 20, // Preserve original precision
         }).format(amount);
         break;
-      
+
       case 'no':
         formatted = new Intl.NumberFormat('nb-NO', {
           minimumFractionDigits: 0,
-          maximumFractionDigits: 20
+          maximumFractionDigits: 20,
         }).format(amount);
         // Replace non-breaking space with regular space and minus with hyphen
         formatted = formatted.replace(/\u00A0/g, ' ').replace(/\u2212/g, '-');
         break;
-      
+
       case 'sr':
         formatted = new Intl.NumberFormat('sr-RS', {
           minimumFractionDigits: 0,
-          maximumFractionDigits: 20
+          maximumFractionDigits: 20,
         }).format(amount);
         // Replace non-breaking space with regular space and minus with hyphen
         formatted = formatted.replace(/\u00A0/g, ' ').replace(/\u2212/g, '-');
         break;
-      
+
       default:
         return formatLocalizedNumber(amount, 'en');
     }
-    
+
     return formatted;
-  } catch (error) {
+  } catch {
     // Fallback to basic formatting if Intl fails
     return amount.toString();
   }
@@ -111,15 +116,15 @@ export function formatLocalizedNumber(amount: number, locale: string): string {
  * @returns Formatted currency string
  */
 export function formatLocalizedCurrency(
-  amountString: string, 
-  currency: string, 
-  locale: string
+  amountString: string,
+  currency: string,
+  locale: string,
 ): string {
   const normalizedLocale = normalizeSupportedLocale(locale);
-  
+
   // Convert from cents to main currency unit
   const amount = parseFloat(amountString) / 100;
-  
+
   // Handle invalid amounts
   if (isNaN(amount)) {
     return formatLocalizedCurrency('0', currency, locale);
@@ -127,7 +132,7 @@ export function formatLocalizedCurrency(
 
   try {
     let formatted: string;
-    
+
     // Special handling for different locales and currencies
     switch (normalizedLocale) {
       case 'en':
@@ -135,16 +140,16 @@ export function formatLocalizedCurrency(
           style: 'currency',
           currency: currency,
           minimumFractionDigits: currency === 'JPY' ? 0 : 2,
-          maximumFractionDigits: currency === 'JPY' ? 0 : 2
+          maximumFractionDigits: currency === 'JPY' ? 0 : 2,
         }).format(amount);
         break;
-      
+
       case 'no':
         // Norwegian typically puts currency symbol after amount for NOK
         if (currency === 'NOK') {
           const numberFormatted = new Intl.NumberFormat('nb-NO', {
             minimumFractionDigits: 2,
-            maximumFractionDigits: 2
+            maximumFractionDigits: 2,
           }).format(amount);
           // Replace non-breaking space with regular space
           formatted = `${numberFormatted.replace(/\u00A0/g, ' ')} kr`;
@@ -153,28 +158,28 @@ export function formatLocalizedCurrency(
             style: 'currency',
             currency: currency,
             minimumFractionDigits: currency === 'JPY' ? 0 : 2,
-            maximumFractionDigits: currency === 'JPY' ? 0 : 2
+            maximumFractionDigits: currency === 'JPY' ? 0 : 2,
           }).format(amount);
           formatted = formatted.replace(/\u00A0/g, ' ').replace(/\u2212/g, '-');
         }
         break;
-      
+
       case 'sr':
         formatted = new Intl.NumberFormat('sr-RS', {
           style: 'currency',
           currency: currency,
           minimumFractionDigits: currency === 'JPY' ? 0 : 2,
-          maximumFractionDigits: currency === 'JPY' ? 0 : 2
+          maximumFractionDigits: currency === 'JPY' ? 0 : 2,
         }).format(amount);
         formatted = formatted.replace(/\u00A0/g, ' ').replace(/\u2212/g, '-');
         break;
-      
+
       default:
         return formatLocalizedCurrency(amountString, currency, 'en');
     }
-    
+
     return formatted;
-  } catch (error) {
+  } catch {
     // Fallback to basic formatting if Intl fails
     const formatted = formatLocalizedNumber(amount, locale);
     return `${currency} ${formatted}`;
@@ -192,20 +197,20 @@ export function formatTransactionReference(id: string | null | undefined): strin
   if (!id) {
     return '';
   }
-  
+
   // Convert to string and trim whitespace
   const cleanId = String(id).trim();
-  
+
   // Return empty string for empty input
   if (!cleanId) {
     return '';
   }
-  
+
   // If ID is 8 characters or less, return as-is
   if (cleanId.length <= 8) {
     return cleanId;
   }
-  
+
   // Return last 8 characters for longer IDs
   return cleanId.slice(-8);
 }
@@ -217,19 +222,19 @@ export function formatTransactionReference(id: string | null | undefined): strin
  */
 function normalizeSupportedLocale(locale: string): SupportedLocale {
   const normalized = locale.toLowerCase();
-  
+
   if (normalized === 'en' || normalized.startsWith('en-')) {
     return 'en';
   }
-  
+
   if (normalized === 'no' || normalized === 'nb' || normalized.startsWith('nb-')) {
     return 'no';
   }
-  
+
   if (normalized === 'sr' || normalized.startsWith('sr-')) {
     return 'sr';
   }
-  
+
   // Default fallback to English
   return 'en';
 }

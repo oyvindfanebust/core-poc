@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
 import { LogIn, CreditCard } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
+import { useState, FormEvent } from 'react';
+
 import { LanguageSwitcher } from '@/components/language-switcher';
 
 interface LoginFormProps {
@@ -32,18 +33,18 @@ export function LoginForm({ translations }: LoginFormProps) {
     // Extract locale from current pathname
     const segments = pathname.split('/');
     const locale = segments[1];
-    
+
     // If we have a locale in the URL, prepend it
     if (locale && ['en', 'sr', 'no'].includes(locale)) {
       return `/${locale}${path}`;
     }
-    
+
     return path;
   };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    
+
     if (!customerId.trim()) {
       setError(translations.errors.customerIdRequired);
       return;
@@ -77,12 +78,8 @@ export function LoginForm({ translations }: LoginFormProps) {
           <div className="flex justify-center">
             <CreditCard className="h-12 w-12 text-blue-600" />
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            {translations.title}
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            {translations.subtitle}
-          </p>
+          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">{translations.title}</h2>
+          <p className="mt-2 text-sm text-gray-600">{translations.subtitle}</p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
@@ -98,7 +95,7 @@ export function LoginForm({ translations }: LoginFormProps) {
                 className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder={translations.customerIdPlaceholder}
                 value={customerId}
-                onChange={(e) => {
+                onChange={e => {
                   setCustomerId(e.target.value);
                   setError('');
                 }}
@@ -106,9 +103,7 @@ export function LoginForm({ translations }: LoginFormProps) {
             </div>
           </div>
 
-          {error && (
-            <div className="text-red-600 text-sm text-center">{error}</div>
-          )}
+          {error && <div className="text-red-600 text-sm text-center">{error}</div>}
 
           <div>
             <button
@@ -134,7 +129,7 @@ export function LoginForm({ translations }: LoginFormProps) {
             </div>
           </div>
         </form>
-        
+
         <div className="mt-6 text-center text-sm text-gray-600">
           <p>{translations.demoText}</p>
           <p>{translations.instructionText}</p>

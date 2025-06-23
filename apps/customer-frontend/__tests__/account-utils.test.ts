@@ -9,7 +9,7 @@ const mockAccount = {
   totalCredits: 200000,
   totalDebits: 50000,
   createdAt: '2023-01-01T00:00:00Z',
-  updatedAt: '2023-01-01T00:00:00Z'
+  updatedAt: '2023-01-01T00:00:00Z',
 };
 
 describe('Account Utils', () => {

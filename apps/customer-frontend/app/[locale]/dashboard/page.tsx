@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { ProtectedLayout } from '@/components/protected-layout';
-import { accountsApi, Account, Balance } from '@/lib/api';
-import { getAccountShortName, maskAccountId } from '@/lib/account-utils';
 import { CreditCard, TrendingUp, ArrowUpRight, Plus } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+
+import { ProtectedLayout } from '@/components/protected-layout';
+import { getAccountShortName, maskAccountId } from '@/lib/account-utils';
+import { accountsApi, Account, Balance } from '@/lib/api';
 
 interface AccountWithBalance extends Account {
   balance?: Balance;
@@ -35,10 +36,10 @@ export default function DashboardPage() {
     try {
       setLoading(true);
       const accountList = await accountsApi.getAccountsByCustomer(customerId);
-      
+
       // Load balances for each account
       const accountsWithBalances = await Promise.all(
-        accountList.map(async (account) => {
+        accountList.map(async account => {
           try {
             const balance = await accountsApi.getAccountBalance(account.accountId);
             return { ...account, balance };
@@ -46,7 +47,7 @@ export default function DashboardPage() {
             console.error(`Failed to load balance for account ${account.accountId}:`, err);
             return account;
           }
-        })
+        }),
       );
 
       setAccounts(accountsWithBalances);
@@ -77,10 +78,6 @@ export default function DashboardPage() {
       default:
         return <CreditCard className="h-6 w-6 text-gray-600" />;
     }
-  };
-
-  const getAccountTypeLabel = (type: string) => {
-    return t(`accountType.${type}`) || type;
   };
 
   const getTotalBalance = () => {
@@ -140,7 +137,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {accounts.map((account) => (
+              {accounts.map(account => (
                 <Link
                   key={account.accountId}
                   href={`/accounts/${account.accountId}`}
@@ -148,9 +145,7 @@ export default function DashboardPage() {
                 >
                   <div className="p-5">
                     <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        {getAccountIcon(account.accountType)}
-                      </div>
+                      <div className="flex-shrink-0">{getAccountIcon(account.accountType)}</div>
                       <div className="ml-5 w-0 flex-1">
                         <dl>
                           <dt className="text-sm font-medium text-gray-500 truncate">

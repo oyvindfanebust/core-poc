@@ -1,8 +1,8 @@
-import { 
-  formatLocalizedDate, 
-  formatLocalizedNumber, 
+import {
+  formatLocalizedDate,
+  formatLocalizedNumber,
   formatLocalizedCurrency,
-  formatTransactionReference 
+  formatTransactionReference,
 } from '../lib/formatting-utils';
 
 describe('Formatting Utils', () => {

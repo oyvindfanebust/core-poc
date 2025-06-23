@@ -1,15 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { ProtectedLayout } from '@/components/protected-layout';
-import { accountsApi, CreateAccountRequest } from '@/lib/api';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+
+import { ProtectedLayout } from '@/components/protected-layout';
+import { accountsApi, CreateAccountRequest } from '@/lib/api';
 
 const createAccountSchema = z.object({
   type: z.enum(['DEPOSIT', 'LOAN', 'CREDIT']),
@@ -29,7 +30,6 @@ export default function CreateAccountPage() {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(createAccountSchema),
@@ -38,8 +38,6 @@ export default function CreateAccountPage() {
       currency: 'USD',
     },
   });
-
-  const accountType = watch('type');
 
   const onSubmit = async (data: FormData) => {
     const customerId = localStorage.getItem('customerId');
@@ -57,14 +55,13 @@ export default function CreateAccountPage() {
         customerId,
       };
 
+      await accountsApi.createAccount(request);
 
-      const result = await accountsApi.createAccount(request);
-      
       // Redirect to dashboard after successful creation
       router.push('/dashboard');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to create account:', err);
-      setError(err.message || t('errors.createFailed'));
+      setError(err instanceof Error ? err.message : t('errors.createFailed'));
     } finally {
       setLoading(false);
     }
@@ -96,12 +93,14 @@ export default function CreateAccountPage() {
                 className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
               >
                 <option value="DEPOSIT">{t('accountTypes.DEPOSIT')}</option>
-                <option value="LOAN" disabled>{t('accountTypes.LOAN')}</option>
-                <option value="CREDIT" disabled>{t('accountTypes.CREDIT')}</option>
+                <option value="LOAN" disabled>
+                  {t('accountTypes.LOAN')}
+                </option>
+                <option value="CREDIT" disabled>
+                  {t('accountTypes.CREDIT')}
+                </option>
               </select>
-              {errors.type && (
-                <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>
-              )}
+              {errors.type && <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>}
             </div>
 
             <div>
@@ -139,14 +138,11 @@ export default function CreateAccountPage() {
                 placeholder={t('accountNicknamePlaceholder')}
                 maxLength={100}
               />
-              <p className="mt-1 text-sm text-gray-500">
-                {t('accountNicknameHint')}
-              </p>
+              <p className="mt-1 text-sm text-gray-500">{t('accountNicknameHint')}</p>
               {errors.accountName && (
                 <p className="mt-1 text-sm text-red-600">{errors.accountName.message}</p>
               )}
             </div>
-
 
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">

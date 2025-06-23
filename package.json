@@ -22,10 +22,18 @@
     "test:core-api": "npm run test --workspace=@core-poc/core-api",
     "test:batch-processor": "npm run test --workspace=@core-poc/batch-processor",
     "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down"
+    "docker:down": "docker-compose down",
+    "lint": "npm run lint --workspaces",
+    "lint:fix": "npm run lint:fix --workspaces",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "prettier": "^3.4.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.3.0"
   },
   "keywords": [
     "banking",

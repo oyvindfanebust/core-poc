@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { AccountTypeIcon } from './AccountTypeIcon';
-import { Tooltip } from './Tooltip';
-import { ToggleableId } from './ToggleableId';
+import React, { useState } from 'react';
+
 import { formatLocalizedCurrency } from '../lib/formatting-utils';
 import { cn } from '../lib/utils';
+
+import { AccountTypeIcon } from './AccountTypeIcon';
+import { ToggleableId } from './ToggleableId';
+import { Tooltip } from './Tooltip';
 
 export interface Account {
   id: string;
@@ -28,7 +30,7 @@ export const AccountHeader: React.FC<AccountHeaderProps> = ({
 }) => {
   const t = useTranslations();
   const locale = useLocale();
-  
+
   const [isEditing, setIsEditing] = useState(false);
   const [editingNickname, setEditingNickname] = useState(account.nickname || '');
   const [isSaving, setIsSaving] = useState(false);
@@ -40,7 +42,7 @@ export const AccountHeader: React.FC<AccountHeaderProps> = ({
 
   const handleSaveClick = async () => {
     if (!onNicknameChange) return;
-    
+
     setIsSaving(true);
     try {
       await onNicknameChange(editingNickname);
@@ -68,23 +70,15 @@ export const AccountHeader: React.FC<AccountHeaderProps> = ({
     }
   };
 
-
   const formattedBalance = formatLocalizedCurrency(account.balance, account.currency, locale);
 
   return (
-    <div 
-      className={cn('account-header', className)}
-      {...props}
-    >
+    <div className={cn('account-header', className)} {...props}>
       <div className="account-header__main">
         <div className="account-header__icon-section">
-          <AccountTypeIcon 
-            accountType={account.accountType} 
-            size="large"
-            color="primary"
-          />
+          <AccountTypeIcon accountType={account.accountType} size="large" color="primary" />
         </div>
-        
+
         <div className="account-header__info">
           <div className="account-header__title-section">
             {isEditing ? (
@@ -92,7 +86,7 @@ export const AccountHeader: React.FC<AccountHeaderProps> = ({
                 <input
                   type="text"
                   value={editingNickname}
-                  onChange={(e) => setEditingNickname(e.target.value)}
+                  onChange={e => setEditingNickname(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder={t('accountDetails.accountNamePlaceholder')}
                   className="account-header__nickname-input"
@@ -119,9 +113,7 @@ export const AccountHeader: React.FC<AccountHeaderProps> = ({
               </div>
             ) : (
               <div className="account-header__title-display">
-                <h1 className="account-header__title">
-                  {account.nickname || t('common.account')}
-                </h1>
+                <h1 className="account-header__title">{account.nickname || t('common.account')}</h1>
                 {onNicknameChange && (
                   <button
                     onClick={handleEditClick}
@@ -134,27 +126,19 @@ export const AccountHeader: React.FC<AccountHeaderProps> = ({
               </div>
             )}
           </div>
-          
+
           <div className="account-header__details">
             <div className="account-header__balance-section">
               <Tooltip content={t('tooltips.balance')}>
                 <div className="account-header__balance">
-                  <span className="account-header__balance-amount">
-                    {formattedBalance}
-                  </span>
-                  <span className="account-header__currency">
-                    {account.currency}
-                  </span>
+                  <span className="account-header__balance-amount">{formattedBalance}</span>
+                  <span className="account-header__currency">{account.currency}</span>
                 </div>
               </Tooltip>
             </div>
-            
+
             <div className="account-header__id-section">
-              <ToggleableId 
-                id={account.id} 
-                type="account"
-                className="account-header__account-id"
-              />
+              <ToggleableId id={account.id} type="account" className="account-header__account-id" />
             </div>
           </div>
         </div>

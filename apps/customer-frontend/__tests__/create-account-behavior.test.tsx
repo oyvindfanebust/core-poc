@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+
 import * as api from '../lib/api';
 
 // Mock the API module
@@ -20,13 +21,13 @@ const TestCreateAccountForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
-    
+
     const request = {
       type: formData.get('type') as string,
       currency: formData.get('currency') as string,
       customerId: 'CUSTOMER-ABC-123',
     };
-    
+
     // Should NOT include initialBalance
     await (api.accountsApi.createAccount as jest.Mock)(request);
   };
@@ -37,12 +38,12 @@ const TestCreateAccountForm = () => {
       <select id="type" name="type" defaultValue="DEPOSIT">
         <option value="DEPOSIT">Deposit Account</option>
       </select>
-      
+
       <label htmlFor="currency">Currency</label>
       <select id="currency" name="currency" defaultValue="USD">
         <option value="USD">USD</option>
       </select>
-      
+
       <button type="submit">Create Account</button>
     </form>
   );
@@ -55,7 +56,7 @@ describe('Create Account Form - TDD Tests', () => {
 
   it('should NOT have initial balance field', () => {
     render(<TestCreateAccountForm />);
-    
+
     // These should pass after we remove the initial balance field
     expect(screen.queryByLabelText(/initial balance/i)).not.toBeInTheDocument();
     expect(screen.queryByPlaceholderText(/0\.00/i)).not.toBeInTheDocument();
@@ -67,10 +68,10 @@ describe('Create Account Form - TDD Tests', () => {
     mockCreateAccount.mockResolvedValue({ accountId: '123' });
 
     render(<TestCreateAccountForm />);
-    
+
     const form = screen.getByTestId('create-account-form');
     fireEvent.submit(form);
-    
+
     await waitFor(() => {
       expect(mockCreateAccount).toHaveBeenCalledWith({
         type: 'DEPOSIT',
@@ -78,7 +79,7 @@ describe('Create Account Form - TDD Tests', () => {
         customerId: 'CUSTOMER-ABC-123',
       });
     });
-    
+
     // Verify initialBalance is NOT in the call
     const callArgs = mockCreateAccount.mock.calls[0][0];
     expect(callArgs).not.toHaveProperty('initialBalance');
@@ -89,26 +90,26 @@ describe('Create Account Form - TDD Tests', () => {
     mockCreateAccount.mockResolvedValue({ accountId: '456' });
 
     render(<TestCreateAccountForm />);
-    
+
     const submitButton = screen.getByRole('button', { name: /create account/i });
     fireEvent.click(submitButton);
-    
+
     await waitFor(() => {
       expect(mockCreateAccount).toHaveBeenCalledTimes(1);
     });
-    
+
     expect(mockCreateAccount).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'DEPOSIT',
         currency: 'USD',
         customerId: 'CUSTOMER-ABC-123',
-      })
+      }),
     );
-    
+
     expect(mockCreateAccount).toHaveBeenCalledWith(
       expect.not.objectContaining({
-        initialBalance: expect.anything()
-      })
+        initialBalance: expect.anything(),
+      }),
     );
   });
 });

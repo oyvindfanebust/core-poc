@@ -8,7 +8,9 @@
   "scripts": {
     "build": "tsc --outDir dist",
     "dev": "tsc --watch --outDir dist",
-    "test": "echo 'No tests for core-services package'"
+    "test": "echo 'No tests for core-services package'",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix"
   },
   "dependencies": {
     "@types/node": "^24.0.1",
@@ -19,7 +21,10 @@
     "winston": "^3.17.0",
     "zod": "^3.25.64"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@core-poc/eslint-config": "*",
+    "eslint": "^8.57.0"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC"

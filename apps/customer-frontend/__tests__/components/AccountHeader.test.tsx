@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { AccountHeader } from '../../components/AccountHeader';
 
 // Mock next-intl hooks
@@ -50,10 +51,8 @@ describe('AccountHeader', () => {
 
     it('should render account without nickname', () => {
       const accountWithoutNickname = { ...mockAccount, nickname: undefined };
-      
-      render(
-        <AccountHeader account={accountWithoutNickname} />
-      );
+
+      render(<AccountHeader account={accountWithoutNickname} />);
 
       expect(screen.getByText('Account')).toBeInTheDocument(); // Default title
       expect(screen.getByText('$2,500.00')).toBeInTheDocument();
@@ -61,15 +60,13 @@ describe('AccountHeader', () => {
 
     it('should render different account types with correct icons', () => {
       const { rerender } = render(
-        <AccountHeader account={{ ...mockAccount, accountType: 'DEPOSIT' }} />
+        <AccountHeader account={{ ...mockAccount, accountType: 'DEPOSIT' }} />,
       );
 
       let icon = screen.getByRole('img');
       expect(icon).toHaveAttribute('aria-label', 'Deposit Account');
 
-      rerender(
-        <AccountHeader account={{ ...mockAccount, accountType: 'LOAN' }} />
-      );
+      rerender(<AccountHeader account={{ ...mockAccount, accountType: 'LOAN' }} />);
 
       icon = screen.getByRole('img');
       expect(icon).toHaveAttribute('aria-label', 'Loan Account');
@@ -78,39 +75,31 @@ describe('AccountHeader', () => {
 
   describe('Balance Display', () => {
     it('should format currency according to locale', () => {
-      render(
-        <AccountHeader account={mockAccount} />
-      );
+      render(<AccountHeader account={mockAccount} />);
 
       expect(screen.getByText('$2,500.00')).toBeInTheDocument();
     });
 
     it('should handle different currencies', () => {
       const eurAccount = { ...mockAccount, currency: 'EUR' };
-      
-      render(
-        <AccountHeader account={eurAccount} />
-      );
+
+      render(<AccountHeader account={eurAccount} />);
 
       expect(screen.getByText('EUR')).toBeInTheDocument();
     });
 
     it('should handle zero balance', () => {
       const zeroBalanceAccount = { ...mockAccount, balance: '0' };
-      
-      render(
-        <AccountHeader account={zeroBalanceAccount} />
-      );
+
+      render(<AccountHeader account={zeroBalanceAccount} />);
 
       expect(screen.getByText('$0.00')).toBeInTheDocument();
     });
 
     it('should handle negative balance', () => {
       const negativeBalanceAccount = { ...mockAccount, balance: '-150000' };
-      
-      render(
-        <AccountHeader account={negativeBalanceAccount} />
-      );
+
+      render(<AccountHeader account={negativeBalanceAccount} />);
 
       expect(screen.getByText('-$1,500.00')).toBeInTheDocument();
     });
@@ -118,9 +107,7 @@ describe('AccountHeader', () => {
 
   describe('Account ID Display', () => {
     it('should show masked account ID by default', () => {
-      render(
-        <AccountHeader account={mockAccount} />
-      );
+      render(<AccountHeader account={mockAccount} />);
 
       // Should show masked version (last 8 characters)
       expect(screen.getByText('•••• 3262708')).toBeInTheDocument();
@@ -128,9 +115,7 @@ describe('AccountHeader', () => {
     });
 
     it('should have tooltip for account ID', async () => {
-      render(
-        <AccountHeader account={mockAccount} />
-      );
+      render(<AccountHeader account={mockAccount} />);
 
       const accountIdElement = screen.getByText('•••• 3262708');
       fireEvent.mouseEnter(accountIdElement);
@@ -143,10 +128,8 @@ describe('AccountHeader', () => {
 
     it('should toggle full account ID when clicked', async () => {
       const user = userEvent.setup();
-      
-      render(
-        <AccountHeader account={mockAccount} />
-      );
+
+      render(<AccountHeader account={mockAccount} />);
 
       const accountIdElement = screen.getByText('•••• 3262708');
       await user.click(accountIdElement);
@@ -166,18 +149,14 @@ describe('AccountHeader', () => {
   describe('Nickname Editing', () => {
     it('should show edit button when onNicknameChange is provided', () => {
       const handleNicknameChange = jest.fn();
-      
-      render(
-        <AccountHeader account={mockAccount} onNicknameChange={handleNicknameChange} />
-      );
+
+      render(<AccountHeader account={mockAccount} onNicknameChange={handleNicknameChange} />);
 
       expect(screen.getByRole('button', { name: 'Edit account name' })).toBeInTheDocument();
     });
 
     it('should not show edit button when onNicknameChange is not provided', () => {
-      render(
-        <AccountHeader account={mockAccount} />
-      );
+      render(<AccountHeader account={mockAccount} />);
 
       expect(screen.queryByRole('button', { name: 'Edit account name' })).not.toBeInTheDocument();
     });
@@ -185,10 +164,8 @@ describe('AccountHeader', () => {
     it('should enter edit mode when edit button is clicked', async () => {
       const user = userEvent.setup();
       const handleNicknameChange = jest.fn();
-      
-      render(
-        <AccountHeader account={mockAccount} onNicknameChange={handleNicknameChange} />
-      );
+
+      render(<AccountHeader account={mockAccount} onNicknameChange={handleNicknameChange} />);
 
       const editButton = screen.getByRole('button', { name: 'Edit account name' });
       await user.click(editButton);
@@ -202,10 +179,8 @@ describe('AccountHeader', () => {
     it('should save nickname when save button is clicked', async () => {
       const user = userEvent.setup();
       const handleNicknameChange = jest.fn().mockResolvedValue(undefined);
-      
-      render(
-        <AccountHeader account={mockAccount} onNicknameChange={handleNicknameChange} />
-      );
+
+      render(<AccountHeader account={mockAccount} onNicknameChange={handleNicknameChange} />);
 
       // Enter edit mode
       const editButton = screen.getByRole('button', { name: 'Edit account name' });
@@ -221,7 +196,7 @@ describe('AccountHeader', () => {
       await user.click(saveButton);
 
       expect(handleNicknameChange).toHaveBeenCalledWith('Updated Savings Account');
-      
+
       await waitFor(() => {
         expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
       });
@@ -230,10 +205,8 @@ describe('AccountHeader', () => {
     it('should cancel editing when cancel button is clicked', async () => {
       const user = userEvent.setup();
       const handleNicknameChange = jest.fn();
-      
-      render(
-        <AccountHeader account={mockAccount} onNicknameChange={handleNicknameChange} />
-      );
+
+      render(<AccountHeader account={mockAccount} onNicknameChange={handleNicknameChange} />);
 
       // Enter edit mode
       const editButton = screen.getByRole('button', { name: 'Edit account name' });
@@ -256,10 +229,8 @@ describe('AccountHeader', () => {
     it('should save on Enter key press', async () => {
       const user = userEvent.setup();
       const handleNicknameChange = jest.fn().mockResolvedValue(undefined);
-      
-      render(
-        <AccountHeader account={mockAccount} onNicknameChange={handleNicknameChange} />
-      );
+
+      render(<AccountHeader account={mockAccount} onNicknameChange={handleNicknameChange} />);
 
       // Enter edit mode
       const editButton = screen.getByRole('button', { name: 'Edit account name' });
@@ -277,10 +248,8 @@ describe('AccountHeader', () => {
     it('should cancel on Escape key press', async () => {
       const user = userEvent.setup();
       const handleNicknameChange = jest.fn();
-      
-      render(
-        <AccountHeader account={mockAccount} onNicknameChange={handleNicknameChange} />
-      );
+
+      render(<AccountHeader account={mockAccount} onNicknameChange={handleNicknameChange} />);
 
       // Enter edit mode
       const editButton = screen.getByRole('button', { name: 'Edit account name' });
@@ -301,9 +270,9 @@ describe('AccountHeader', () => {
       const user = userEvent.setup();
       const handleNicknameChange = jest.fn().mockResolvedValue(undefined);
       const accountWithoutNickname = { ...mockAccount, nickname: undefined };
-      
+
       render(
-        <AccountHeader account={accountWithoutNickname} onNicknameChange={handleNicknameChange} />
+        <AccountHeader account={accountWithoutNickname} onNicknameChange={handleNicknameChange} />,
       );
 
       // Enter edit mode
@@ -327,14 +296,12 @@ describe('AccountHeader', () => {
       const user = userEvent.setup();
       let resolvePromise: (value: any) => void;
       const handleNicknameChange = jest.fn().mockImplementation(() => {
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
           resolvePromise = resolve;
         });
       });
-      
-      render(
-        <AccountHeader account={mockAccount} onNicknameChange={handleNicknameChange} />
-      );
+
+      render(<AccountHeader account={mockAccount} onNicknameChange={handleNicknameChange} />);
 
       // Enter edit mode and start saving
       const editButton = screen.getByRole('button', { name: 'Edit account name' });
@@ -353,7 +320,7 @@ describe('AccountHeader', () => {
 
       // Resolve the promise
       resolvePromise!(undefined);
-      
+
       await waitFor(() => {
         expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
       });
@@ -362,9 +329,7 @@ describe('AccountHeader', () => {
 
   describe('Accessibility', () => {
     it('should have proper ARIA labels and roles', () => {
-      render(
-        <AccountHeader account={mockAccount} />
-      );
+      render(<AccountHeader account={mockAccount} />);
 
       expect(screen.getByRole('img')).toHaveAttribute('aria-label', 'Deposit Account');
       expect(screen.getByRole('button', { name: 'View full account ID' })).toBeInTheDocument();
@@ -372,14 +337,12 @@ describe('AccountHeader', () => {
 
     it('should support keyboard navigation for account ID toggle', async () => {
       const user = userEvent.setup();
-      
-      render(
-        <AccountHeader account={mockAccount} />
-      );
+
+      render(<AccountHeader account={mockAccount} />);
 
       const accountIdButton = screen.getByText('•••• 3262708');
       await user.tab();
-      
+
       // Should be focusable
       expect(accountIdButton).toHaveFocus();
 
@@ -396,16 +359,14 @@ describe('AccountHeader', () => {
   describe('Custom Props', () => {
     it('should support custom className', () => {
       const { container } = render(
-        <AccountHeader account={mockAccount} className="custom-header" />
+        <AccountHeader account={mockAccount} className="custom-header" />,
       );
 
       expect(container.firstChild).toHaveClass('custom-header');
     });
 
     it('should forward additional props', () => {
-      render(
-        <AccountHeader account={mockAccount} data-testid="account-header" />
-      );
+      render(<AccountHeader account={mockAccount} data-testid="account-header" />);
 
       expect(screen.getByTestId('account-header')).toBeInTheDocument();
     });

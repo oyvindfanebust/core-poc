@@ -1,7 +1,11 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7001';
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string, public data?: any) {
+  constructor(
+    public status: number,
+    message: string,
+    public data?: unknown,
+  ) {
     super(message);
     this.name = 'ApiError';
   }
@@ -17,7 +21,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
     const error = await response.json().catch(() => ({ error: 'Unknown error' }));
     throw new ApiError(response.status, error.error || 'Request failed', error);
   }
-  
+
   return response.json();
 }
 
@@ -31,7 +35,7 @@ export const apiClient = {
     return handleResponse<T>(response);
   },
 
-  async post<T>(path: string, data: any): Promise<T> {
+  async post<T>(path: string, data: unknown): Promise<T> {
     const response = await fetch(`${API_BASE_URL}${path}`, {
       method: 'POST',
       headers: {
@@ -42,7 +46,7 @@ export const apiClient = {
     return handleResponse<T>(response);
   },
 
-  async put<T>(path: string, data: any): Promise<T> {
+  async put<T>(path: string, data: unknown): Promise<T> {
     const response = await fetch(`${API_BASE_URL}${path}`, {
       method: 'PUT',
       headers: {
@@ -53,7 +57,7 @@ export const apiClient = {
     return handleResponse<T>(response);
   },
 
-  async patch<T>(path: string, data: any): Promise<T> {
+  async patch<T>(path: string, data: unknown): Promise<T> {
     const response = await fetch(`${API_BASE_URL}${path}`, {
       method: 'PATCH',
       headers: {

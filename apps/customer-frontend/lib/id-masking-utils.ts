@@ -25,7 +25,7 @@ export function getMaskingPattern(type: IdType): MaskingPattern {
         preserveStructure: false,
         minLength: 5,
       };
-    
+
     case 'transaction':
       return {
         maskChar: '•',
@@ -34,7 +34,7 @@ export function getMaskingPattern(type: IdType): MaskingPattern {
         preserveStructure: false,
         minLength: 6,
       };
-    
+
     case 'customer':
       return {
         maskChar: '•',
@@ -43,7 +43,7 @@ export function getMaskingPattern(type: IdType): MaskingPattern {
         preserveStructure: true, // Preserve structure like CUSTOMER-XXX-123
         minLength: 4,
       };
-    
+
     default:
       return {
         maskChar: '•',
@@ -62,7 +62,7 @@ export function formatMaskedId(maskedPart: string, visiblePart: string, separato
   if (!maskedPart && !visiblePart) return '';
   if (!maskedPart) return visiblePart;
   if (!visiblePart) return maskedPart;
-  
+
   return `${maskedPart}${separator}${visiblePart}`;
 }
 
@@ -81,7 +81,7 @@ function maskCustomerIdWithStructure(id: string, pattern: MaskingPattern): strin
       return `${first}-${middleMask}-${last}`;
     }
   }
-  
+
   // Handle numeric customer IDs - use standard pattern with separator
   if (/^\d+$/.test(id) && id.length > 6) {
     const visibleLength = Math.min(4, Math.floor(id.length / 2));
@@ -89,14 +89,14 @@ function maskCustomerIdWithStructure(id: string, pattern: MaskingPattern): strin
     const maskedPart = pattern.maskChar.repeat(4);
     return formatMaskedId(maskedPart, visiblePart, ' ');
   }
-  
+
   // Handle other structured patterns - show first char and mask rest
   if (id.length > 4) {
     const maskLength = Math.min(3, id.length - 1);
     const maskedPart = pattern.maskChar.repeat(maskLength);
     return `${id[0]}${maskedPart}`;
   }
-  
+
   // Too short for meaningful masking
   return id;
 }
@@ -105,28 +105,28 @@ function maskCustomerIdWithStructure(id: string, pattern: MaskingPattern): strin
  * Mask a sensitive ID based on its type and length
  */
 export function maskSensitiveId(
-  id: string | null | undefined, 
-  type: IdType, 
-  customOptions?: Partial<MaskingOptions>
+  id: string | null | undefined,
+  type: IdType,
+  customOptions?: Partial<MaskingOptions>,
 ): string {
   if (!id || typeof id !== 'string') {
     return '';
   }
-  
+
   if (id.length <= 2) {
     return id; // Too short to mask meaningfully
   }
-  
+
   const pattern = { ...getMaskingPattern(type), ...customOptions };
-  
+
   // Special handling for customer IDs with structure preservation
   if (type === 'customer' && pattern.preserveStructure) {
     return maskCustomerIdWithStructure(id, pattern);
   }
-  
+
   // Calculate visible length based on ID length and type
   let visibleLength = pattern.visibleLength;
-  
+
   if (type === 'account') {
     // Adaptive visible length for account IDs
     if (id.length > 30) visibleLength = 7;
@@ -134,22 +134,22 @@ export function maskSensitiveId(
     else if (id.length > 10) visibleLength = 4;
     else visibleLength = Math.max(2, Math.floor(id.length / 2));
   }
-  
+
   // Use custom visible length if provided
   if (customOptions?.visibleLength !== undefined) {
     visibleLength = customOptions.visibleLength;
   }
-  
+
   // Ensure we don't show more than half the ID
   visibleLength = Math.min(visibleLength, Math.floor(id.length / 2));
-  
+
   // Get visible part (last N characters)
   const visiblePart = id.slice(-visibleLength);
-  
+
   // Calculate mask length - show 4 dots for most cases, 3 for very short IDs
   const maskLength = id.length <= 7 ? 3 : 4;
   const maskedPart = pattern.maskChar.repeat(maskLength);
-  
+
   return formatMaskedId(maskedPart, visiblePart, pattern.separator);
 }
 
@@ -160,9 +160,9 @@ export function shouldShowMaskingOption(id: string | null | undefined, type: IdT
   if (!id || typeof id !== 'string') {
     return false;
   }
-  
+
   const pattern = getMaskingPattern(type);
-  
+
   // Different minimum thresholds for different types
   switch (type) {
     case 'account':
@@ -183,27 +183,27 @@ export function getSecurityLevel(id: string | null | undefined, type: IdType): S
   if (!id || typeof id !== 'string') {
     return 'none';
   }
-  
+
   const length = id.length;
-  
+
   switch (type) {
     case 'account':
       if (length >= 25) return 'high';
       if (length >= 15) return 'medium';
       if (length >= 8) return 'low';
       return 'none';
-      
+
     case 'transaction':
       if (length >= 20) return 'high';
       if (length >= 12) return 'medium';
       if (length >= 8) return 'low';
       return 'none';
-      
+
     case 'customer':
       if (length >= 15 || (id.includes('-') && length >= 10)) return 'medium';
       if (length >= 8) return 'low';
       return 'none';
-      
+
     default:
       if (length >= 20) return 'high';
       if (length >= 12) return 'medium';

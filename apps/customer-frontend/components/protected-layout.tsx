@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 import { Navigation } from './navigation';
 
 export function ProtectedLayout({ children }: { children: React.ReactNode }) {
@@ -11,7 +12,7 @@ export function ProtectedLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Mark as client-side to ensure proper hydration
     setIsClientSide(true);
-    
+
     const customerId = localStorage.getItem('customerId');
     if (!customerId) {
       router.push('/');
@@ -45,9 +46,7 @@ export function ProtectedLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Navigation />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</main>
     </>
   );
 }

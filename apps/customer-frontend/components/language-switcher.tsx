@@ -1,9 +1,10 @@
 'use client';
 
-import { useRouter, usePathname } from 'next/navigation';
-import { locales, localeNames, type Locale } from '@/i18n/config';
 import { Globe } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
+
+import { locales, localeNames, type Locale } from '@/i18n/config';
 
 interface LanguageSwitcherProps {
   currentLocale?: string;
@@ -33,9 +34,9 @@ export function LanguageSwitcher({ currentLocale }: LanguageSwitcherProps) {
     // Extract current locale from pathname
     const segments = pathname.split('/');
     const currentLocaleInPath = segments[1];
-    
+
     let pathnameWithoutLocale = pathname;
-    
+
     // Remove current locale from pathname if it exists and is valid
     if (currentLocaleInPath && ['en', 'sr', 'no'].includes(currentLocaleInPath)) {
       pathnameWithoutLocale = pathname.slice(`/${currentLocaleInPath}`.length) || '/';
@@ -43,10 +44,9 @@ export function LanguageSwitcher({ currentLocale }: LanguageSwitcherProps) {
 
     // Navigate to new locale
     // Note: We explicitly use /en for English to avoid browser locale detection issues
-    const newPath = newLocale === 'en' 
-      ? `/en${pathnameWithoutLocale}`
-      : `/${newLocale}${pathnameWithoutLocale}`;
-    
+    const newPath =
+      newLocale === 'en' ? `/en${pathnameWithoutLocale}` : `/${newLocale}${pathnameWithoutLocale}`;
+
     router.push(newPath);
     setIsOpen(false);
   };
@@ -64,14 +64,12 @@ export function LanguageSwitcher({ currentLocale }: LanguageSwitcherProps) {
       {isOpen && (
         <div className="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-50">
           <div className="py-1">
-            {locales.map((loc) => (
+            {locales.map(loc => (
               <button
                 key={loc}
                 onClick={() => handleLocaleChange(loc)}
                 className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
-                  locale === loc 
-                    ? 'bg-blue-50 text-blue-700 font-medium' 
-                    : 'text-gray-700'
+                  locale === loc ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
                 }`}
               >
                 {localeNames[loc]}

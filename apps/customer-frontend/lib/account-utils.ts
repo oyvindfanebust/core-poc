@@ -5,13 +5,17 @@ import { Account } from './api';
  */
 export function formatAccountDisplayName(account: Account, showFullId: boolean = false): string {
   const { accountName, accountType, accountId } = account;
-  
+
   if (accountName) {
-    return showFullId ? `${accountName} (${accountId})` : `${accountName} (••••${accountId.slice(-4)})`;
+    return showFullId
+      ? `${accountName} (${accountId})`
+      : `${accountName} (••••${accountId.slice(-4)})`;
   }
-  
+
   const typeDisplay = accountType.charAt(0) + accountType.slice(1).toLowerCase();
-  return showFullId ? `${typeDisplay} Account (${accountId})` : `${typeDisplay} Account (••••${accountId.slice(-4)})`;
+  return showFullId
+    ? `${typeDisplay} Account (${accountId})`
+    : `${typeDisplay} Account (••••${accountId.slice(-4)})`;
 }
 
 /**
@@ -19,7 +23,8 @@ export function formatAccountDisplayName(account: Account, showFullId: boolean =
  */
 export function formatAccountOption(account: Account): string {
   const { accountName, accountType, currency, accountId } = account;
-  const name = accountName || `${accountType.charAt(0) + accountType.slice(1).toLowerCase()} Account`;
+  const name =
+    accountName || `${accountType.charAt(0) + accountType.slice(1).toLowerCase()} Account`;
   return `${name} - ${currency} (••••${accountId.slice(-4)})`;
 }
 
@@ -27,7 +32,10 @@ export function formatAccountOption(account: Account): string {
  * Get a short display name for an account
  */
 export function getAccountShortName(account: Account): string {
-  return account.accountName || `${account.accountType.charAt(0) + account.accountType.slice(1).toLowerCase()} Account`;
+  return (
+    account.accountName ||
+    `${account.accountType.charAt(0) + account.accountType.slice(1).toLowerCase()} Account`
+  );
 }
 
 /**

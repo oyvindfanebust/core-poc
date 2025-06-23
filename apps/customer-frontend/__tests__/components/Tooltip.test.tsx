@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { Tooltip } from '../../components/Tooltip';
 
 describe('Tooltip', () => {
@@ -8,9 +9,9 @@ describe('Tooltip', () => {
       render(
         <Tooltip content="This is a tooltip">
           <button>Hover me</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
+
       expect(screen.getByRole('button', { name: 'Hover me' })).toBeInTheDocument();
       expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
     });
@@ -19,12 +20,12 @@ describe('Tooltip', () => {
       render(
         <Tooltip content="This is a tooltip">
           <button>Hover me</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
+
       const trigger = screen.getByRole('button');
       fireEvent.mouseEnter(trigger);
-      
+
       await waitFor(() => {
         expect(screen.getByRole('tooltip')).toBeInTheDocument();
         expect(screen.getByText('This is a tooltip')).toBeInTheDocument();
@@ -37,16 +38,16 @@ describe('Tooltip', () => {
           <strong>Bold text</strong> and <em>italic text</em>
         </div>
       );
-      
+
       render(
         <Tooltip content={content}>
           <button>Hover me</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
+
       const trigger = screen.getByRole('button');
       fireEvent.mouseEnter(trigger);
-      
+
       await waitFor(() => {
         expect(screen.getByRole('tooltip')).toBeInTheDocument();
         expect(screen.getByText('Bold text')).toBeInTheDocument();
@@ -60,12 +61,12 @@ describe('Tooltip', () => {
       render(
         <Tooltip content="Mouse enter tooltip">
           <button>Hover me</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
+
       const trigger = screen.getByRole('button');
       fireEvent.mouseEnter(trigger);
-      
+
       await waitFor(() => {
         expect(screen.getByRole('tooltip')).toBeInTheDocument();
       });
@@ -75,18 +76,18 @@ describe('Tooltip', () => {
       render(
         <Tooltip content="Mouse leave tooltip">
           <button>Hover me</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
+
       const trigger = screen.getByRole('button');
       fireEvent.mouseEnter(trigger);
-      
+
       await waitFor(() => {
         expect(screen.getByRole('tooltip')).toBeInTheDocument();
       });
-      
+
       fireEvent.mouseLeave(trigger);
-      
+
       await waitFor(() => {
         expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
       });
@@ -96,20 +97,20 @@ describe('Tooltip', () => {
       render(
         <Tooltip content="Hoverable tooltip content">
           <button>Hover me</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
+
       const trigger = screen.getByRole('button');
       fireEvent.mouseEnter(trigger);
-      
+
       await waitFor(() => {
         expect(screen.getByRole('tooltip')).toBeInTheDocument();
       });
-      
+
       const tooltip = screen.getByRole('tooltip');
       fireEvent.mouseEnter(tooltip);
       fireEvent.mouseLeave(trigger);
-      
+
       // Tooltip should remain visible
       expect(screen.getByRole('tooltip')).toBeInTheDocument();
     });
@@ -118,16 +119,15 @@ describe('Tooltip', () => {
   describe('Focus Interactions', () => {
     it('should show tooltip on focus', async () => {
       const user = userEvent.setup();
-      
+
       render(
         <Tooltip content="Focus tooltip">
           <button>Focus me</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
-      const trigger = screen.getByRole('button');
+
       await user.tab(); // Focus the button
-      
+
       await waitFor(() => {
         expect(screen.getByRole('tooltip')).toBeInTheDocument();
       });
@@ -135,25 +135,24 @@ describe('Tooltip', () => {
 
     it('should hide tooltip on blur', async () => {
       const user = userEvent.setup();
-      
+
       render(
         <div>
           <Tooltip content="Blur tooltip">
             <button>Focus me</button>
           </Tooltip>
           <button>Other button</button>
-        </div>
+        </div>,
       );
-      
-      const trigger = screen.getByRole('button', { name: 'Focus me' });
+
       await user.tab(); // Focus the first button
-      
+
       await waitFor(() => {
         expect(screen.getByRole('tooltip')).toBeInTheDocument();
       });
-      
+
       await user.tab(); // Focus the second button (blur first)
-      
+
       await waitFor(() => {
         expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
       });
@@ -163,22 +162,21 @@ describe('Tooltip', () => {
   describe('Keyboard Navigation', () => {
     it('should hide tooltip when Escape key is pressed', async () => {
       const user = userEvent.setup();
-      
+
       render(
         <Tooltip content="Escape to close">
           <button>Focus me</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
-      const trigger = screen.getByRole('button');
+
       await user.tab(); // Focus the button
-      
+
       await waitFor(() => {
         expect(screen.getByRole('tooltip')).toBeInTheDocument();
       });
-      
+
       await user.keyboard('{Escape}');
-      
+
       await waitFor(() => {
         expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
       });
@@ -187,17 +185,16 @@ describe('Tooltip', () => {
     it('should not interfere with other keyboard events', async () => {
       const user = userEvent.setup();
       const handleClick = jest.fn();
-      
+
       render(
         <Tooltip content="Keyboard events">
           <button onClick={handleClick}>Press Enter</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
-      const trigger = screen.getByRole('button');
+
       await user.tab(); // Focus the button
       await user.keyboard('{Enter}'); // Trigger click
-      
+
       expect(handleClick).toHaveBeenCalledTimes(1);
     });
   });
@@ -207,12 +204,12 @@ describe('Tooltip', () => {
       render(
         <Tooltip content="Accessible tooltip">
           <button>Accessible button</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
+
       const trigger = screen.getByRole('button');
       fireEvent.mouseEnter(trigger);
-      
+
       await waitFor(() => {
         const tooltip = screen.getByRole('tooltip');
         expect(tooltip).toHaveAttribute('id');
@@ -225,17 +222,17 @@ describe('Tooltip', () => {
       render(
         <Tooltip content="ARIA cleanup">
           <button>Test button</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
+
       const trigger = screen.getByRole('button');
-      
+
       // Show tooltip
       fireEvent.mouseEnter(trigger);
       await waitFor(() => {
         expect(trigger).toHaveAttribute('aria-describedby');
       });
-      
+
       // Hide tooltip
       fireEvent.mouseLeave(trigger);
       await waitFor(() => {
@@ -247,12 +244,12 @@ describe('Tooltip', () => {
       render(
         <Tooltip content="Screen reader content">
           <button>Button with tooltip</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
+
       const trigger = screen.getByRole('button');
       fireEvent.mouseEnter(trigger);
-      
+
       await waitFor(() => {
         const tooltip = screen.getByRole('tooltip');
         expect(tooltip).toHaveAttribute('role', 'tooltip');
@@ -266,28 +263,28 @@ describe('Tooltip', () => {
       const { rerender } = render(
         <Tooltip content="Top placement" placement="top">
           <button>Top tooltip</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
+
       let trigger = screen.getByRole('button');
       fireEvent.mouseEnter(trigger);
-      
+
       await waitFor(() => {
         const tooltip = screen.getByRole('tooltip');
         expect(tooltip).toHaveClass('tooltip--top');
       });
-      
+
       fireEvent.mouseLeave(trigger);
-      
+
       rerender(
         <Tooltip content="Bottom placement" placement="bottom">
           <button>Bottom tooltip</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
+
       trigger = screen.getByRole('button');
       fireEvent.mouseEnter(trigger);
-      
+
       await waitFor(() => {
         const tooltip = screen.getByRole('tooltip');
         expect(tooltip).toHaveClass('tooltip--bottom');
@@ -298,12 +295,12 @@ describe('Tooltip', () => {
       render(
         <Tooltip content="Default placement">
           <button>Default button</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
+
       const trigger = screen.getByRole('button');
       fireEvent.mouseEnter(trigger);
-      
+
       await waitFor(() => {
         const tooltip = screen.getByRole('tooltip');
         expect(tooltip).toHaveClass('tooltip--top');
@@ -314,57 +311,57 @@ describe('Tooltip', () => {
   describe('Delay and Timing', () => {
     it('should support custom show delay', async () => {
       jest.useFakeTimers();
-      
+
       render(
         <Tooltip content="Delayed tooltip" showDelay={500}>
           <button>Delayed button</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
+
       const trigger = screen.getByRole('button');
       fireEvent.mouseEnter(trigger);
-      
+
       // Should not be visible immediately
       expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
-      
+
       // Fast-forward time
       jest.advanceTimersByTime(500);
-      
+
       await waitFor(() => {
         expect(screen.getByRole('tooltip')).toBeInTheDocument();
       });
-      
+
       jest.useRealTimers();
     });
 
     it('should support custom hide delay', async () => {
       jest.useFakeTimers();
-      
+
       render(
         <Tooltip content="Hide delayed tooltip" hideDelay={300}>
           <button>Hide delayed button</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
+
       const trigger = screen.getByRole('button');
       fireEvent.mouseEnter(trigger);
-      
+
       await waitFor(() => {
         expect(screen.getByRole('tooltip')).toBeInTheDocument();
       });
-      
+
       fireEvent.mouseLeave(trigger);
-      
+
       // Should still be visible
       expect(screen.getByRole('tooltip')).toBeInTheDocument();
-      
+
       // Fast-forward time
       jest.advanceTimersByTime(300);
-      
+
       await waitFor(() => {
         expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
       });
-      
+
       jest.useRealTimers();
     });
   });
@@ -374,12 +371,12 @@ describe('Tooltip', () => {
       render(
         <Tooltip content="Custom styled tooltip" className="custom-tooltip">
           <button>Custom button</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
+
       const trigger = screen.getByRole('button');
       fireEvent.mouseEnter(trigger);
-      
+
       await waitFor(() => {
         const tooltip = screen.getByRole('tooltip');
         expect(tooltip).toHaveClass('custom-tooltip');
@@ -392,9 +389,9 @@ describe('Tooltip', () => {
           <button data-testid="trigger-button" disabled>
             Disabled button
           </button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
+
       const trigger = screen.getByTestId('trigger-button');
       expect(trigger).toBeDisabled();
     });
@@ -403,21 +400,21 @@ describe('Tooltip', () => {
       const { rerender } = render(
         <Tooltip content="Controlled tooltip" open={false}>
           <button>Controlled button</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
+
       const trigger = screen.getByRole('button');
       fireEvent.mouseEnter(trigger);
-      
+
       // Should not show even on hover when controlled and closed
       expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
-      
+
       rerender(
         <Tooltip content="Controlled tooltip" open={true}>
           <button>Controlled button</button>
-        </Tooltip>
+        </Tooltip>,
       );
-      
+
       // Should show when controlled and open
       await waitFor(() => {
         expect(screen.getByRole('tooltip')).toBeInTheDocument();

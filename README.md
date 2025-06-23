@@ -8,7 +8,7 @@ A comprehensive banking ledger proof-of-concept built with Node.js, TypeScript, 
 core-poc/
 ├── apps/
 │   ├── core-api/           # Core API server (port 7001)
-│   ├── batch-processor/   # Background job processor (port 7003)  
+│   ├── batch-processor/   # Background job processor (port 7003)
 │   └── customer-frontend/ # Customer web application (port 7002)
 ├── packages/
 │   ├── core-services/     # Database, TigerBeetle, repositories
@@ -22,12 +22,14 @@ core-poc/
 ## Features
 
 ### Core Banking Operations
+
 - **Account Management**: Create and manage deposit, loan, and credit accounts
 - **Transfers**: Secure money transfers between accounts with full audit trails
 - **Loan Processing**: Automated loan payment calculations and payment plan management
 - **Invoice Management**: Create, track, and process invoices with overdue handling
 
 ### Enterprise Features
+
 - **Type Safety**: Full TypeScript implementation with runtime validation using Zod
 - **Database Persistence**: PostgreSQL with automated migrations
 - **Monitoring**: Comprehensive health checks, metrics, and Prometheus integration
@@ -37,6 +39,7 @@ core-poc/
 - **Value Objects**: Type-safe Money, AccountId, and CustomerId implementations
 
 ### Architecture Highlights
+
 - **Domain-Driven Design**: Clear separation between domain logic and infrastructure
 - **Repository Pattern**: Abstracted data access layer
 - **Service Layer**: Business logic encapsulated in domain services
@@ -44,6 +47,7 @@ core-poc/
 - **Request Validation**: Comprehensive input validation with detailed error messages
 
 ### Payment Plan Features
+
 - **Multiple Loan Types**: Support for annuity and serial loan structures
 - **Flexible Payment Frequencies**: Weekly, bi-weekly, monthly, quarterly, semi-annually, and annually
 - **Fee Management**: Comprehensive fee structures (origination, processing, insurance, late payment, prepayment, appraisal, administration)
@@ -52,6 +56,7 @@ core-poc/
 - **Payment Processing Integration**: Direct TigerBeetle transfer processing for loan payments
 
 ### Multi-Currency Support
+
 - **10 Supported Currencies**: USD, EUR, GBP, NOK, SEK, DKK, JPY, CAD, AUD, CHF
 - **ISO 4217 Standards**: All currencies mapped to standard ISO codes
 - **Currency-Specific Accounts**: Each account tied to a single currency for compliance
@@ -59,12 +64,14 @@ core-poc/
 ## Quick Start
 
 ### Prerequisites
+
 - Node.js 18+ and npm
 - PostgreSQL 12+
 - TigerBeetle database (for accounting ledger)
 - direnv (for environment variable management)
 
 ### 1. Installation
+
 ```bash
 git clone <repository-url>
 cd core-poc
@@ -72,6 +79,7 @@ npm install  # This will install all workspace dependencies
 ```
 
 ### 2. Environment Setup with direnv
+
 ```bash
 # Install direnv if not already installed
 # macOS: brew install direnv
@@ -91,6 +99,7 @@ direnv allow
 ```
 
 ### 3. Database Setup
+
 ```bash
 # Create PostgreSQL database
 createdb banking_poc
@@ -99,6 +108,7 @@ createdb banking_poc
 ```
 
 ### 4. Infrastructure Setup
+
 ```bash
 # Start all required services (PostgreSQL, TigerBeetle, RabbitMQ)
 docker-compose up -d
@@ -110,6 +120,7 @@ docker-compose ps
 ### 5. Start the Application
 
 #### Backend Only
+
 ```bash
 # Development with auto-reload
 npm run dev:backend
@@ -119,18 +130,21 @@ npm run dev  # Defaults to backend
 ```
 
 #### Frontend Only
+
 ```bash
 # Development server
 npm run dev:frontend
 ```
 
 #### Both Backend and Frontend
+
 ```bash
 # Run both concurrently
 npm run dev:all
 ```
 
 #### Production Build
+
 ```bash
 # Build all workspaces
 npm run build
@@ -143,14 +157,18 @@ npm run build:frontend
 ## API Documentation
 
 ### Backend API
+
 Once the backend is running, visit:
+
 - **API Documentation**: http://localhost:7001/api-docs
 - **Health Checks**: http://localhost:7001/health
 - **Metrics**: http://localhost:7001/metrics
 - **API Info**: http://localhost:7001/api/info
 
 ### Frontend Application
+
 Once the frontend is running:
+
 - **Customer Banking**: http://localhost:7002
 - **Next.js Dev Tools**: Available in development mode
 
@@ -160,28 +178,30 @@ Once the frontend is running:
 
 The application uses direnv to manage environment variables. Copy `.envrc.example` to `.envrc` and customize as needed.
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NODE_ENV` | Environment (development/production/test) | development |
-| `PORT` | Server port | 7001 |
-| `DB_HOST` | PostgreSQL host | localhost |
-| `DB_PORT` | PostgreSQL port | 5432 |
-| `DB_NAME` | Database name | banking_poc |
-| `DB_USER` | Database user | postgres |
-| `DB_PASSWORD` | Database password | postgres |
-| `TIGERBEETLE_CLUSTER_ID` | TigerBeetle cluster ID | 0 |
-| `TIGERBEETLE_ADDRESSES` | TigerBeetle server addresses | 3000 |
-| `LOG_LEVEL` | Logging level (error/warn/info/debug) | info |
+| Variable                 | Description                               | Default     |
+| ------------------------ | ----------------------------------------- | ----------- |
+| `NODE_ENV`               | Environment (development/production/test) | development |
+| `PORT`                   | Server port                               | 7001        |
+| `DB_HOST`                | PostgreSQL host                           | localhost   |
+| `DB_PORT`                | PostgreSQL port                           | 5432        |
+| `DB_NAME`                | Database name                             | banking_poc |
+| `DB_USER`                | Database user                             | postgres    |
+| `DB_PASSWORD`            | Database password                         | postgres    |
+| `TIGERBEETLE_CLUSTER_ID` | TigerBeetle cluster ID                    | 0           |
+| `TIGERBEETLE_ADDRESSES`  | TigerBeetle server addresses              | 3000        |
+| `LOG_LEVEL`              | Logging level (error/warn/info/debug)     | info        |
 
 ### Development vs Production
 
 **Development:**
+
 - Detailed console logging with colors
 - Background jobs run every 30-60 seconds for testing
 - Swagger UI enabled
 - Detailed error messages
 
 **Production:**
+
 - JSON structured logging to files
 - Background jobs run on realistic schedules (daily/monthly)
 - Reduced error details for security
@@ -190,6 +210,7 @@ The application uses direnv to manage environment variables. Copy `.envrc.exampl
 ## API Usage Examples
 
 ### Create a Deposit Account
+
 ```bash
 curl -X POST http://localhost:7001/accounts \
   -H "Content-Type: application/json" \
@@ -202,11 +223,12 @@ curl -X POST http://localhost:7001/accounts \
 ```
 
 ### Create a Loan Account
+
 ```bash
 curl -X POST http://localhost:7001/accounts \
   -H "Content-Type: application/json" \
   -d '{
-    "type": "LOAN", 
+    "type": "LOAN",
     "customerId": "CUSTOMER-ABC-123",
     "currency": "GBP",
     "principalAmount": "20000000",
@@ -222,7 +244,7 @@ curl -X POST http://localhost:7001/accounts \
       },
       {
         "type": "INSURANCE",
-        "amount": "25000", 
+        "amount": "25000",
         "description": "Loan protection insurance"
       }
     ]
@@ -230,18 +252,20 @@ curl -X POST http://localhost:7001/accounts \
 ```
 
 ### Transfer Money
+
 ```bash
 curl -X POST http://localhost:7001/transfers \
   -H "Content-Type: application/json" \
   -d '{
     "fromAccountId": "1234567890",
-    "toAccountId": "0987654321", 
+    "toAccountId": "0987654321",
     "amount": "50000",
     "currency": "USD"
   }'
 ```
 
 ### Create Invoice
+
 ```bash
 curl -X POST http://localhost:7001/invoices \
   -H "Content-Type: application/json" \
@@ -253,16 +277,19 @@ curl -X POST http://localhost:7001/invoices \
 ```
 
 ### Get Payment Plan
+
 ```bash
 curl -X GET http://localhost:7001/accounts/1234567890/payment-plan
 ```
 
 ### Get Amortization Schedule
+
 ```bash
 curl -X GET http://localhost:7001/accounts/1234567890/amortization-schedule
 ```
 
 ### List Customer Accounts
+
 ```bash
 # Get all accounts for a specific customer
 curl -X GET http://localhost:7001/customers/CUSTOMER-ABC-123/accounts
@@ -291,25 +318,30 @@ curl -X GET http://localhost:7001/customers/CUSTOMER-ABC-123/accounts
 ## Validation Rules and Constraints
 
 ### Customer IDs
+
 - **Length**: 1-50 characters
 - **Format**: Letters, numbers, hyphens, and underscores only (`[A-Za-z0-9\-_]+`)
 - **Examples**: `CUSTOMER-ABC-123`, `CUST001`, `User_12345`
 
 ### Currencies
+
 - **Supported**: USD, EUR, GBP, NOK, SEK, DKK, JPY, CAD, AUD, CHF
 - **Standard**: ISO 4217 currency codes
 - **Validation**: Currency must be supported and valid for the operation
 
 ### Money Amounts
+
 - **Format**: Positive integers as strings (representing cents/smallest unit)
 - **Examples**: `"100000"` = $1,000.00, `"50000"` = $500.00
 - **Validation**: Must be valid BigInt values >= 0
 
 ### Payment Frequencies
+
 - **Supported**: WEEKLY, BI_WEEKLY, MONTHLY, QUARTERLY, SEMI_ANNUALLY, ANNUALLY
 - **Use Cases**: Flexible loan payment schedules and invoice generation
 
 ### Fee Types
+
 - **Supported**: ORIGINATION, PROCESSING, INSURANCE, LATE_PAYMENT, PREPAYMENT, APPRAISAL, ADMINISTRATION
 - **Structure**: Each fee includes type, amount (in cents), and description
 
@@ -332,6 +364,7 @@ npm run test:watch
 ```
 
 ### Test Structure
+
 - **Unit Tests**: Domain logic, value objects, and services
 - **Integration Tests**: Database interactions and repository layer
 - **E2E Tests**: Full API workflows with real TigerBeetle instances
@@ -339,16 +372,19 @@ npm run test:watch
 ## Monitoring and Observability
 
 ### Health Checks
+
 - `GET /health` - Comprehensive health status
 - `GET /health/ready` - Readiness probe for Kubernetes
 - `GET /health/live` - Liveness probe for Kubernetes
 
 ### Metrics
+
 - `GET /metrics` - Application metrics (JSON)
 - `GET /metrics/http` - HTTP-specific metrics
 - `GET /metrics/prometheus` - Prometheus-format metrics
 
 ### Logging
+
 - Structured JSON logging in production
 - Colored console logging in development
 - Request/response logging with correlation IDs
@@ -371,11 +407,13 @@ await migrationRunner.rollbackMigration('migration_id');
 ## Background Jobs
 
 ### Payment Plan Processing
+
 - **Development**: Runs every 30 seconds
 - **Production**: Runs monthly
 - Processes loan payments and updates remaining balances
 
 ### Invoice Processing
+
 - **Development**: Runs every 60 seconds
 - **Production**: Runs daily
 - Marks overdue invoices and triggers notifications
@@ -383,18 +421,21 @@ await migrationRunner.rollbackMigration('migration_id');
 ## Architecture Decisions
 
 ### Why TigerBeetle?
+
 - **Performance**: Optimized for high-frequency financial transactions
 - **ACID Compliance**: Ensures data consistency for financial operations
 - **Double-Entry Bookkeeping**: Built-in accounting principles
 - **Audit Trail**: Immutable transaction history
 
 ### Why PostgreSQL?
+
 - **Reliability**: ACID transactions and data integrity
 - **Scalability**: Excellent performance for analytical queries
 - **JSON Support**: Flexible data storage when needed
 - **Ecosystem**: Rich tooling and monitoring support
 
 ### Design Patterns Used
+
 - **Repository Pattern**: Clean data access abstraction
 - **Domain Services**: Business logic encapsulation
 - **Value Objects**: Type-safe financial primitives
@@ -423,11 +464,13 @@ await migrationRunner.rollbackMigration('migration_id');
 The frontend application supports multiple languages with full internationalization using next-intl.
 
 ### Supported Languages
+
 - **English**: Default language (`en`)
 - **Norwegian**: Complete translations (`no`)
 - **Serbian**: Complete translations with Cyrillic script (`sr`)
 
 ### Features
+
 - **Language Switching**: Dynamic language switching via dropdown in navigation
 - **URL-based Locale**: Language preference reflected in URL (`/en`, `/no`, `/sr`)
 - **Complete Coverage**: All UI text, navigation, forms, and messages translated
@@ -435,18 +478,22 @@ The frontend application supports multiple languages with full internationalizat
 - **Fallback Support**: Graceful fallback to English if translations missing
 
 ### Usage
+
 1. **Language Switcher**: Click the globe icon in the top navigation
 2. **Direct URL Access**: Navigate directly to `/en`, `/no`, or `/sr` for specific languages
 3. **Persistent State**: Language preference maintained across page navigation
 4. **Root URL**: Automatically redirects to user's preferred language based on browser settings
 
 ### Translation Files
+
 Translation files are located in `frontend/messages/`:
+
 - `en.json` - English (default)
 - `no.json` - Norwegian (Norsk)
 - `sr.json` - Serbian (Српски)
 
 ### Adding New Languages
+
 1. Create new translation file in `frontend/messages/[locale].json`
 2. Add locale to `frontend/i18n/config.ts` locales array
 3. Add locale name to `localeNames` mapping
@@ -461,6 +508,7 @@ Translation files are located in `frontend/messages/`:
 5. Submit a pull request
 
 ### Code Style
+
 - TypeScript strict mode enabled
 - ESLint and Prettier for code formatting
 - Comprehensive error handling
@@ -474,6 +522,7 @@ ISC License - see LICENSE file for details
 ## Support
 
 For issues and questions:
+
 - Check the API documentation at `/api-docs`
 - Review health status at `/health`
 - Check application logs

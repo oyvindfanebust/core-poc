@@ -30,48 +30,49 @@ export interface AuditLogEntry {
 }
 
 export class AuditEventHandler implements CDCEventHandler {
-  
   async handleTransferEvent(event: TransferEvent): Promise<void> {
     try {
       logger.info('AuditEventHandler: Starting audit log creation', {
         transferId: event.transfer.id,
         eventType: event.type,
-        timestamp: event.timestamp
+        timestamp: event.timestamp,
       });
-      
+
       const auditEntry = this.createAuditLogEntry(event);
       logger.debug('Audit entry created, storing...', {
-        auditId: auditEntry.id
+        auditId: auditEntry.id,
       });
-      
+
       await this.storeAuditLog(auditEntry);
-      
+
       logger.debug('Audit log created for transfer event', {
         transferId: event.transfer.id,
         eventType: event.type,
-        auditId: auditEntry.id
+        auditId: auditEntry.id,
       });
-      
     } catch (error) {
       logger.error('Failed to create audit log for transfer event', {
-        error: error instanceof Error ? {
-          name: error.name,
-          message: error.message,
-          stack: error.stack
-        } : error,
+        error:
+          error instanceof Error
+            ? {
+                name: error.name,
+                message: error.message,
+                stack: error.stack,
+              }
+            : error,
         transferId: event.transfer.id,
         eventType: event.type,
         errorType: typeof error,
-        errorString: String(error)
+        errorString: String(error),
       });
-      
+
       // Don't throw here - audit failure shouldn't break other handlers
     }
   }
 
   private createAuditLogEntry(event: TransferEvent): AuditLogEntry {
     const auditId = `audit_${event.transfer.id}_${Date.now()}`;
-    
+
     return {
       id: auditId,
       timestamp: event.timestamp,
@@ -86,7 +87,7 @@ export class AuditEventHandler implements CDCEventHandler {
       user_data: {
         user_data_128: event.transfer.user_data_128.toString(),
         user_data_64: event.transfer.user_data_64.toString(),
-        user_data_32: event.transfer.user_data_32.toString()
+        user_data_32: event.transfer.user_data_32.toString(),
       },
       account_balances: [
         {
@@ -94,20 +95,20 @@ export class AuditEventHandler implements CDCEventHandler {
           debits_pending: event.debit_account.debits_pending.toString(),
           debits_posted: event.debit_account.debits_posted.toString(),
           credits_pending: event.debit_account.credits_pending.toString(),
-          credits_posted: event.debit_account.credits_posted.toString()
+          credits_posted: event.debit_account.credits_posted.toString(),
         },
         {
           account_id: event.credit_account.id,
           debits_pending: event.credit_account.debits_pending.toString(),
           debits_posted: event.credit_account.debits_posted.toString(),
           credits_pending: event.credit_account.credits_pending.toString(),
-          credits_posted: event.credit_account.credits_posted.toString()
-        }
+          credits_posted: event.credit_account.credits_posted.toString(),
+        },
       ],
       metadata: {
         processed_at: new Date().toISOString(),
-        source: 'tigerbeetle_cdc'
-      }
+        source: 'tigerbeetle_cdc',
+      },
     };
   }
 
@@ -118,7 +119,7 @@ export class AuditEventHandler implements CDCEventHandler {
     // 2. External audit service
     // 3. File-based logging with rotation
     // 4. Elasticsearch/other search/analytics platform
-    
+
     logger.info('Storing audit log entry', {
       auditId: auditEntry.id,
       transferId: auditEntry.transfer_id,
@@ -126,17 +127,17 @@ export class AuditEventHandler implements CDCEventHandler {
       amount: auditEntry.amount,
       accounts: {
         debit: auditEntry.debit_account_id,
-        credit: auditEntry.credit_account_id
-      }
+        credit: auditEntry.credit_account_id,
+      },
     });
 
     // Example implementation with database:
     // await this.auditRepository.create(auditEntry);
-    
+
     // Example implementation with external service:
     // await this.auditService.log(auditEntry);
-    
-    // For now, we're logging to winston which can be configured 
+
+    // For now, we're logging to winston which can be configured
     // to output to files, databases, or external services
     logger.info('Transfer event audit', auditEntry);
   }
@@ -151,15 +152,18 @@ export class AuditEventHandler implements CDCEventHandler {
   }): Promise<AuditLogEntry[]> {
     // TODO: Implement audit trail querying
     logger.info('Querying audit trail', { filters });
-    
+
     // This would query your audit storage system
     // return await this.auditRepository.findByFilters(filters);
-    
+
     return [];
   }
 
   // Helper method for compliance reports
-  async generateComplianceReport(accountId: string, period: { from: string; to: string }): Promise<{
+  async generateComplianceReport(
+    accountId: string,
+    period: { from: string; to: string },
+  ): Promise<{
     accountId: string;
     period: { from: string; to: string };
     totalTransfers: number;
@@ -169,17 +173,20 @@ export class AuditEventHandler implements CDCEventHandler {
   }> {
     // TODO: Implement compliance reporting
     logger.info('Generating compliance report', { accountId, period });
-    
+
     const auditEntries = await this.getAuditTrail({
       accountId,
       dateFrom: period.from,
-      dateTo: period.to
+      dateTo: period.to,
     });
 
-    const eventSummary = auditEntries.reduce((summary, entry) => {
-      summary[entry.event_type] = (summary[entry.event_type] || 0) + 1;
-      return summary;
-    }, {} as Record<string, number>);
+    const eventSummary = auditEntries.reduce(
+      (summary, entry) => {
+        summary[entry.event_type] = (summary[entry.event_type] || 0) + 1;
+        return summary;
+      },
+      {} as Record<string, number>,
+    );
 
     const totalVolume = auditEntries.reduce((total, entry) => {
       return total + BigInt(entry.amount);
@@ -191,7 +198,7 @@ export class AuditEventHandler implements CDCEventHandler {
       totalTransfers: auditEntries.length,
       totalVolume: totalVolume.toString(),
       eventSummary,
-      auditEntries
+      auditEntries,
     };
   }
 }

@@ -1,7 +1,9 @@
-import { CDCService } from './cdc.service.js';
-import { BankingEventHandler } from '../handlers/banking-event.handler.js';
-import { AuditEventHandler } from '../handlers/audit-event.handler.js';
 import { logger } from '@core-poc/core-services';
+
+import { AuditEventHandler } from '../handlers/audit-event.handler.js';
+import { BankingEventHandler } from '../handlers/banking-event.handler.js';
+
+import { CDCService } from './cdc.service.js';
 
 interface Config {
   cdc: {
@@ -24,7 +26,6 @@ export class CDCManagerService {
   }
 
   async initialize(): Promise<void> {
-
     try {
       logger.info('Initializing CDC Manager...');
 
@@ -32,7 +33,7 @@ export class CDCManagerService {
         exchange: this.config.cdc.exchange,
         queue: this.config.cdc.queue,
         routingKeys: this.config.cdc.routingKeys,
-        autoAck: this.config.cdc.autoAck
+        autoAck: this.config.cdc.autoAck,
       });
 
       // Connect to RabbitMQ
@@ -47,9 +48,8 @@ export class CDCManagerService {
       logger.info('CDC Manager initialized successfully', {
         exchange: this.config.cdc.exchange,
         queue: this.config.cdc.queue,
-        routingKeys: this.config.cdc.routingKeys
+        routingKeys: this.config.cdc.routingKeys,
       });
-
     } catch (error) {
       logger.error('Failed to initialize CDC Manager', { error });
       throw error;
@@ -78,8 +78,8 @@ export class CDCManagerService {
         'banking (two_phase_pending)',
         'banking (two_phase_posted)',
         'banking (two_phase_voided)',
-        'banking (two_phase_expired)'
-      ]
+        'banking (two_phase_expired)',
+      ],
     });
   }
 

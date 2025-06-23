@@ -1,6 +1,7 @@
-import express from 'express';
-import { BatchServiceFactory, BatchServiceContainer } from './services/factory.js';
 import { logger } from '@core-poc/core-services';
+import express from 'express';
+
+import { BatchServiceFactory, BatchServiceContainer } from './services/factory.js';
 
 let services: BatchServiceContainer;
 
@@ -54,21 +55,16 @@ async function createApp(): Promise<express.Application> {
     services.paymentPlanJob.startMonthlyJob();
 
     logger.info('Batch Processor initialized successfully', {
-      endpoints: [
-        'GET /health',
-        'GET /status',
-      ],
-      jobs: [
-        'PaymentPlanJob (started)',
-      ],
+      endpoints: ['GET /health', 'GET /status'],
+      jobs: ['PaymentPlanJob (started)'],
     });
-    
+
     return app;
   } catch (error) {
     console.error('Failed to initialize Batch Processor:', error);
-    logger.error('Failed to initialize Batch Processor', { 
-      error: error instanceof Error ? error.message : String(error), 
-      stack: error instanceof Error ? error.stack : undefined 
+    logger.error('Failed to initialize Batch Processor', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
     });
     throw error;
   }
@@ -77,7 +73,7 @@ async function createApp(): Promise<express.Application> {
 // Graceful shutdown handler
 async function gracefulShutdown(): Promise<void> {
   logger.info('Received shutdown signal, cleaning up Batch Processor...');
-  
+
   try {
     await BatchServiceFactory.cleanup();
     logger.info('Batch Processor graceful shutdown completed');
@@ -93,8 +89,8 @@ process.on('SIGINT', gracefulShutdown);
 process.on('SIGTERM', gracefulShutdown);
 
 // Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
-  logger.error('Uncaught exception in Batch Processor', { 
+process.on('uncaughtException', error => {
+  logger.error('Uncaught exception in Batch Processor', {
     error,
     message: error?.message || 'No error message',
     stack: error?.stack || 'No stack trace',
@@ -102,8 +98,8 @@ process.on('uncaughtException', (error) => {
   gracefulShutdown();
 });
 
-process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled rejection in Batch Processor', { 
+process.on('unhandledRejection', (reason, _promise) => {
+  logger.error('Unhandled rejection in Batch Processor', {
     reason,
     reasonType: typeof reason,
     reasonMessage: (reason as Error)?.message || 'No reason message',
@@ -115,24 +111,26 @@ process.on('unhandledRejection', (reason, promise) => {
 // Start the server
 if (import.meta.url === `file://${process.argv[1]}`) {
   const port = parseInt(process.env.BATCH_PROCESSOR_PORT || '7003');
-  
-  createApp().then(app => {
-    app.listen(port, () => {
-      logger.info('Banking Ledger Batch Processor started', {
-        port,
-        environment: process.env.NODE_ENV || 'development',
-        health: `http://localhost:${port}/health`,
-        status: `http://localhost:${port}/status`,
+
+  createApp()
+    .then(app => {
+      app.listen(port, () => {
+        logger.info('Banking Ledger Batch Processor started', {
+          port,
+          environment: process.env.NODE_ENV || 'development',
+          health: `http://localhost:${port}/health`,
+          status: `http://localhost:${port}/status`,
+        });
       });
+    })
+    .catch(error => {
+      console.error('Failed to start Batch Processor:', error);
+      logger.error('Failed to start Batch Processor', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      process.exit(1);
     });
-  }).catch(error => {
-    console.error('Failed to start Batch Processor:', error);
-    logger.error('Failed to start Batch Processor', { 
-      error: error instanceof Error ? error.message : String(error), 
-      stack: error instanceof Error ? error.stack : undefined 
-    });
-    process.exit(1);
-  });
 }
 
 export default createApp;

@@ -80,16 +80,19 @@ hooks/
 ## Key Features
 
 ### Account Creation
+
 - Create deposit accounts with initial balance
 - Support for 10 currencies
 - Real-time validation
 
 ### Money Transfers
+
 - Transfer between your own accounts
 - Currency validation
 - Success confirmation with redirect
 
 ### Account Dashboard
+
 - Total balance calculation
 - Quick access to all accounts
 - Visual account type indicators
@@ -97,6 +100,7 @@ hooks/
 ## API Integration
 
 The frontend communicates with the backend API through:
+
 - Direct API calls to `http://localhost:7001`
 - Proper error handling
 - BigInt serialization support

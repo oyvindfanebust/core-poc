@@ -42,7 +42,9 @@ export class Money {
    */
   subtract(other: Money): Money {
     if (this._currency !== other._currency) {
-      throw new Error(`Cannot subtract different currencies: ${this._currency} and ${other._currency}`);
+      throw new Error(
+        `Cannot subtract different currencies: ${this._currency} and ${other._currency}`,
+      );
     }
     return new Money(this._amount - other._amount, this._currency);
   }
@@ -51,7 +53,7 @@ export class Money {
    * Multiply by a number (for interest calculations, etc.)
    */
   multiply(factor: number): Money {
-    return new Money(this._amount * BigInt(Math.round(factor * 100)) / 100n, this._currency);
+    return new Money((this._amount * BigInt(Math.round(factor * 100))) / 100n, this._currency);
   }
 
   /**
@@ -59,7 +61,9 @@ export class Money {
    */
   greaterThan(other: Money): boolean {
     if (this._currency !== other._currency) {
-      throw new Error(`Cannot compare different currencies: ${this._currency} and ${other._currency}`);
+      throw new Error(
+        `Cannot compare different currencies: ${this._currency} and ${other._currency}`,
+      );
     }
     return this._amount > other._amount;
   }
@@ -69,7 +73,9 @@ export class Money {
    */
   lessThan(other: Money): boolean {
     if (this._currency !== other._currency) {
-      throw new Error(`Cannot compare different currencies: ${this._currency} and ${other._currency}`);
+      throw new Error(
+        `Cannot compare different currencies: ${this._currency} and ${other._currency}`,
+      );
     }
     return this._amount < other._amount;
   }

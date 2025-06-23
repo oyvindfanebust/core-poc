@@ -1,4 +1,7 @@
-import { createTestServicesWithMocks, MockServiceContainer } from '../mocks/mock-service-factory.js';
+import {
+  createTestServicesWithMocks,
+  MockServiceContainer,
+} from '../mocks/mock-service-factory.js';
 
 describe('Fast CDC Debug (Mock Services)', () => {
   let services: MockServiceContainer;
@@ -13,9 +16,9 @@ describe('Fast CDC Debug (Mock Services)', () => {
       exists: !!services.cdcManager,
       isConnected: services.cdcManager?.isConnected,
     });
-    
+
     expect(services.cdcManager).toBeDefined();
-    
+
     // For now, let's just see what the status is
     const isConnected = services.cdcManager.isConnected;
     console.log('CDC Connected:', isConnected);

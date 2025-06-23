@@ -1,10 +1,14 @@
-import request from 'supertest';
 import express from 'express';
+import request from 'supertest';
+
 import { AccountController } from '../../src/controllers/account.controller.js';
 import { validateRequest, errorHandler } from '../../src/middleware/validation.js';
 import { CreateAccountSchema, TransferSchema } from '../../src/validation/schemas.js';
 import { resetTestData } from '../helpers/test-setup.js';
-import { createTestServicesWithMocks, MockServiceContainer } from '../mocks/mock-service-factory.js';
+import {
+  createTestServicesWithMocks,
+  MockServiceContainer,
+} from '../mocks/mock-service-factory.js';
 
 describe('Fast Banking Workflows (Mock Services)', () => {
   let services: MockServiceContainer;
@@ -13,28 +17,31 @@ describe('Fast Banking Workflows (Mock Services)', () => {
   beforeAll(async () => {
     // Use mock services for fast testing
     services = await createTestServicesWithMocks();
-    
+
     const accountController = new AccountController(
       services.accountService,
       services.loanService,
-      services.transferRepository
+      services.transferRepository,
     );
 
     app = express();
     app.use(express.json());
-    
-    app.post('/accounts', 
+
+    app.post(
+      '/accounts',
       validateRequest(CreateAccountSchema),
-      accountController.createAccount.bind(accountController)
+      accountController.createAccount.bind(accountController),
     );
-    app.post('/transfers', 
+    app.post(
+      '/transfers',
       validateRequest(TransferSchema),
-      accountController.transfer.bind(accountController)
+      accountController.transfer.bind(accountController),
     );
-    app.get('/accounts/:accountId/balance', 
-      accountController.getAccountBalance.bind(accountController)
+    app.get(
+      '/accounts/:accountId/balance',
+      accountController.getAccountBalance.bind(accountController),
     );
-    
+
     app.use(errorHandler);
   });
 
@@ -74,13 +81,9 @@ describe('Fast Banking Workflows (Mock Services)', () => {
       const account2Id = account2Response.body.accountId;
 
       // Verify initial balances
-      const balance1 = await request(app)
-        .get(`/accounts/${account1Id}/balance`)
-        .expect(200);
-      
-      const balance2 = await request(app)
-        .get(`/accounts/${account2Id}/balance`)
-        .expect(200);
+      const balance1 = await request(app).get(`/accounts/${account1Id}/balance`).expect(200);
+
+      const balance2 = await request(app).get(`/accounts/${account2Id}/balance`).expect(200);
 
       expect(balance1.body.balance).toBe('100000');
       expect(balance2.body.balance).toBe('50000');
@@ -97,16 +100,12 @@ describe('Fast Banking Workflows (Mock Services)', () => {
         .expect(201);
 
       // Verify balances after transfer
-      const updatedBalance1 = await request(app)
-        .get(`/accounts/${account1Id}/balance`)
-        .expect(200);
-      
-      const updatedBalance2 = await request(app)
-        .get(`/accounts/${account2Id}/balance`)
-        .expect(200);
+      const updatedBalance1 = await request(app).get(`/accounts/${account1Id}/balance`).expect(200);
 
-      expect(updatedBalance1.body.balance).toBe('75000');  // 100000 - 25000
-      expect(updatedBalance2.body.balance).toBe('75000');  // 50000 + 25000
+      const updatedBalance2 = await request(app).get(`/accounts/${account2Id}/balance`).expect(200);
+
+      expect(updatedBalance1.body.balance).toBe('75000'); // 100000 - 25000
+      expect(updatedBalance2.body.balance).toBe('75000'); // 50000 + 25000
 
       // Verify mock service state
       expect(services.tigerBeetleService.getAccountCount()).toBe(2);
@@ -150,23 +149,19 @@ describe('Fast Banking Workflows (Mock Services)', () => {
               amount: '10000', // $100.00 each
               currency: 'USD',
             })
-            .expect(201)
+            .expect(201),
         );
       }
 
       await Promise.all(transferPromises);
 
       // Verify final balances
-      const finalBalance1 = await request(app)
-        .get(`/accounts/${account1Id}/balance`)
-        .expect(200);
-      
-      const finalBalance2 = await request(app)
-        .get(`/accounts/${account2Id}/balance`)
-        .expect(200);
+      const finalBalance1 = await request(app).get(`/accounts/${account1Id}/balance`).expect(200);
 
-      expect(finalBalance1.body.balance).toBe('950000');  // 1000000 - (5 * 10000)
-      expect(finalBalance2.body.balance).toBe('550000');  // 500000 + (5 * 10000)
+      const finalBalance2 = await request(app).get(`/accounts/${account2Id}/balance`).expect(200);
+
+      expect(finalBalance1.body.balance).toBe('950000'); // 1000000 - (5 * 10000)
+      expect(finalBalance2.body.balance).toBe('550000'); // 500000 + (5 * 10000)
 
       // Verify all transfers were recorded
       expect(services.tigerBeetleService.getTransferCount()).toBe(5);
@@ -209,9 +204,7 @@ describe('Fast Banking Workflows (Mock Services)', () => {
         .expect(500); // Should fail due to insufficient funds
 
       // Verify balance unchanged
-      const balance = await request(app)
-        .get(`/accounts/${fromAccountId}/balance`)
-        .expect(200);
+      const balance = await request(app).get(`/accounts/${fromAccountId}/balance`).expect(200);
 
       expect(balance.body.balance).toBe('1000'); // Unchanged
       expect(services.tigerBeetleService.getTransferCount()).toBe(0); // No transfers
@@ -259,7 +252,7 @@ describe('Fast Banking Workflows (Mock Services)', () => {
         account1Response.body.accountId,
         account2Response.body.accountId,
         '25000',
-        'USD'
+        'USD',
       );
 
       // Verify CDC event was recorded

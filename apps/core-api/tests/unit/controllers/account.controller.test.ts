@@ -1,7 +1,8 @@
-import { Request, Response } from 'express';
-import { AccountController } from '../../../src/controllers/account.controller.js';
-import { AccountService, LoanService, AccountId } from '@core-poc/domain';
 import { TransferRepository } from '@core-poc/core-services';
+import { AccountService, LoanService, AccountId } from '@core-poc/domain';
+import { Request, Response } from 'express';
+
+import { AccountController } from '../../../src/controllers/account.controller.js';
 
 // Mock the services
 jest.mock('@core-poc/domain');
@@ -29,12 +30,12 @@ describe('AccountController', () => {
     accountController = new AccountController(
       mockAccountService,
       mockLoanService,
-      mockTransferRepository
+      mockTransferRepository,
     );
 
     mockRequest = {
       params: {},
-      body: {}
+      body: {},
     };
 
     mockResponse = {
@@ -56,14 +57,11 @@ describe('AccountController', () => {
       mockRequest.body = { accountName: 'New Account Name' };
       mockAccountService.updateAccountName.mockResolvedValue(true);
 
-      await accountController.updateAccountName(
-        mockRequest as Request,
-        mockResponse as Response
-      );
+      await accountController.updateAccountName(mockRequest as Request, mockResponse as Response);
 
       expect(mockAccountService.updateAccountName).toHaveBeenCalledWith(
         expect.any(AccountId),
-        'New Account Name'
+        'New Account Name',
       );
       expect(mockResponse.json).toHaveBeenCalledWith({ success: true });
     });
@@ -72,10 +70,7 @@ describe('AccountController', () => {
       mockRequest.body = { accountName: 'Non-existent Account' };
       mockAccountService.updateAccountName.mockResolvedValue(false);
 
-      await accountController.updateAccountName(
-        mockRequest as Request,
-        mockResponse as Response
-      );
+      await accountController.updateAccountName(mockRequest as Request, mockResponse as Response);
 
       expect(mockResponse.status).toHaveBeenCalledWith(404);
       expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Account not found' });
@@ -85,14 +80,11 @@ describe('AccountController', () => {
       mockRequest.body = { accountName: null };
       mockAccountService.updateAccountName.mockResolvedValue(true);
 
-      await accountController.updateAccountName(
-        mockRequest as Request,
-        mockResponse as Response
-      );
+      await accountController.updateAccountName(mockRequest as Request, mockResponse as Response);
 
       expect(mockAccountService.updateAccountName).toHaveBeenCalledWith(
         expect.any(AccountId),
-        null
+        null,
       );
       expect(mockResponse.json).toHaveBeenCalledWith({ success: true });
     });
@@ -101,10 +93,7 @@ describe('AccountController', () => {
       mockRequest.body = { accountName: 'Test Account' };
       mockAccountService.updateAccountName.mockRejectedValue(new Error('Database error'));
 
-      await accountController.updateAccountName(
-        mockRequest as Request,
-        mockResponse as Response
-      );
+      await accountController.updateAccountName(mockRequest as Request, mockResponse as Response);
 
       expect(mockResponse.status).toHaveBeenCalledWith(500);
       expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Failed to update account name' });
@@ -121,7 +110,7 @@ describe('AccountController', () => {
           currency: 'USD' as const,
           accountName: 'My Savings Account',
           createdAt: new Date('2023-01-01'),
-          updatedAt: new Date('2023-01-01')
+          updatedAt: new Date('2023-01-01'),
         },
         {
           accountId: BigInt('987654321'),
@@ -130,8 +119,8 @@ describe('AccountController', () => {
           currency: 'EUR' as const,
           accountName: undefined,
           createdAt: new Date('2023-01-02'),
-          updatedAt: new Date('2023-01-02')
-        }
+          updatedAt: new Date('2023-01-02'),
+        },
       ];
 
       mockRequest.params = { customerId: 'CUSTOMER-123' };
@@ -139,7 +128,7 @@ describe('AccountController', () => {
 
       await accountController.getAccountsByCustomer(
         mockRequest as Request,
-        mockResponse as Response
+        mockResponse as Response,
       );
 
       expect(mockResponse.json).toHaveBeenCalledWith([
@@ -150,7 +139,7 @@ describe('AccountController', () => {
           currency: 'USD',
           accountName: 'My Savings Account',
           createdAt: '2023-01-01T00:00:00.000Z',
-          updatedAt: '2023-01-01T00:00:00.000Z'
+          updatedAt: '2023-01-01T00:00:00.000Z',
         },
         {
           accountId: '987654321',
@@ -159,8 +148,8 @@ describe('AccountController', () => {
           currency: 'EUR',
           accountName: undefined,
           createdAt: '2023-01-02T00:00:00.000Z',
-          updatedAt: '2023-01-02T00:00:00.000Z'
-        }
+          updatedAt: '2023-01-02T00:00:00.000Z',
+        },
       ]);
     });
   });

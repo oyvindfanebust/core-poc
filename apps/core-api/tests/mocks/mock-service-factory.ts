@@ -1,15 +1,12 @@
-import { 
-  AccountService, 
-  LoanService, 
-  PaymentProcessingService 
-} from '@core-poc/domain';
 import {
   DatabaseConnection,
   PaymentPlanRepository,
-  TransferRepository
+  TransferRepository,
 } from '@core-poc/core-services';
-import { MockTigerBeetleService } from './mock-tigerbeetle.service.js';
+import { AccountService, LoanService, PaymentProcessingService } from '@core-poc/domain';
+
 import { MockCDCManagerService } from './mock-cdc-manager.service.js';
+import { MockTigerBeetleService } from './mock-tigerbeetle.service.js';
 
 export interface MockServiceContainer {
   accountService: AccountService;
@@ -23,11 +20,11 @@ export interface MockServiceContainer {
 
 /**
  * Factory for creating test services with mocked external dependencies
- * 
+ *
  * Provides much faster test execution by avoiding real TigerBeetle and CDC connections.
  * Creates fully configured service containers using mock implementations while
  * maintaining the same interfaces as production services.
- * 
+ *
  * Usage:
  * ```typescript
  * const services = await createTestServicesWithMocks();
@@ -45,7 +42,7 @@ export class MockServiceFactory {
     // Create mock services - no external dependencies
     const tigerBeetleService = new MockTigerBeetleService();
     const cdcManager = new MockCDCManagerService();
-    
+
     // Initialize mock services
     await cdcManager.initialize();
 
@@ -62,7 +59,7 @@ export class MockServiceFactory {
     // Create payment processing service
     const paymentProcessingService = new PaymentProcessingService(
       paymentPlanRepository,
-      accountService
+      accountService,
     );
 
     // Use real database connection - tests can still use it for data verification
@@ -87,11 +84,11 @@ export class MockServiceFactory {
         // Clean up mock services
         await MockServiceFactory.instance.tigerBeetleService.close();
         await MockServiceFactory.instance.cdcManager.shutdown();
-        
+
         // Reset mock state
         MockServiceFactory.instance.tigerBeetleService.reset();
         MockServiceFactory.instance.cdcManager.clearEvents();
-        
+
         MockServiceFactory.instance = null;
       } catch (error) {
         console.warn('Error during mock service cleanup:', error);
@@ -112,9 +109,9 @@ export class MockServiceFactory {
  */
 export async function createTestServicesWithMocks(): Promise<MockServiceContainer> {
   const services = await MockServiceFactory.createMockServices();
-  
+
   // Reset state for clean test
   MockServiceFactory.resetMockState();
-  
+
   return services;
 }

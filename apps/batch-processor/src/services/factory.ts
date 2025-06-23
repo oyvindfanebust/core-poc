@@ -1,16 +1,14 @@
-import { 
-  AccountService, 
-  PaymentProcessingService 
-} from '@core-poc/domain';
 import {
   DatabaseConnection,
   PaymentPlanRepository,
   TigerBeetleService,
   getConfig,
-  logger
+  logger,
 } from '@core-poc/core-services';
-import { PaymentPlanJob } from '../jobs/payment-plan.job.js';
+import { AccountService, PaymentProcessingService } from '@core-poc/domain';
 import { createClient } from 'tigerbeetle-node';
+
+import { PaymentPlanJob } from '../jobs/payment-plan.job.js';
 
 export interface BatchServiceContainer {
   accountService: AccountService;
@@ -41,23 +39,25 @@ export class BatchServiceFactory {
         await database.initializeSchema();
         logger.info('Database schema initialized successfully');
       } catch (dbError) {
-        logger.error('Failed to initialize database schema', { 
+        logger.error('Failed to initialize database schema', {
           error: dbError,
           dbHost: config.database.host,
           dbPort: config.database.port,
-          dbName: config.database.name
+          dbName: config.database.name,
         });
-        throw new Error(`Database initialization failed: ${(dbError as Error)?.message || 'Unknown database error'}`);
+        throw new Error(
+          `Database initialization failed: ${(dbError as Error)?.message || 'Unknown database error'}`,
+        );
       }
 
       // Create TigerBeetle client
       logger.info('Initializing TigerBeetle client...');
       const tigerbeetleAddresses = [config.tigerbeetle.address];
       const clusterId = config.tigerbeetle.clusterId;
-      
+
       logger.info('TigerBeetle configuration', {
         clusterId: clusterId.toString(),
-        addresses: tigerbeetleAddresses
+        addresses: tigerbeetleAddresses,
       });
 
       let tigerBeetleClient;
@@ -68,16 +68,22 @@ export class BatchServiceFactory {
         });
         logger.info('TigerBeetle client created successfully');
       } catch (tbError) {
-        logger.error('Failed to create TigerBeetle client', { 
+        logger.error('Failed to create TigerBeetle client', {
           error: tbError,
           clusterId: clusterId.toString(),
-          addresses: tigerbeetleAddresses
+          addresses: tigerbeetleAddresses,
         });
-        throw new Error(`TigerBeetle client creation failed: ${(tbError as Error)?.message || 'Unknown TigerBeetle error'}`);
+        throw new Error(
+          `TigerBeetle client creation failed: ${(tbError as Error)?.message || 'Unknown TigerBeetle error'}`,
+        );
       }
 
       // Create core services
-      const tigerBeetleService = new TigerBeetleService(tigerBeetleClient, clusterId, tigerbeetleAddresses);
+      const tigerBeetleService = new TigerBeetleService(
+        tigerBeetleClient,
+        clusterId,
+        tigerbeetleAddresses,
+      );
       const accountService = new AccountService(tigerBeetleService);
 
       // Create repositories
@@ -86,11 +92,15 @@ export class BatchServiceFactory {
       // Create payment processing service
       const paymentProcessingService = new PaymentProcessingService(
         paymentPlanRepository,
-        accountService
+        accountService,
       );
 
       // Create background jobs
-      const paymentPlanJob = new PaymentPlanJob(paymentPlanRepository, accountService, paymentProcessingService);
+      const paymentPlanJob = new PaymentPlanJob(
+        paymentPlanRepository,
+        accountService,
+        paymentProcessingService,
+      );
 
       BatchServiceFactory.instance = {
         accountService,
@@ -112,16 +122,16 @@ export class BatchServiceFactory {
     if (BatchServiceFactory.instance) {
       try {
         logger.info('Cleaning up batch processor services...');
-        
+
         // Stop background jobs
         BatchServiceFactory.instance.paymentPlanJob.stopMonthlyJob();
-        
+
         // Close database connection
         await BatchServiceFactory.instance.database.close();
-        
+
         // Reset database singleton
         DatabaseConnection.resetInstance();
-        
+
         BatchServiceFactory.instance = null;
         logger.info('Batch processor services cleaned up successfully');
       } catch (error) {

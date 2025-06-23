@@ -38,7 +38,7 @@ export class TransferRepository {
           transfer.amount.toString(),
           transfer.currency,
           transfer.description || null,
-        ]
+        ],
       );
 
       logger.debug('Transfer record saved', {
@@ -75,7 +75,7 @@ export class TransferRepository {
         WHERE t.from_account_id = $1 OR t.to_account_id = $1
         ORDER BY t.created_at DESC
         LIMIT $2`,
-        [accountId.value, limit]
+        [accountId.value, limit],
       );
 
       return result.rows.map(row => ({
@@ -117,7 +117,7 @@ export class TransferRepository {
         JOIN accounts ta ON t.to_account_id = ta.account_id
         ORDER BY t.created_at DESC
         LIMIT $1`,
-        [limit]
+        [limit],
       );
 
       return result.rows.map(row => ({

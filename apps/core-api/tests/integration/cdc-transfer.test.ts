@@ -1,12 +1,13 @@
-import request from 'supertest';
+import { DatabaseConnection } from '@core-poc/core-services';
 import express from 'express';
+import request from 'supertest';
+
 import { AccountController } from '../../src/controllers/account.controller';
 import { validateRequest, errorHandler } from '../../src/middleware/validation';
+import { ServiceContainer } from '../../src/services/factory.js';
 import { CreateAccountSchema, TransferSchema } from '../../src/validation/schemas';
 import { resetTestData, waitForTransferRecord } from '../helpers/test-setup.js';
 import { getGlobalTestServices } from '../setup.js';
-import { DatabaseConnection } from '@core-poc/core-services';
-import { ServiceContainer } from '../../src/services/factory.js';
 
 describe('CDC Transfer Integration', () => {
   let services: ServiceContainer;
@@ -17,28 +18,31 @@ describe('CDC Transfer Integration', () => {
     // Use global test services
     services = getGlobalTestServices();
     database = DatabaseConnection.getInstance();
-    
+
     const accountController = new AccountController(
       services.accountService,
       services.loanService,
-      services.transferRepository
+      services.transferRepository,
     );
 
     app = express();
     app.use(express.json());
-    
-    app.post('/accounts', 
+
+    app.post(
+      '/accounts',
       validateRequest(CreateAccountSchema),
-      accountController.createAccount.bind(accountController)
+      accountController.createAccount.bind(accountController),
     );
-    app.post('/transfers', 
+    app.post(
+      '/transfers',
       validateRequest(TransferSchema),
-      accountController.transfer.bind(accountController)
+      accountController.transfer.bind(accountController),
     );
-    app.get('/accounts/:accountId/balance', 
-      accountController.getAccountBalance.bind(accountController)
+    app.get(
+      '/accounts/:accountId/balance',
+      accountController.getAccountBalance.bind(accountController),
     );
-    
+
     app.use(errorHandler);
   });
 
@@ -76,7 +80,7 @@ describe('CDC Transfer Integration', () => {
       const initialFromBalance = await request(app)
         .get(`/accounts/${fromAccountId}/balance`)
         .expect(200);
-      
+
       const initialToBalance = await request(app)
         .get(`/accounts/${toAccountId}/balance`)
         .expect(200);
@@ -85,9 +89,7 @@ describe('CDC Transfer Integration', () => {
       expect(initialToBalance.body.balance).toBe('50000');
 
       // 3. Verify no transfer records exist in PostgreSQL initially
-      const initialTransferCount = await database.query(
-        'SELECT COUNT(*) as count FROM transfers'
-      );
+      const initialTransferCount = await database.query('SELECT COUNT(*) as count FROM transfers');
       expect(parseInt(initialTransferCount.rows[0].count)).toBe(0);
 
       // 4. Perform transfer
@@ -108,13 +110,13 @@ describe('CDC Transfer Integration', () => {
       const updatedFromBalance = await request(app)
         .get(`/accounts/${fromAccountId}/balance`)
         .expect(200);
-      
+
       const updatedToBalance = await request(app)
         .get(`/accounts/${toAccountId}/balance`)
         .expect(200);
 
-      expect(updatedFromBalance.body.balance).toBe('75000');  // 100000 - 25000
-      expect(updatedToBalance.body.balance).toBe('75000');    // 50000 + 25000
+      expect(updatedFromBalance.body.balance).toBe('75000'); // 100000 - 25000
+      expect(updatedToBalance.body.balance).toBe('75000'); // 50000 + 25000
 
       // 6. Wait for CDC event processing to create PostgreSQL record
       const transferRecordExists = await waitForTransferRecord(transferId);
@@ -123,11 +125,11 @@ describe('CDC Transfer Integration', () => {
       // 7. Verify transfer record was created in PostgreSQL via CDC
       const transferRecords = await database.query(
         'SELECT * FROM transfers WHERE transfer_id = $1',
-        [transferId]
+        [transferId],
       );
 
       expect(transferRecords.rows).toHaveLength(1);
-      
+
       const transferRecord = transferRecords.rows[0];
       expect(transferRecord.transfer_id).toBe(transferId);
       expect(transferRecord.from_account_id).toBe(fromAccountId);
@@ -138,9 +140,7 @@ describe('CDC Transfer Integration', () => {
       expect(transferRecord.created_at).toBeDefined();
 
       // 8. Verify total transfer count increased
-      const finalTransferCount = await database.query(
-        'SELECT COUNT(*) as count FROM transfers'
-      );
+      const finalTransferCount = await database.query('SELECT COUNT(*) as count FROM transfers');
       expect(parseInt(finalTransferCount.rows[0].count)).toBe(1);
     }, 15000);
 
@@ -196,16 +196,16 @@ describe('CDC Transfer Integration', () => {
       // Verify both transfers recorded in PostgreSQL
       const transferRecords = await database.query(
         'SELECT * FROM transfers WHERE from_account_id IN ($1, $2) OR to_account_id IN ($1, $2) ORDER BY created_at',
-        [account1Id, account2Id]
+        [account1Id, account2Id],
       );
 
       expect(transferRecords.rows).toHaveLength(2);
-      
+
       // First transfer: account1 -> account2 (50000)
       expect(transferRecords.rows[0].from_account_id).toBe(account1Id);
       expect(transferRecords.rows[0].to_account_id).toBe(account2Id);
       expect(transferRecords.rows[0].amount).toBe('50000');
-      
+
       // Second transfer: account2 -> account1 (25000)
       expect(transferRecords.rows[1].from_account_id).toBe(account2Id);
       expect(transferRecords.rows[1].to_account_id).toBe(account1Id);

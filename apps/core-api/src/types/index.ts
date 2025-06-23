@@ -39,7 +39,13 @@ export interface CreateTransferRequest {
 }
 
 export type LoanType = 'ANNUITY' | 'SERIAL';
-export type PaymentFrequency = 'WEEKLY' | 'BI_WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'SEMI_ANNUALLY' | 'ANNUALLY';
+export type PaymentFrequency =
+  | 'WEEKLY'
+  | 'BI_WEEKLY'
+  | 'MONTHLY'
+  | 'QUARTERLY'
+  | 'SEMI_ANNUALLY'
+  | 'ANNUALLY';
 
 export interface LoanFee {
   type: string;
@@ -57,7 +63,7 @@ export interface PaymentPlan {
   loanType: LoanType;
   paymentFrequency: PaymentFrequency;
   fees: LoanFee[];
-  totalLoanAmount: bigint;  // Principal + fees
+  totalLoanAmount: bigint; // Principal + fees
   nextPaymentDate: Date;
   customerId: string;
 }
@@ -77,4 +83,3 @@ export interface AmortizationSchedule {
   totalPayments: bigint;
   totalInterest: bigint;
 }
-

@@ -11,15 +11,15 @@ graph LR
     TB[TigerBeetle Ledger] --> CDC[TigerBeetle CDC]
     CDC --> MQ[RabbitMQ<br/>AMQP Exchange]
     MQ --> EH[Event Handlers]
-    
+
     EH --> BH[Banking Handler]
     EH --> AH[Audit Handler]
     EH --> CH[Custom Handlers]
-    
+
     BH --> BL[Business Logic<br/>• Notifications<br/>• Workflows<br/>• Processing]
     AH --> AL[Audit Logs<br/>• Compliance<br/>• Reporting<br/>• Trail]
     CH --> ES[External Systems<br/>• CRM<br/>• Analytics<br/>• APIs]
-    
+
     style TB fill:#e1f5fe
     style CDC fill:#f3e5f5
     style MQ fill:#fff3e0
@@ -32,16 +32,19 @@ graph LR
 ## Components
 
 ### 1. CDC Service (`src/services/cdc.service.ts`)
+
 - Connects to RabbitMQ via AMQP
 - Manages event subscriptions and consumption
 - Handles connection recovery and error handling
 - Routes events to registered handlers
 
 ### 2. Event Handlers
+
 - **Banking Event Handler** (`src/handlers/banking-event.handler.ts`) - Business logic processing
 - **Audit Event Handler** (`src/handlers/audit-event.handler.ts`) - Compliance and audit trails
 
 ### 3. CDC Manager (`src/services/cdc-manager.service.ts`)
+
 - Orchestrates CDC service initialization
 - Registers event handlers
 - Manages lifecycle (start/stop)
@@ -50,12 +53,12 @@ graph LR
 
 TigerBeetle streams the following event types:
 
-| Event Type | Description |
-|------------|-------------|
-| `single_phase` | Regular completed transfers |
+| Event Type          | Description                 |
+| ------------------- | --------------------------- |
+| `single_phase`      | Regular completed transfers |
 | `two_phase_pending` | Pending two-phase transfers |
-| `two_phase_posted` | Posted two-phase transfers |
-| `two_phase_voided` | Voided two-phase transfers |
+| `two_phase_posted`  | Posted two-phase transfers  |
+| `two_phase_voided`  | Voided two-phase transfers  |
 | `two_phase_expired` | Expired two-phase transfers |
 
 ## Event Payload Structure
@@ -67,7 +70,7 @@ TigerBeetle streams the following event types:
   "transfer": {
     "id": "123456789",
     "debit_account_id": "1001",
-    "credit_account_id": "1002", 
+    "credit_account_id": "1002",
     "amount": "1000",
     "ledger": "840",
     "code": "10",
@@ -80,14 +83,14 @@ TigerBeetle streams the following event types:
       "id": "1001",
       "debits_pending": "0",
       "debits_posted": "1000",
-      "credits_pending": "0", 
+      "credits_pending": "0",
       "credits_posted": "0",
       "timestamp": "2024-06-15T10:30:00Z"
     },
     {
       "id": "1002",
       "debits_pending": "0",
-      "debits_posted": "0", 
+      "debits_posted": "0",
       "credits_pending": "0",
       "credits_posted": "1000",
       "timestamp": "2024-06-15T10:30:00Z"
@@ -116,6 +119,7 @@ CDC_AUTO_ACK=false
 ### Docker Compose
 
 The system includes:
+
 - **RabbitMQ** service with management interface
 - **TigerBeetle** service for the ledger
 - **TigerBeetle CDC** service for event streaming
@@ -196,21 +200,25 @@ this.cdcService.registerHandler('*', customHandler);
 ## Use Cases
 
 ### 1. Real-time Notifications
+
 - Send push notifications for transfers
 - Email/SMS alerts for large transactions
 - WebSocket updates to client applications
 
 ### 2. Audit and Compliance
+
 - Complete audit trail of all transactions
 - Regulatory reporting
 - Fraud detection and monitoring
 
 ### 3. External System Integration
+
 - Sync with CRM systems
 - Update ERP systems
 - Third-party analytics platforms
 
 ### 4. Business Process Automation
+
 - Invoice payment processing
 - Loan payment handling
 - Account reconciliation
@@ -241,7 +249,7 @@ Events are logged with structured data:
 {
   "level": "info",
   "message": "Processing banking event",
-  "type": "single_phase", 
+  "type": "single_phase",
   "transferId": "123456789",
   "amount": "1000",
   "timestamp": "2024-06-15T10:30:00Z"
@@ -289,6 +297,7 @@ LOG_LEVEL=debug
 ```
 
 This provides detailed information about:
+
 - Event consumption
 - Handler execution
 - Connection management

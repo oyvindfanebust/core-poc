@@ -1,4 +1,5 @@
 import { Pool, PoolConfig } from 'pg';
+
 import { logger } from '../utils/logger.js';
 
 export class DatabaseConnection {
@@ -19,7 +20,7 @@ export class DatabaseConnection {
 
     this.pool = new Pool(config);
 
-    this.pool.on('error', (err) => {
+    this.pool.on('error', err => {
       logger.error('Database pool error', { error: err });
     });
 
@@ -53,13 +54,13 @@ export class DatabaseConnection {
     try {
       const result = await this.pool.query(text, params);
       const duration = Date.now() - start;
-      
+
       logger.debug('Database query executed', {
         query: text,
         duration,
         rows: result.rowCount,
       });
-      
+
       return result;
     } catch (error) {
       logger.error('Database query failed', {
@@ -78,12 +79,12 @@ export class DatabaseConnection {
 
   async initializeSchema(): Promise<void> {
     logger.info('Initializing database schema...');
-    
+
     try {
       const { MigrationRunner } = await import('./migrations.js');
       const migrationRunner = new MigrationRunner(this);
       await migrationRunner.runMigrations();
-      
+
       logger.info('Database schema initialized successfully');
     } catch (error) {
       logger.error('Failed to initialize database schema', { error });

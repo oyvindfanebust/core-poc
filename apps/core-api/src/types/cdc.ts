@@ -1,5 +1,10 @@
 export interface TransferEvent {
-  type: 'single_phase' | 'two_phase_pending' | 'two_phase_posted' | 'two_phase_voided' | 'two_phase_expired';
+  type:
+    | 'single_phase'
+    | 'two_phase_pending'
+    | 'two_phase_posted'
+    | 'two_phase_voided'
+    | 'two_phase_expired';
   timestamp: string;
   transfer: {
     id: string;

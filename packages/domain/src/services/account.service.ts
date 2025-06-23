@@ -1,4 +1,12 @@
-import { TigerBeetleService, AccountRepository, AccountMetadata, TransferRepository, TransferWithAccounts, CreateAccountRequest, Currency, CustomerId, AccountId } from '@core-poc/core-services';
+import {
+  TigerBeetleService,
+  AccountRepository,
+  AccountMetadata,
+  TransferRepository,
+  Currency,
+  AccountId,
+  CustomerId,
+} from '@core-poc/core-services';
 
 export class AccountService {
   private accountRepository: AccountRepository;
@@ -8,7 +16,12 @@ export class AccountService {
     this.accountRepository = new AccountRepository();
     this.transferRepository = new TransferRepository();
   }
-  async createLoanAccount(customerId: string, currency: Currency, principalAmount: bigint, accountName?: string): Promise<bigint> {
+  async createLoanAccount(
+    customerId: string,
+    currency: Currency,
+    principalAmount: bigint,
+    accountName?: string,
+  ): Promise<bigint> {
     const accountId = await this.tigerBeetleService.createAccount({
       type: 'LOAN',
       customerId,
@@ -28,7 +41,12 @@ export class AccountService {
     return accountId;
   }
 
-  async createDepositAccount(customerId: string, currency: Currency, initialBalance?: bigint, accountName?: string): Promise<bigint> {
+  async createDepositAccount(
+    customerId: string,
+    currency: Currency,
+    initialBalance?: bigint,
+    accountName?: string,
+  ): Promise<bigint> {
     const accountId = await this.tigerBeetleService.createAccount({
       type: 'DEPOSIT',
       customerId,
@@ -48,7 +66,12 @@ export class AccountService {
     return accountId;
   }
 
-  async createCreditAccount(customerId: string, currency: Currency, creditLimit: bigint, accountName?: string): Promise<bigint> {
+  async createCreditAccount(
+    customerId: string,
+    currency: Currency,
+    creditLimit: bigint,
+    accountName?: string,
+  ): Promise<bigint> {
     const accountId = await this.tigerBeetleService.createAccount({
       type: 'CREDIT',
       customerId,
@@ -72,7 +95,13 @@ export class AccountService {
     return await this.tigerBeetleService.getAccountBalance(accountId);
   }
 
-  async transfer(fromAccountId: bigint, toAccountId: bigint, amount: bigint, currency: Currency, description?: string) {
+  async transfer(
+    fromAccountId: bigint,
+    toAccountId: bigint,
+    amount: bigint,
+    currency: Currency,
+    _description?: string,
+  ) {
     const transferId = await this.tigerBeetleService.createTransfer({
       fromAccountId,
       toAccountId,
@@ -96,4 +125,3 @@ export class AccountService {
     return await this.accountRepository.updateAccountName(accountId, accountName);
   }
 }
-

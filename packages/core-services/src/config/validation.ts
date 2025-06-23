@@ -1,32 +1,61 @@
 import { z } from 'zod';
+
 import { logger } from '../utils/logger.js';
 
 // Environment configuration schema
 const ConfigSchema = z.object({
   // Database
   DB_HOST: z.string().default('localhost'),
-  DB_PORT: z.string().transform(val => parseInt(val)).pipe(z.number().min(1).max(65535)).default('5432'),
+  DB_PORT: z
+    .string()
+    .transform(val => parseInt(val))
+    .pipe(z.number().min(1).max(65535))
+    .default('5432'),
   DB_NAME: z.string().min(1).default('banking_poc'),
   DB_USER: z.string().min(1).default('postgres'),
   DB_PASSWORD: z.string().min(1).default('postgres'),
-  DB_POOL_SIZE: z.string().transform(val => parseInt(val)).pipe(z.number().min(1).max(100)).default('10'),
-  DB_IDLE_TIMEOUT: z.string().transform(val => parseInt(val)).pipe(z.number().min(1000)).default('30000'),
-  DB_CONNECTION_TIMEOUT: z.string().transform(val => parseInt(val)).pipe(z.number().min(1000)).default('2000'),
+  DB_POOL_SIZE: z
+    .string()
+    .transform(val => parseInt(val))
+    .pipe(z.number().min(1).max(100))
+    .default('10'),
+  DB_IDLE_TIMEOUT: z
+    .string()
+    .transform(val => parseInt(val))
+    .pipe(z.number().min(1000))
+    .default('30000'),
+  DB_CONNECTION_TIMEOUT: z
+    .string()
+    .transform(val => parseInt(val))
+    .pipe(z.number().min(1000))
+    .default('2000'),
 
   // TigerBeetle
-  TIGERBEETLE_CLUSTER_ID: z.string().transform(val => parseInt(val)).pipe(z.number().min(0)).default('0'),
+  TIGERBEETLE_CLUSTER_ID: z
+    .string()
+    .transform(val => parseInt(val))
+    .pipe(z.number().min(0))
+    .default('0'),
   TIGERBEETLE_ADDRESSES: z.string().min(1).default('6000'),
 
   // Application
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  PORT: z.string().transform(val => parseInt(val)).pipe(z.number().min(1).max(65535)).default('7001'),
+  PORT: z
+    .string()
+    .transform(val => parseInt(val))
+    .pipe(z.number().min(1).max(65535))
+    .default('7001'),
 
   // CDC/AMQP
   AMQP_URL: z.string().url().default('amqp://guest:guest@localhost:5672'),
   CDC_EXCHANGE: z.string().min(1).default('banking-events'),
   CDC_QUEUE: z.string().min(1).default('banking-queue'),
   CDC_ROUTING_KEYS: z.string().min(1).default('#'),
-  CDC_AUTO_ACK: z.string().transform(val => val.toLowerCase() === 'true').pipe(z.boolean()).default('false'),
+  CDC_AUTO_ACK: z
+    .string()
+    .transform(val => val.toLowerCase() === 'true')
+    .pipe(z.boolean())
+    .default('false'),
 
   // Logging
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
@@ -37,9 +66,9 @@ export type Config = z.infer<typeof ConfigSchema>;
 export function validateConfig(): Config {
   try {
     logger.info('Validating environment configuration...');
-    
+
     const config = ConfigSchema.parse(process.env);
-    
+
     logger.info('Environment configuration validated successfully', {
       NODE_ENV: config.NODE_ENV,
       PORT: config.PORT,
@@ -48,7 +77,7 @@ export function validateConfig(): Config {
       DB_NAME: config.DB_NAME,
       // Don't log sensitive information like passwords
     });
-    
+
     return config;
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -59,10 +88,12 @@ export function validateConfig(): Config {
           received: 'input' in err ? err.input : undefined,
         })),
       });
-      
-      throw new Error(`Configuration validation failed: ${error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')}`);
+
+      throw new Error(
+        `Configuration validation failed: ${error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')}`,
+      );
     }
-    
+
     logger.error('Unexpected error during configuration validation', { error });
     throw error;
   }

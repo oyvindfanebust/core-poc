@@ -3,6 +3,7 @@
 ## Problem Statement
 
 Currently, developers working on multiple features simultaneously face:
+
 - Port conflicts when running multiple development environments
 - Security risks when AI agents need unrestricted access to modify code
 - Lack of complete isolation between different feature branches
@@ -11,6 +12,7 @@ Currently, developers working on multiple features simultaneously face:
 ## Proposed Solution
 
 Implement a **devcontainer-per-worktree** architecture that provides:
+
 - Complete security isolation for AI agents
 - Separate development environments per git worktree
 - Identical port usage across worktrees without conflicts

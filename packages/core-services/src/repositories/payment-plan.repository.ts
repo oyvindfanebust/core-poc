@@ -1,7 +1,7 @@
 import { DatabaseConnection } from '../database/connection.js';
 import { PaymentPlan } from '../types/index.js';
-import { AccountId, Money } from '../value-objects.js';
 import { logger } from '../utils/logger.js';
+import { AccountId } from '../value-objects.js';
 
 export class PaymentPlanRepository {
   private db: DatabaseConnection;
@@ -43,14 +43,14 @@ export class PaymentPlanRepository {
           paymentPlan.totalLoanAmount.toString(),
           paymentPlan.nextPaymentDate.toISOString().split('T')[0], // DATE format
           paymentPlan.customerId,
-        ]
+        ],
       );
-      
+
       logger.debug('Payment plan saved', { accountId: paymentPlan.accountId.toString() });
     } catch (error) {
-      logger.error('Failed to save payment plan', { 
+      logger.error('Failed to save payment plan', {
         accountId: paymentPlan.accountId.toString(),
-        error 
+        error,
       });
       throw error;
     }
@@ -58,10 +58,9 @@ export class PaymentPlanRepository {
 
   async findByAccountId(accountId: AccountId): Promise<PaymentPlan | null> {
     try {
-      const result = await this.db.query(
-        'SELECT * FROM payment_plans WHERE account_id = $1',
-        [accountId.toString()]
-      );
+      const result = await this.db.query('SELECT * FROM payment_plans WHERE account_id = $1', [
+        accountId.toString(),
+      ]);
 
       if (result.rows.length === 0) {
         return null;
@@ -83,9 +82,9 @@ export class PaymentPlanRepository {
         customerId: row.customer_id || '',
       };
     } catch (error) {
-      logger.error('Failed to find payment plan', { 
+      logger.error('Failed to find payment plan', {
         accountId: accountId.toString(),
-        error 
+        error,
       });
       throw error;
     }
@@ -94,7 +93,7 @@ export class PaymentPlanRepository {
   async findAll(): Promise<PaymentPlan[]> {
     try {
       const result = await this.db.query('SELECT * FROM payment_plans ORDER BY created_at');
-      
+
       return result.rows.map(row => ({
         accountId: BigInt(row.account_id),
         principalAmount: BigInt(row.principal_amount),
@@ -119,17 +118,17 @@ export class PaymentPlanRepository {
     try {
       await this.db.query(
         'UPDATE payment_plans SET remaining_payments = $1, updated_at = CURRENT_TIMESTAMP WHERE account_id = $2',
-        [remainingPayments, accountId.toString()]
+        [remainingPayments, accountId.toString()],
       );
-      
-      logger.debug('Payment plan remaining payments updated', { 
+
+      logger.debug('Payment plan remaining payments updated', {
         accountId: accountId.toString(),
-        remainingPayments 
+        remainingPayments,
       });
     } catch (error) {
-      logger.error('Failed to update remaining payments', { 
+      logger.error('Failed to update remaining payments', {
         accountId: accountId.toString(),
-        error 
+        error,
       });
       throw error;
     }
@@ -137,12 +136,14 @@ export class PaymentPlanRepository {
 
   async delete(accountId: AccountId): Promise<void> {
     try {
-      await this.db.query('DELETE FROM payment_plans WHERE account_id = $1', [accountId.toString()]);
+      await this.db.query('DELETE FROM payment_plans WHERE account_id = $1', [
+        accountId.toString(),
+      ]);
       logger.debug('Payment plan deleted', { accountId: accountId.toString() });
     } catch (error) {
-      logger.error('Failed to delete payment plan', { 
+      logger.error('Failed to delete payment plan', {
         accountId: accountId.toString(),
-        error 
+        error,
       });
       throw error;
     }
@@ -155,9 +156,9 @@ export class PaymentPlanRepository {
          WHERE next_payment_date <= $1 
          AND remaining_payments > 0 
          ORDER BY next_payment_date`,
-        [date.toISOString().split('T')[0]]
+        [date.toISOString().split('T')[0]],
       );
-      
+
       return result.rows.map(row => ({
         accountId: BigInt(row.account_id),
         principalAmount: BigInt(row.principal_amount),
@@ -182,17 +183,17 @@ export class PaymentPlanRepository {
     try {
       await this.db.query(
         'UPDATE payment_plans SET next_payment_date = $1, updated_at = CURRENT_TIMESTAMP WHERE account_id = $2',
-        [nextPaymentDate.toISOString().split('T')[0], accountId.toString()]
+        [nextPaymentDate.toISOString().split('T')[0], accountId.toString()],
       );
-      
-      logger.debug('Payment plan next payment date updated', { 
+
+      logger.debug('Payment plan next payment date updated', {
         accountId: accountId.toString(),
-        nextPaymentDate: nextPaymentDate.toISOString().split('T')[0]
+        nextPaymentDate: nextPaymentDate.toISOString().split('T')[0],
       });
     } catch (error) {
-      logger.error('Failed to update next payment date', { 
+      logger.error('Failed to update next payment date', {
         accountId: accountId.toString(),
-        error 
+        error,
       });
       throw error;
     }

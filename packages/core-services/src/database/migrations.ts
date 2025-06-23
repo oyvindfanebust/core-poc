@@ -1,5 +1,6 @@
-import { DatabaseConnection } from './connection.js';
 import { logger } from '../utils/logger.js';
+
+import { DatabaseConnection } from './connection.js';
 
 export interface Migration {
   id: string;
@@ -18,28 +19,28 @@ export class MigrationRunner {
   async runMigrations(): Promise<void> {
     try {
       logger.info('Starting database migrations...');
-      
+
       // Ensure migrations table exists
       await this.ensureMigrationsTable();
-      
+
       const migrations = this.getMigrations();
       const appliedMigrations = await this.getAppliedMigrations();
-      
+
       const pendingMigrations = migrations.filter(
-        migration => !appliedMigrations.includes(migration.id)
+        migration => !appliedMigrations.includes(migration.id),
       );
-      
+
       if (pendingMigrations.length === 0) {
         logger.info('No pending migrations');
         return;
       }
-      
+
       logger.info(`Running ${pendingMigrations.length} pending migrations...`);
-      
+
       for (const migration of pendingMigrations) {
         await this.runMigration(migration);
       }
-      
+
       logger.info('All migrations completed successfully');
     } catch (error) {
       logger.error('Migration failed', { error });
@@ -50,22 +51,22 @@ export class MigrationRunner {
   async rollbackMigration(migrationId: string): Promise<void> {
     try {
       logger.info(`Rolling back migration: ${migrationId}`);
-      
+
       const migrations = this.getMigrations();
       const migration = migrations.find(m => m.id === migrationId);
-      
+
       if (!migration) {
         throw new Error(`Migration not found: ${migrationId}`);
       }
-      
+
       const appliedMigrations = await this.getAppliedMigrations();
       if (!appliedMigrations.includes(migrationId)) {
         throw new Error(`Migration not applied: ${migrationId}`);
       }
-      
+
       await migration.down(this.db);
       await this.removeMigrationRecord(migrationId);
-      
+
       logger.info(`Migration rolled back successfully: ${migrationId}`);
     } catch (error) {
       logger.error('Migration rollback failed', { migrationId, error });
@@ -91,10 +92,10 @@ export class MigrationRunner {
   private async runMigration(migration: Migration): Promise<void> {
     try {
       logger.info(`Running migration: ${migration.name}`);
-      
+
       await migration.up(this.db);
       await this.recordMigration(migration);
-      
+
       logger.info(`Migration completed: ${migration.name}`);
     } catch (error) {
       logger.error(`Migration failed: ${migration.name}`, { error });
@@ -103,10 +104,10 @@ export class MigrationRunner {
   }
 
   private async recordMigration(migration: Migration): Promise<void> {
-    await this.db.query(
-      'INSERT INTO migrations (id, name) VALUES ($1, $2)',
-      [migration.id, migration.name]
-    );
+    await this.db.query('INSERT INTO migrations (id, name) VALUES ($1, $2)', [
+      migration.id,
+      migration.name,
+    ]);
   }
 
   private async removeMigrationRecord(migrationId: string): Promise<void> {
@@ -152,15 +153,15 @@ export class MigrationRunner {
           await db.query(`
             CREATE INDEX IF NOT EXISTS idx_payment_plans_account_id ON payment_plans(account_id)
           `);
-          
+
           await db.query(`
             CREATE INDEX IF NOT EXISTS idx_invoices_account_id ON invoices(account_id)
           `);
-          
+
           await db.query(`
             CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status)
           `);
-          
+
           await db.query(`
             CREATE INDEX IF NOT EXISTS idx_invoices_due_date ON invoices(due_date)
           `);
@@ -346,11 +347,11 @@ export class MigrationRunner {
           await db.query(`
             CREATE INDEX IF NOT EXISTS idx_accounts_customer_id ON accounts(customer_id)
           `);
-          
+
           await db.query(`
             CREATE INDEX IF NOT EXISTS idx_accounts_type ON accounts(account_type)
           `);
-          
+
           await db.query(`
             CREATE INDEX IF NOT EXISTS idx_accounts_customer_type ON accounts(customer_id, account_type)
           `);
@@ -382,7 +383,7 @@ export class MigrationRunner {
             ALTER TABLE accounts 
             ALTER COLUMN customer_id TYPE VARCHAR(50)
           `);
-          
+
           await db.query(`
             ALTER TABLE payment_plans 
             ALTER COLUMN customer_id TYPE VARCHAR(50)
@@ -392,7 +393,7 @@ export class MigrationRunner {
           await db.query(`
             ALTER TABLE accounts DROP CONSTRAINT IF EXISTS chk_currency
           `);
-          
+
           await db.query(`
             DO $$ 
             BEGIN
@@ -406,7 +407,7 @@ export class MigrationRunner {
           await db.query(`
             ALTER TABLE payment_plans DROP CONSTRAINT IF EXISTS chk_payment_frequency
           `);
-          
+
           await db.query(`
             DO $$ 
             BEGIN
@@ -422,7 +423,7 @@ export class MigrationRunner {
             ALTER TABLE accounts 
             ALTER COLUMN customer_id TYPE VARCHAR(8)
           `);
-          
+
           await db.query(`
             ALTER TABLE payment_plans 
             ALTER COLUMN customer_id TYPE VARCHAR(8)
@@ -432,7 +433,7 @@ export class MigrationRunner {
           await db.query(`
             ALTER TABLE accounts DROP CONSTRAINT IF EXISTS chk_currency_updated
           `);
-          
+
           await db.query(`
             ALTER TABLE accounts ADD CONSTRAINT chk_currency CHECK (currency IN ('USD', 'EUR', 'NOK'))
           `);
@@ -440,7 +441,7 @@ export class MigrationRunner {
           await db.query(`
             ALTER TABLE payment_plans DROP CONSTRAINT IF EXISTS chk_payment_frequency_updated
           `);
-          
+
           await db.query(`
             ALTER TABLE payment_plans ADD CONSTRAINT chk_payment_frequency CHECK (payment_frequency IN ('WEEKLY', 'BI_WEEKLY', 'MONTHLY'))
           `);
@@ -486,15 +487,15 @@ export class MigrationRunner {
               FOREIGN KEY (to_account_id) REFERENCES accounts(account_id)
             )
           `);
-          
+
           await db.query(`
             CREATE INDEX IF NOT EXISTS idx_transfers_from_account ON transfers(from_account_id, created_at DESC)
           `);
-          
+
           await db.query(`
             CREATE INDEX IF NOT EXISTS idx_transfers_to_account ON transfers(to_account_id, created_at DESC)
           `);
-          
+
           await db.query(`
             CREATE INDEX IF NOT EXISTS idx_transfers_created ON transfers(created_at DESC)
           `);
@@ -525,16 +526,16 @@ export class MigrationRunner {
               updated_by VARCHAR(255)
             )
           `);
-          
+
           // Recreate indexes
           await db.query(`
             CREATE INDEX IF NOT EXISTS idx_invoices_account_id ON invoices(account_id)
           `);
-          
+
           await db.query(`
             CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status)
           `);
-          
+
           await db.query(`
             CREATE INDEX IF NOT EXISTS idx_invoices_due_date ON invoices(due_date)
           `);
@@ -546,19 +547,19 @@ export class MigrationRunner {
         up: async (db: DatabaseConnection) => {
           // TigerBeetle generates 34-character IDs, but transfers table was created with VARCHAR(20)
           // This causes "22001: value too long for type character varying(20)" errors
-          
+
           // Increase transfer_id column length
           await db.query(`
             ALTER TABLE transfers 
             ALTER COLUMN transfer_id TYPE VARCHAR(50)
           `);
-          
+
           // Increase from_account_id and to_account_id column lengths
           await db.query(`
             ALTER TABLE transfers 
             ALTER COLUMN from_account_id TYPE VARCHAR(50)
           `);
-          
+
           await db.query(`
             ALTER TABLE transfers 
             ALTER COLUMN to_account_id TYPE VARCHAR(50)
@@ -570,12 +571,12 @@ export class MigrationRunner {
             ALTER TABLE transfers 
             ALTER COLUMN transfer_id TYPE VARCHAR(20)
           `);
-          
+
           await db.query(`
             ALTER TABLE transfers 
             ALTER COLUMN from_account_id TYPE VARCHAR(20)
           `);
-          
+
           await db.query(`
             ALTER TABLE transfers 
             ALTER COLUMN to_account_id TYPE VARCHAR(20)

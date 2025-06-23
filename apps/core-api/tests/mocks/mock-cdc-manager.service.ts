@@ -1,9 +1,9 @@
 /**
  * Mock CDCManagerService for testing
- * 
+ *
  * Provides fast, synchronous event simulation without RabbitMQ dependencies.
  * Events are processed immediately and stored in-memory for test verification.
- * 
+ *
  * Features:
  * - Synchronous event publishing and handling
  * - In-memory event storage and retrieval
@@ -13,7 +13,7 @@
  */
 export class MockCDCManagerService {
   private _isConnected = true;
-  private eventHandlers = new Map<string, Function[]>();
+  private eventHandlers = new Map<string, ((event: MockCDCEvent) => Promise<void>)[]>();
   private events: MockCDCEvent[] = [];
 
   async initialize(): Promise<void> {
@@ -51,7 +51,7 @@ export class MockCDCManagerService {
   }
 
   // Register event handlers for testing
-  onEvent(eventType: string, handler: Function): void {
+  onEvent(eventType: string, handler: (event: MockCDCEvent) => Promise<void>): void {
     if (!this.eventHandlers.has(eventType)) {
       this.eventHandlers.set(eventType, []);
     }
@@ -76,7 +76,13 @@ export class MockCDCManagerService {
   }
 
   // Simulate transfer events for testing
-  async simulateTransferEvent(transferId: string, fromAccountId: string, toAccountId: string, amount: string, currency: string): Promise<void> {
+  async simulateTransferEvent(
+    transferId: string,
+    fromAccountId: string,
+    toAccountId: string,
+    amount: string,
+    currency: string,
+  ): Promise<void> {
     await this.publishEvent({
       type: 'transfer.created',
       data: {
@@ -87,7 +93,7 @@ export class MockCDCManagerService {
         currency,
         description: 'Customer transfer',
         created_at: new Date().toISOString(),
-      }
+      },
     });
   }
 }

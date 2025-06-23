@@ -1,7 +1,8 @@
 import { TigerBeetleService } from '@core-poc/core-services';
+
+import { testCustomers, testAmounts } from '../../fixtures/test-data.js';
 import { resetTestData } from '../../helpers/test-setup.js';
 import { getGlobalTestServices } from '../../setup.js';
-import { testCustomers, testAmounts } from '../../fixtures/test-data.js';
 
 describe('TigerBeetleService Integration', () => {
   let tigerBeetleService: TigerBeetleService;
@@ -28,7 +29,7 @@ describe('TigerBeetleService Integration', () => {
       expect(accountId).toBeDefined();
       expect(typeof accountId).toBe('bigint');
       expect(accountId > 0n).toBe(true);
-      
+
       const balance = await tigerBeetleService.getAccountBalance(accountId);
       expect(balance.balance).toBe(0n);
     }, 10000);
@@ -42,7 +43,7 @@ describe('TigerBeetleService Integration', () => {
       });
 
       expect(accountId).toBeDefined();
-      
+
       const balance = await tigerBeetleService.getAccountBalance(accountId);
       expect(balance.balance).toBe(testAmounts.small);
     }, 10000);
@@ -70,7 +71,7 @@ describe('TigerBeetleService Integration', () => {
 
     it('should transfer funds between accounts', async () => {
       const transferAmount = 2500n;
-      
+
       const transferId = await tigerBeetleService.createTransfer({
         fromAccountId,
         toAccountId,
@@ -91,10 +92,10 @@ describe('TigerBeetleService Integration', () => {
   describe('getAccountBalance', () => {
     it('should throw error for non-existent account', async () => {
       const nonExistentId = 999999n;
-      
-      await expect(
-        tigerBeetleService.getAccountBalance(nonExistentId)
-      ).rejects.toThrow('Account not found');
+
+      await expect(tigerBeetleService.getAccountBalance(nonExistentId)).rejects.toThrow(
+        'Account not found',
+      );
     }, 10000);
   });
 });

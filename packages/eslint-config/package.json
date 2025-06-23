@@ -10,7 +10,9 @@
   ],
   "scripts": {
     "build": "echo 'No build needed for eslint-config'",
-    "test": "echo 'No tests for eslint-config package'"
+    "test": "echo 'No tests for eslint-config package'",
+    "lint": "echo 'No linting for eslint-config package'",
+    "lint:fix": "echo 'No linting for eslint-config package'"
   },
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^8.20.0",

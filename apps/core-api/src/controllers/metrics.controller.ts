@@ -1,5 +1,7 @@
-import { Request, Response } from 'express';
+import os from 'os';
+
 import { logger } from '@core-poc/core-services';
+import { Request, Response, NextFunction } from 'express';
 
 export interface Metrics {
   timestamp: string;
@@ -88,7 +90,7 @@ class MetricsCollector {
   getMetrics(): Metrics {
     const memUsage = process.memoryUsage();
     const cpuUsage = process.cpuUsage();
-    
+
     return {
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
@@ -106,7 +108,7 @@ class MetricsCollector {
         nodeVersion: process.version,
       },
       system: {
-        loadAvg: require('os').loadavg(),
+        loadAvg: os.loadavg(),
         cpuUsage,
       },
       http: {
@@ -119,10 +121,9 @@ class MetricsCollector {
 
   getDetailedHttpMetrics() {
     const responseTime = this.httpMetrics.responseTimeHistogram;
-    const avg = responseTime.length > 0 
-      ? responseTime.reduce((a, b) => a + b, 0) / responseTime.length 
-      : 0;
-    
+    const avg =
+      responseTime.length > 0 ? responseTime.reduce((a, b) => a + b, 0) / responseTime.length : 0;
+
     const sorted = [...responseTime].sort((a, b) => a - b);
     const p95 = sorted[Math.floor(sorted.length * 0.95)] || 0;
     const p99 = sorted[Math.floor(sorted.length * 0.99)] || 0;
@@ -148,7 +149,7 @@ export class MetricsController {
   async getMetrics(req: Request, res: Response): Promise<void> {
     try {
       const metrics = metricsCollector.getMetrics();
-      
+
       logger.debug('Metrics requested', {
         userAgent: req.get('User-Agent'),
         ip: req.ip,
@@ -164,7 +165,7 @@ export class MetricsController {
   async getHttpMetrics(req: Request, res: Response): Promise<void> {
     try {
       const httpMetrics = metricsCollector.getDetailedHttpMetrics();
-      
+
       res.json(httpMetrics);
     } catch (error) {
       logger.error('Failed to get HTTP metrics', { error });
@@ -176,7 +177,7 @@ export class MetricsController {
     try {
       const metrics = metricsCollector.getMetrics();
       const httpMetrics = metricsCollector.getDetailedHttpMetrics();
-      
+
       // Generate Prometheus-format metrics
       const prometheusMetrics = [
         `# HELP nodejs_heap_size_used_bytes Process heap memory currently used`,
@@ -211,7 +212,7 @@ export class MetricsController {
           `# HELP http_requests_status_total Total HTTP requests by status code`,
           `# TYPE http_requests_status_total counter`,
           `http_requests_status_total{status="${status}"} ${count}`,
-          ``
+          ``,
         );
       }
 
@@ -224,7 +225,7 @@ export class MetricsController {
           `http_request_duration_ms_count ${httpMetrics.responseTime.samples}`,
           `http_request_duration_ms{quantile="0.95"} ${httpMetrics.responseTime.p95}`,
           `http_request_duration_ms{quantile="0.99"} ${httpMetrics.responseTime.p99}`,
-          ``
+          ``,
         );
       }
 
@@ -238,16 +239,16 @@ export class MetricsController {
 }
 
 // Middleware to collect HTTP metrics
-export function metricsMiddleware(req: Request, res: Response, next: Function): void {
+export function metricsMiddleware(req: Request, res: Response, next: NextFunction): void {
   const startTime = Date.now();
-  
+
   metricsCollector.incrementRequests();
   metricsCollector.incrementActiveConnections();
   metricsCollector.recordPath(req.path);
 
   res.on('finish', () => {
     const responseTime = Date.now() - startTime;
-    
+
     metricsCollector.decrementActiveConnections();
     metricsCollector.recordStatusCode(res.statusCode);
     metricsCollector.recordResponseTime(responseTime);

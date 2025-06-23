@@ -1,4 +1,11 @@
-import { PaymentPlanRepository, logger, Money, AccountId, CustomerId, PaymentPlan } from '@core-poc/core-services';
+import {
+  PaymentPlanRepository,
+  logger,
+  Money,
+  AccountId,
+  PaymentPlan,
+} from '@core-poc/core-services';
+
 import { AccountService } from './account.service.js';
 
 export interface PaymentProcessingResult {
@@ -10,20 +17,22 @@ export interface PaymentProcessingResult {
 export class PaymentProcessingService {
   constructor(
     private paymentPlanRepository: PaymentPlanRepository,
-    private accountService: AccountService
+    private accountService: AccountService,
   ) {}
 
   /**
    * Process all payment plans that are due for payment
    */
-  async processScheduledPayments(processDate: Date = new Date()): Promise<PaymentProcessingResult[]> {
+  async processScheduledPayments(
+    processDate: Date = new Date(),
+  ): Promise<PaymentProcessingResult[]> {
     try {
       logger.info('Starting scheduled payment processing', {
         processDate: processDate.toISOString(),
       });
 
       const paymentsDue = await this.paymentPlanRepository.findPaymentsDue(processDate);
-      
+
       if (paymentsDue.length === 0) {
         logger.info('No payments due for processing');
         return [];
@@ -60,7 +69,10 @@ export class PaymentProcessingService {
   /**
    * Process a single payment plan
    */
-  async processPaymentPlan(paymentPlan: PaymentPlan, processDate: Date = new Date()): Promise<PaymentProcessingResult> {
+  async processPaymentPlan(
+    paymentPlan: PaymentPlan,
+    _processDate: Date = new Date(),
+  ): Promise<PaymentProcessingResult> {
     const result: PaymentProcessingResult = {
       paymentProcessed: false,
     };
@@ -75,7 +87,7 @@ export class PaymentProcessingService {
 
       // Step 1: Find customer's deposit account
       const customerDepositAccount = await this.findCustomerDepositAccount(paymentPlan.customerId);
-      
+
       if (!customerDepositAccount) {
         result.error = `No deposit account found for customer ${paymentPlan.customerId}`;
         logger.error('No deposit account found for customer', {
@@ -89,7 +101,7 @@ export class PaymentProcessingService {
       const transferId = await this.processPaymentTransaction(
         customerDepositAccount,
         new AccountId(paymentPlan.accountId),
-        new Money(paymentPlan.monthlyPayment, 'USD') // TODO: Get currency from payment plan
+        new Money(paymentPlan.monthlyPayment, 'USD'), // TODO: Get currency from payment plan
       );
 
       result.paymentProcessed = true;
@@ -121,7 +133,6 @@ export class PaymentProcessingService {
     }
   }
 
-
   /**
    * Find the customer's primary deposit account for payments
    */
@@ -130,11 +141,11 @@ export class PaymentProcessingService {
       // In a real system, this would query the database for customer accounts
       // For now, we'll use a simple approach of looking for deposit accounts
       // that might belong to this customer based on account creation patterns
-      
+
       // TODO: This is a simplified implementation
       // In reality, you'd have a customer-account mapping table
       logger.info('Looking for deposit account for customer', { customerId });
-      
+
       // For now, return null to indicate we need a proper customer-account mapping
       // This will be implemented when we have customer account management
       return null;
@@ -153,14 +164,14 @@ export class PaymentProcessingService {
   private async processPaymentTransaction(
     fromAccountId: AccountId,
     toAccountId: AccountId,
-    amount: Money
+    amount: Money,
   ): Promise<bigint> {
     try {
       const transferId = await this.accountService.transfer(
         fromAccountId.value,
         toAccountId.value,
         amount.amount,
-        amount.currency
+        amount.currency,
       );
 
       logger.info('Payment transfer created in TigerBeetle', {
@@ -189,22 +200,22 @@ export class PaymentProcessingService {
     try {
       // Decrement remaining payments
       const newRemainingPayments = paymentPlan.remainingPayments - 1;
-      
+
       await this.paymentPlanRepository.updateRemainingPayments(
         new AccountId(paymentPlan.accountId),
-        newRemainingPayments
+        newRemainingPayments,
       );
 
       // Calculate next payment date based on payment frequency
       if (newRemainingPayments > 0) {
         const nextPaymentDate = this.calculateNextPaymentDate(
           paymentPlan.nextPaymentDate,
-          paymentPlan.paymentFrequency
+          paymentPlan.paymentFrequency,
         );
 
         await this.paymentPlanRepository.updateNextPaymentDate(
           new AccountId(paymentPlan.accountId),
-          nextPaymentDate
+          nextPaymentDate,
         );
 
         logger.info('Next payment date updated', {
@@ -247,5 +258,4 @@ export class PaymentProcessingService {
 
     return nextDate;
   }
-
 }

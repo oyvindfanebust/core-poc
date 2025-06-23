@@ -1,7 +1,8 @@
+import { TransferType } from '@core-poc/shared';
 import { id, createClient } from 'tigerbeetle-node';
+
 import { ACCOUNT_TYPES, LEDGER_CODES } from './config/tigerbeetle.js';
 import { CreateAccountRequest, CreateTransferRequest } from './types/index.js';
-import { TransferType } from '@core-poc/shared';
 import { logger } from './utils/logger.js';
 
 export class TigerBeetleService {
@@ -25,7 +26,7 @@ export class TigerBeetleService {
     try {
       logger.info('Attempting to reconnect to TigerBeetle...', {
         clusterId: this.clusterId.toString(),
-        addresses: this.addresses
+        addresses: this.addresses,
       });
 
       if (this.client) {
@@ -52,25 +53,26 @@ export class TigerBeetleService {
 
   private async withRetry<T>(operation: () => Promise<T>, maxRetries: number = 3): Promise<T> {
     let lastError: any;
-    
+
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         await this.ensureConnection();
         return await operation();
       } catch (error) {
         lastError = error;
-        
+
         // Don't retry business logic errors
-        if (error instanceof Error && (
-          error.message.includes('Account not found') ||
-          error.message.includes('Duplicate transfer') ||
-          error.message.includes('Invalid account')
-        )) {
+        if (
+          error instanceof Error &&
+          (error.message.includes('Account not found') ||
+            error.message.includes('Duplicate transfer') ||
+            error.message.includes('Invalid account'))
+        ) {
           throw error;
         }
-        
-        logger.warn(`TigerBeetle operation failed (attempt ${attempt}/${maxRetries})`, { 
-          error: error instanceof Error ? error.message : String(error) 
+
+        logger.warn(`TigerBeetle operation failed (attempt ${attempt}/${maxRetries})`, {
+          error: error instanceof Error ? error.message : String(error),
         });
 
         if (attempt < maxRetries) {
@@ -80,7 +82,7 @@ export class TigerBeetleService {
         }
       }
     }
-    
+
     throw lastError;
   }
 
@@ -93,7 +95,7 @@ export class TigerBeetleService {
   async createAccount(request: CreateAccountRequest): Promise<bigint> {
     return this.withRetry(async () => {
       const accountId = id();
-      
+
       const account = {
         id: accountId,
         debits_pending: 0n,
@@ -126,7 +128,7 @@ export class TigerBeetleService {
   async createTransfer(request: CreateTransferRequest): Promise<bigint> {
     return this.withRetry(async () => {
       const transferId = id();
-      
+
       const transfer = {
         id: transferId,
         debit_account_id: request.fromAccountId,
@@ -152,7 +154,9 @@ export class TigerBeetleService {
     });
   }
 
-  async getAccountBalance(accountId: bigint): Promise<{ debits: bigint; credits: bigint; balance: bigint }> {
+  async getAccountBalance(
+    accountId: bigint,
+  ): Promise<{ debits: bigint; credits: bigint; balance: bigint }> {
     return this.withRetry(async () => {
       const accounts = await this.client.lookupAccounts([accountId]);
       if (accounts.length === 0) {
@@ -168,9 +172,13 @@ export class TigerBeetleService {
     });
   }
 
-  private async initialDeposit(accountId: bigint, amount: bigint, currency: keyof typeof LEDGER_CODES): Promise<void> {
+  private async initialDeposit(
+    accountId: bigint,
+    amount: bigint,
+    currency: keyof typeof LEDGER_CODES,
+  ): Promise<void> {
     const systemAccountId = id();
-    
+
     const systemAccount = {
       id: systemAccountId,
       debits_pending: 0n,
@@ -202,4 +210,3 @@ export class TigerBeetleService {
     });
   }
 }
-

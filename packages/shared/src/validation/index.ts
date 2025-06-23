@@ -2,4 +2,15 @@
 // These will be extracted from backend in future iterations
 import { z } from 'zod';
 
-export const CurrencySchema = z.enum(['USD', 'EUR', 'GBP', 'NOK', 'SEK', 'DKK', 'JPY', 'CAD', 'AUD', 'CHF'] as const);
+export const CurrencySchema = z.enum([
+  'USD',
+  'EUR',
+  'GBP',
+  'NOK',
+  'SEK',
+  'DKK',
+  'JPY',
+  'CAD',
+  'AUD',
+  'CHF',
+] as const);

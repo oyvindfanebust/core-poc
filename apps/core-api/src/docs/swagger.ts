@@ -96,7 +96,8 @@ const options: swaggerJSDoc.Options = {
               type: 'string',
               maxLength: 50,
               pattern: '^[A-Za-z0-9\\-_]+$',
-              description: 'Customer identifier (max 50 chars, letters, numbers, hyphens, underscores)',
+              description:
+                'Customer identifier (max 50 chars, letters, numbers, hyphens, underscores)',
               example: 'CUST-001',
             },
             currency: {
@@ -124,7 +125,8 @@ const options: swaggerJSDoc.Options = {
               type: 'string',
               maxLength: 50,
               pattern: '^[A-Za-z0-9\\-_]+$',
-              description: 'Customer identifier (max 50 chars, letters, numbers, hyphens, underscores)',
+              description:
+                'Customer identifier (max 50 chars, letters, numbers, hyphens, underscores)',
               example: 'CUST-001',
             },
             currency: {
@@ -167,7 +169,15 @@ const options: swaggerJSDoc.Options = {
                 properties: {
                   type: {
                     type: 'string',
-                    enum: ['ORIGINATION', 'PROCESSING', 'INSURANCE', 'LATE_PAYMENT', 'PREPAYMENT', 'APPRAISAL', 'ADMINISTRATION'],
+                    enum: [
+                      'ORIGINATION',
+                      'PROCESSING',
+                      'INSURANCE',
+                      'LATE_PAYMENT',
+                      'PREPAYMENT',
+                      'APPRAISAL',
+                      'ADMINISTRATION',
+                    ],
                     example: 'ORIGINATION',
                   },
                   amount: {
@@ -185,7 +195,17 @@ const options: swaggerJSDoc.Options = {
               },
             },
           },
-          required: ['type', 'customerId', 'currency', 'principalAmount', 'interestRate', 'termMonths', 'loanType', 'paymentFrequency', 'fees'],
+          required: [
+            'type',
+            'customerId',
+            'currency',
+            'principalAmount',
+            'interestRate',
+            'termMonths',
+            'loanType',
+            'paymentFrequency',
+            'fees',
+          ],
         },
         CreateCreditAccount: {
           type: 'object',
@@ -199,7 +219,8 @@ const options: swaggerJSDoc.Options = {
               type: 'string',
               maxLength: 50,
               pattern: '^[A-Za-z0-9\\-_]+$',
-              description: 'Customer identifier (max 50 chars, letters, numbers, hyphens, underscores)',
+              description:
+                'Customer identifier (max 50 chars, letters, numbers, hyphens, underscores)',
               example: 'CUST-001',
             },
             currency: {
@@ -294,7 +315,15 @@ const options: swaggerJSDoc.Options = {
                 properties: {
                   type: {
                     type: 'string',
-                    enum: ['ORIGINATION', 'PROCESSING', 'INSURANCE', 'LATE_PAYMENT', 'PREPAYMENT', 'APPRAISAL', 'ADMINISTRATION'],
+                    enum: [
+                      'ORIGINATION',
+                      'PROCESSING',
+                      'INSURANCE',
+                      'LATE_PAYMENT',
+                      'PREPAYMENT',
+                      'APPRAISAL',
+                      'ADMINISTRATION',
+                    ],
                     example: 'ORIGINATION',
                   },
                   amount: {
@@ -316,7 +345,18 @@ const options: swaggerJSDoc.Options = {
               example: '20050000',
             },
           },
-          required: ['accountId', 'principalAmount', 'interestRate', 'termMonths', 'monthlyPayment', 'remainingPayments', 'loanType', 'paymentFrequency', 'fees', 'totalLoanAmount'],
+          required: [
+            'accountId',
+            'principalAmount',
+            'interestRate',
+            'termMonths',
+            'monthlyPayment',
+            'remainingPayments',
+            'loanType',
+            'paymentFrequency',
+            'fees',
+            'totalLoanAmount',
+          ],
         },
         AmortizationSchedule: {
           type: 'object',
@@ -374,7 +414,14 @@ const options: swaggerJSDoc.Options = {
                     example: '19918211',
                   },
                 },
-                required: ['paymentNumber', 'paymentDate', 'paymentAmount', 'principalAmount', 'interestAmount', 'remainingBalance'],
+                required: [
+                  'paymentNumber',
+                  'paymentDate',
+                  'paymentAmount',
+                  'principalAmount',
+                  'interestAmount',
+                  'remainingBalance',
+                ],
               },
             },
           },
@@ -467,7 +514,8 @@ const options: swaggerJSDoc.Options = {
         get: {
           tags: ['Health'],
           summary: 'Get application health status',
-          description: 'Returns comprehensive health information about the application and its dependencies',
+          description:
+            'Returns comprehensive health information about the application and its dependencies',
           responses: {
             '200': {
               description: 'Application is healthy',
@@ -773,7 +821,8 @@ const options: swaggerJSDoc.Options = {
         get: {
           tags: ['Payment Plans'],
           summary: 'Get amortization schedule',
-          description: 'Generates and retrieves the complete amortization schedule for the specified loan account',
+          description:
+            'Generates and retrieves the complete amortization schedule for the specified loan account',
           parameters: [
             {
               name: 'accountId',
@@ -835,7 +884,8 @@ const options: swaggerJSDoc.Options = {
                 maxLength: 50,
                 pattern: '^[A-Za-z0-9\\-_]+$',
               },
-              description: 'The customer identifier (max 50 chars, letters, numbers, hyphens, underscores)',
+              description:
+                'The customer identifier (max 50 chars, letters, numbers, hyphens, underscores)',
               example: 'CUST-001',
             },
           ],
@@ -884,7 +934,14 @@ const options: swaggerJSDoc.Options = {
                           example: '2024-01-01T12:00:00.000Z',
                         },
                       },
-                      required: ['accountId', 'customerId', 'accountType', 'currency', 'createdAt', 'updatedAt'],
+                      required: [
+                        'accountId',
+                        'customerId',
+                        'accountType',
+                        'currency',
+                        'createdAt',
+                        'updatedAt',
+                      ],
                     },
                   },
                   examples: {
@@ -940,7 +997,8 @@ const options: swaggerJSDoc.Options = {
                         details: [
                           {
                             field: 'customerId',
-                            message: 'Customer ID must contain only uppercase letters, numbers, and underscores',
+                            message:
+                              'Customer ID must contain only uppercase letters, numbers, and underscores',
                             code: 'invalid_string',
                           },
                         ],

@@ -1,4 +1,4 @@
-import { validateConfig, Config as EnvConfig } from './validation.js';
+import { validateConfig } from './validation.js';
 
 export interface Config {
   port: number;
@@ -35,7 +35,7 @@ export const getConfig = (): Config => {
   }
 
   const envConfig = validateConfig();
-  
+
   cachedConfig = {
     port: envConfig.PORT,
     tigerbeetle: {
@@ -62,7 +62,7 @@ export const getConfig = (): Config => {
     env: envConfig.NODE_ENV,
     logLevel: envConfig.LOG_LEVEL,
   };
-  
+
   return cachedConfig;
 };
 

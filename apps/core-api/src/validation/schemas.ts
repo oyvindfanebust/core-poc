@@ -1,13 +1,25 @@
 import { z } from 'zod';
-import { Currency } from '../types/index.js';
+
+// import { Currency } from '../types/index.js';
 
 // Base schemas for reusable validation
-export const CurrencySchema = z.enum(['USD', 'EUR', 'GBP', 'NOK', 'SEK', 'DKK', 'JPY', 'CAD', 'AUD', 'CHF'] as const);
+export const CurrencySchema = z.enum([
+  'USD',
+  'EUR',
+  'GBP',
+  'NOK',
+  'SEK',
+  'DKK',
+  'JPY',
+  'CAD',
+  'AUD',
+  'CHF',
+] as const);
 export const AccountTypeSchema = z.enum(['DEPOSIT', 'LOAN', 'CREDIT'] as const);
 
 // Money amount validation (positive BigInt as string)
 export const MoneyAmountSchema = z.string().refine(
-  (val) => {
+  val => {
     try {
       const amount = BigInt(val);
       return amount >= 0n;
@@ -15,12 +27,12 @@ export const MoneyAmountSchema = z.string().refine(
       return false;
     }
   },
-  { message: 'Amount must be a valid positive number' }
+  { message: 'Amount must be a valid positive number' },
 );
 
 // Account ID validation
 export const AccountIdSchema = z.string().refine(
-  (val) => {
+  val => {
     try {
       BigInt(val);
       return true;
@@ -28,14 +40,18 @@ export const AccountIdSchema = z.string().refine(
       return false;
     }
   },
-  { message: 'Account ID must be a valid number' }
+  { message: 'Account ID must be a valid number' },
 );
 
 // Customer ID validation - More realistic for real-world usage
-export const CustomerIdSchema = z.string()
+export const CustomerIdSchema = z
+  .string()
   .min(1, 'Customer ID is required')
   .max(50, 'Customer ID cannot exceed 50 characters')
-  .regex(/^[A-Za-z0-9\-_]+$/, 'Customer ID must contain only letters, numbers, hyphens, and underscores');
+  .regex(
+    /^[A-Za-z0-9\-_]+$/,
+    'Customer ID must contain only letters, numbers, hyphens, and underscores',
+  );
 
 // Account creation schemas
 export const CreateDepositAccountSchema = z.object({
@@ -48,10 +64,25 @@ export const CreateDepositAccountSchema = z.object({
 
 // Loan-specific validation schemas
 export const LoanTypeSchema = z.enum(['ANNUITY', 'SERIAL'] as const);
-export const PaymentFrequencySchema = z.enum(['WEEKLY', 'BI_WEEKLY', 'MONTHLY', 'QUARTERLY', 'SEMI_ANNUALLY', 'ANNUALLY'] as const);
+export const PaymentFrequencySchema = z.enum([
+  'WEEKLY',
+  'BI_WEEKLY',
+  'MONTHLY',
+  'QUARTERLY',
+  'SEMI_ANNUALLY',
+  'ANNUALLY',
+] as const);
 
 // Fee types for loans
-export const FeeTypeSchema = z.enum(['ORIGINATION', 'PROCESSING', 'INSURANCE', 'LATE_PAYMENT', 'PREPAYMENT', 'APPRAISAL', 'ADMINISTRATION'] as const);
+export const FeeTypeSchema = z.enum([
+  'ORIGINATION',
+  'PROCESSING',
+  'INSURANCE',
+  'LATE_PAYMENT',
+  'PREPAYMENT',
+  'APPRAISAL',
+  'ADMINISTRATION',
+] as const);
 
 export const LoanFeeSchema = z.object({
   type: FeeTypeSchema,
@@ -66,18 +97,18 @@ export const CreateLoanAccountSchema = z.object({
   accountName: z.string().max(100, 'Account name cannot exceed 100 characters').optional(),
   principalAmount: MoneyAmountSchema,
   interestRate: z.string().refine(
-    (val) => {
+    val => {
       const rate = parseFloat(val);
       return !isNaN(rate) && rate >= 0 && rate <= 100;
     },
-    { message: 'Interest rate must be between 0 and 100' }
+    { message: 'Interest rate must be between 0 and 100' },
   ),
   termMonths: z.string().refine(
-    (val) => {
+    val => {
       const months = parseInt(val);
       return !isNaN(months) && months > 0 && months <= 480; // Max 40 years
     },
-    { message: 'Term must be between 1 and 480 months' }
+    { message: 'Term must be between 1 and 480 months' },
   ),
   loanType: LoanTypeSchema.optional().default('ANNUITY'),
   paymentFrequency: PaymentFrequencySchema.optional().default('MONTHLY'),
@@ -107,7 +138,6 @@ export const TransferSchema = z.object({
   currency: CurrencySchema,
 });
 
-
 // Request parameter schemas
 export const AccountIdParamSchema = z.object({
   accountId: AccountIdSchema,
@@ -119,7 +149,8 @@ export const CustomerIdParamSchema = z.object({
 
 // Account name update schema
 export const UpdateAccountNameSchema = z.object({
-  accountName: z.string()
+  accountName: z
+    .string()
     .min(1, 'Account name cannot be empty')
     .max(100, 'Account name cannot exceed 100 characters')
     .nullable(),

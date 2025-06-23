@@ -6,12 +6,12 @@ describe('AccountRepository', () => {
 
   beforeEach(() => {
     mockDbQuery = jest.fn();
-    
+
     // Mock the database connection
     const mockDb = {
-      query: mockDbQuery
+      query: mockDbQuery,
     };
-    
+
     accountRepository = new AccountRepository();
     // Override the db property to use our mock
     (accountRepository as any).db = mockDb;
@@ -28,7 +28,7 @@ describe('AccountRepository', () => {
         customerId: 'CUSTOMER-123',
         accountType: 'DEPOSIT',
         currency: 'USD',
-        accountName: 'My Savings Account'
+        accountName: 'My Savings Account',
       };
 
       mockDbQuery.mockResolvedValue({ rows: [] });
@@ -36,14 +36,10 @@ describe('AccountRepository', () => {
       await accountRepository.save(accountMetadata);
 
       expect(mockDbQuery).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO accounts (account_id, customer_id, account_type, currency, account_name)'),
-        [
-          '123456789',
-          'CUSTOMER-123',
-          'DEPOSIT',
-          'USD',
-          'My Savings Account'
-        ]
+        expect.stringContaining(
+          'INSERT INTO accounts (account_id, customer_id, account_type, currency, account_name)',
+        ),
+        ['123456789', 'CUSTOMER-123', 'DEPOSIT', 'USD', 'My Savings Account'],
       );
     });
 
@@ -52,7 +48,7 @@ describe('AccountRepository', () => {
         accountId: BigInt('123456789'),
         customerId: 'CUSTOMER-123',
         accountType: 'DEPOSIT',
-        currency: 'USD'
+        currency: 'USD',
       };
 
       mockDbQuery.mockResolvedValue({ rows: [] });
@@ -60,14 +56,10 @@ describe('AccountRepository', () => {
       await accountRepository.save(accountMetadata);
 
       expect(mockDbQuery).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO accounts (account_id, customer_id, account_type, currency, account_name)'),
-        [
-          '123456789',
-          'CUSTOMER-123',
-          'DEPOSIT',
-          'USD',
-          null
-        ]
+        expect.stringContaining(
+          'INSERT INTO accounts (account_id, customer_id, account_type, currency, account_name)',
+        ),
+        ['123456789', 'CUSTOMER-123', 'DEPOSIT', 'USD', null],
       );
     });
   });
@@ -84,7 +76,7 @@ describe('AccountRepository', () => {
       expect(result).toBe(true);
       expect(mockDbQuery).toHaveBeenCalledWith(
         'UPDATE accounts SET account_name = $1, updated_at = CURRENT_TIMESTAMP WHERE account_id = $2',
-        [accountName, '123456789']
+        [accountName, '123456789'],
       );
     });
 
@@ -109,7 +101,7 @@ describe('AccountRepository', () => {
       expect(result).toBe(true);
       expect(mockDbQuery).toHaveBeenCalledWith(
         'UPDATE accounts SET account_name = $1, updated_at = CURRENT_TIMESTAMP WHERE account_id = $2',
-        [null, '123456789']
+        [null, '123456789'],
       );
     });
   });
@@ -124,7 +116,7 @@ describe('AccountRepository', () => {
           currency: 'USD',
           account_name: 'My Savings',
           created_at: '2023-01-01T00:00:00Z',
-          updated_at: '2023-01-01T00:00:00Z'
+          updated_at: '2023-01-01T00:00:00Z',
         },
         {
           account_id: '987654321',
@@ -133,8 +125,8 @@ describe('AccountRepository', () => {
           currency: 'EUR',
           account_name: null,
           created_at: '2023-01-02T00:00:00Z',
-          updated_at: '2023-01-02T00:00:00Z'
-        }
+          updated_at: '2023-01-02T00:00:00Z',
+        },
       ];
 
       mockDbQuery.mockResolvedValue({ rows: mockRows });

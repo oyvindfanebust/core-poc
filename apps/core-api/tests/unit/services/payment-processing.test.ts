@@ -1,5 +1,9 @@
-import { PaymentProcessingService, PaymentProcessingResult, AccountService } from '@core-poc/domain';
 import { PaymentPlanRepository, PaymentPlan } from '@core-poc/core-services';
+import {
+  PaymentProcessingService,
+  PaymentProcessingResult,
+  AccountService,
+} from '@core-poc/domain';
 
 describe('PaymentProcessingService', () => {
   let paymentProcessingService: PaymentProcessingService;
@@ -28,10 +32,10 @@ describe('PaymentProcessingService', () => {
       getAccountMetadata: jest.fn(),
       updateAccountName: jest.fn(),
     } as any;
-    
+
     paymentProcessingService = new PaymentProcessingService(
       mockPaymentPlanRepository,
-      mockAccountService
+      mockAccountService,
     );
   });
 
@@ -65,7 +69,7 @@ describe('PaymentProcessingService', () => {
 
       expect(mockPaymentPlanRepository.findPaymentsDue).toHaveBeenCalledWith(testDate);
       expect(results).toHaveLength(1);
-      
+
       // Payment processing should fail since no customer accounts are found
       expect(results[0].paymentProcessed).toBe(false);
       expect(results[0].error).toContain('No deposit account found');
@@ -83,23 +87,32 @@ describe('PaymentProcessingService', () => {
   describe('calculateNextPaymentDate', () => {
     it('should calculate next monthly payment date correctly', () => {
       const currentDate = new Date('2024-01-15');
-      const nextDate = (paymentProcessingService as any).calculateNextPaymentDate(currentDate, 'MONTHLY');
-      
+      const nextDate = (paymentProcessingService as any).calculateNextPaymentDate(
+        currentDate,
+        'MONTHLY',
+      );
+
       expect(nextDate.getMonth()).toBe(1); // February (0-indexed)
       expect(nextDate.getDate()).toBe(15);
     });
 
     it('should calculate next weekly payment date correctly', () => {
       const currentDate = new Date('2024-01-15');
-      const nextDate = (paymentProcessingService as any).calculateNextPaymentDate(currentDate, 'WEEKLY');
-      
+      const nextDate = (paymentProcessingService as any).calculateNextPaymentDate(
+        currentDate,
+        'WEEKLY',
+      );
+
       expect(nextDate.getDate()).toBe(22);
     });
 
     it('should calculate next bi-weekly payment date correctly', () => {
       const currentDate = new Date('2024-01-15');
-      const nextDate = (paymentProcessingService as any).calculateNextPaymentDate(currentDate, 'BI_WEEKLY');
-      
+      const nextDate = (paymentProcessingService as any).calculateNextPaymentDate(
+        currentDate,
+        'BI_WEEKLY',
+      );
+
       expect(nextDate.getDate()).toBe(29);
     });
   });

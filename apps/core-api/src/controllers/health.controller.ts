@@ -1,6 +1,6 @@
-import { Request, Response } from 'express';
 import { DatabaseConnection, logger } from '@core-poc/core-services';
 import { CDCManagerService } from '@core-poc/domain';
+import { Request, Response } from 'express';
 
 export interface HealthCheck {
   service: string;
@@ -22,12 +22,12 @@ export interface HealthResponse {
 export class HealthController {
   constructor(
     private database: DatabaseConnection,
-    private cdcManager?: CDCManagerService
+    private cdcManager?: CDCManagerService,
   ) {}
 
   async getHealth(req: Request, res: Response): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       const checks = await Promise.all([
         this.checkDatabase(),
@@ -37,7 +37,7 @@ export class HealthController {
       ]);
 
       const overallStatus = this.determineOverallStatus(checks);
-      
+
       const healthResponse: HealthResponse = {
         status: overallStatus,
         timestamp: new Date().toISOString(),
@@ -48,7 +48,7 @@ export class HealthController {
       };
 
       const statusCode = overallStatus === 'healthy' ? 200 : 503;
-      
+
       logger.info('Health check completed', {
         status: overallStatus,
         responseTime: Date.now() - startTime,
@@ -58,7 +58,7 @@ export class HealthController {
       res.status(statusCode).json(healthResponse);
     } catch (error) {
       logger.error('Health check failed', { error });
-      
+
       res.status(503).json({
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
@@ -71,15 +71,12 @@ export class HealthController {
   async getReadiness(req: Request, res: Response): Promise<void> {
     try {
       // Readiness checks - ensure service can handle requests
-      const checks = await Promise.all([
-        this.checkDatabase(),
-        this.checkCDC(),
-      ]);
+      const checks = await Promise.all([this.checkDatabase(), this.checkCDC()]);
 
       const isReady = checks.every(check => check.status === 'healthy');
-      
+
       const statusCode = isReady ? 200 : 503;
-      
+
       res.status(statusCode).json({
         ready: isReady,
         timestamp: new Date().toISOString(),
@@ -100,9 +97,9 @@ export class HealthController {
     try {
       const memoryCheck = await this.checkMemory();
       const isAlive = memoryCheck.status !== 'unhealthy';
-      
+
       const statusCode = isAlive ? 200 : 503;
-      
+
       res.status(statusCode).json({
         alive: isAlive,
         timestamp: new Date().toISOString(),
@@ -121,13 +118,13 @@ export class HealthController {
 
   private async checkDatabase(): Promise<HealthCheck> {
     const startTime = Date.now();
-    
+
     try {
       // Simple connectivity test
       await this.database.query('SELECT 1 as health_check');
-      
+
       const responseTime = Date.now() - startTime;
-      
+
       return {
         service: 'database',
         status: responseTime < 1000 ? 'healthy' : 'degraded',
@@ -153,15 +150,15 @@ export class HealthController {
       const totalMemory = memUsage.heapTotal;
       const usedMemory = memUsage.heapUsed;
       const memoryUsagePercent = (usedMemory / totalMemory) * 100;
-      
+
       let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
-      
+
       if (memoryUsagePercent > 90) {
         status = 'unhealthy';
       } else if (memoryUsagePercent > 80) {
         status = 'degraded';
       }
-      
+
       return {
         service: 'memory',
         status,
@@ -185,8 +182,8 @@ export class HealthController {
   private async checkDisk(): Promise<HealthCheck> {
     try {
       // Check available disk space (basic check)
-      const stats = await import('fs').then(fs => fs.promises.stat('.'));
-      
+      await import('fs').then(fs => fs.promises.stat('.'));
+
       return {
         service: 'disk',
         status: 'healthy',
@@ -220,7 +217,7 @@ export class HealthController {
       }
 
       const isConnected = this.cdcManager.isConnected;
-      
+
       return {
         service: 'cdc',
         status: isConnected ? 'healthy' : 'unhealthy',
@@ -248,11 +245,11 @@ export class HealthController {
     if (checks.some(check => check.status === 'unhealthy')) {
       return 'unhealthy';
     }
-    
+
     if (checks.some(check => check.status === 'degraded')) {
       return 'degraded';
     }
-    
+
     return 'healthy';
   }
 }

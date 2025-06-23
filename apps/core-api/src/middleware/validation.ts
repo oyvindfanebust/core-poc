@@ -1,16 +1,19 @@
+import { logger } from '@core-poc/core-services';
 import { Request, Response, NextFunction } from 'express';
 import { ZodSchema, ZodError } from 'zod';
-import { logger } from '@core-poc/core-services';
 
 /**
  * Validation middleware factory
  */
-export function validateRequest<T>(schema: ZodSchema<T>, target: 'body' | 'params' | 'query' = 'body') {
+export function validateRequest<T>(
+  schema: ZodSchema<T>,
+  target: 'body' | 'params' | 'query' = 'body',
+) {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       const data = target === 'body' ? req.body : target === 'params' ? req.params : req.query;
       const validated = schema.parse(data);
-      
+
       // Replace the request data with validated data
       if (target === 'body') {
         req.body = validated;
@@ -19,7 +22,7 @@ export function validateRequest<T>(schema: ZodSchema<T>, target: 'body' | 'param
       } else {
         req.query = validated as any;
       }
-      
+
       next();
     } catch (error) {
       if (error instanceof ZodError) {
@@ -28,7 +31,7 @@ export function validateRequest<T>(schema: ZodSchema<T>, target: 'body' | 'param
           method: req.method,
           errors: error.errors,
         });
-        
+
         res.status(400).json({
           error: 'Validation failed',
           details: error.errors.map(err => ({
@@ -48,7 +51,7 @@ export function validateRequest<T>(schema: ZodSchema<T>, target: 'body' | 'param
 /**
  * Generic error handler middleware
  */
-export function errorHandler(error: Error, req: Request, res: Response, next: NextFunction) {
+export function errorHandler(error: Error, req: Request, res: Response, _next: NextFunction) {
   logger.error('Unhandled error', {
     error: error.message,
     stack: error.stack,
@@ -58,7 +61,7 @@ export function errorHandler(error: Error, req: Request, res: Response, next: Ne
 
   // Don't leak internal errors in production
   const isDevelopment = process.env.NODE_ENV === 'development';
-  
+
   res.status(500).json({
     error: 'Internal server error',
     ...(isDevelopment && { details: error.message, stack: error.stack }),
@@ -70,7 +73,7 @@ export function errorHandler(error: Error, req: Request, res: Response, next: Ne
  */
 export function requestLogger(req: Request, res: Response, next: NextFunction) {
   const startTime = Date.now();
-  
+
   res.on('finish', () => {
     const duration = Date.now() - startTime;
     logger.info('Request completed', {
@@ -82,6 +85,6 @@ export function requestLogger(req: Request, res: Response, next: NextFunction) {
       ip: req.ip,
     });
   });
-  
+
   next();
 }

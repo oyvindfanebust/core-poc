@@ -22,12 +22,12 @@ jest.mock('next/navigation', () => ({
 
 // Mock next-intl
 jest.mock('next-intl', () => ({
-  useTranslations: () => (key) => key,
+  useTranslations: () => key => key,
   useLocale: () => 'en',
 }));
 
 // Mock next-intl/server
 jest.mock('next-intl/server', () => ({
-  getTranslations: () => (key) => key,
+  getTranslations: () => key => key,
   getLocale: () => 'en',
 }));

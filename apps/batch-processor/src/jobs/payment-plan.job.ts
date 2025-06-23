@@ -1,5 +1,5 @@
 import { PaymentPlanRepository, logger, PaymentPlan } from '@core-poc/core-services';
-import { AccountService, PaymentProcessingService, Money, AccountId } from '@core-poc/domain';
+import { AccountService, PaymentProcessingService, AccountId } from '@core-poc/domain';
 
 export class PaymentPlanJob {
   private isRunning = false;
@@ -8,7 +8,7 @@ export class PaymentPlanJob {
   constructor(
     private paymentPlanRepository: PaymentPlanRepository,
     private accountService: AccountService,
-    private paymentProcessingService: PaymentProcessingService
+    private paymentProcessingService: PaymentProcessingService,
   ) {}
 
   /**
@@ -27,7 +27,7 @@ export class PaymentPlanJob {
 
       // Use the payment processing service to handle all the logic
       const results = await this.paymentProcessingService.processScheduledPayments();
-      
+
       const successful = results.filter(r => r.paymentProcessed).length;
       const failed = results.filter(r => !r.paymentProcessed).length;
 
@@ -45,7 +45,6 @@ export class PaymentPlanJob {
           failures: failures.map(f => ({ error: f.error })),
         });
       }
-
     } catch (error) {
       logger.error('Failed to process scheduled payments', { error });
     } finally {
@@ -64,11 +63,12 @@ export class PaymentPlanJob {
     }
 
     logger.info('Starting monthly payment job');
-    
+
     // For development/testing, run every 30 seconds instead of 30 days
-    const interval = process.env.NODE_ENV === 'production' 
-      ? 30 * 24 * 60 * 60 * 1000  // 30 days
-      : 30 * 1000;                 // 30 seconds for testing
+    const interval =
+      process.env.NODE_ENV === 'production'
+        ? 30 * 24 * 60 * 60 * 1000 // 30 days
+        : 30 * 1000; // 30 seconds for testing
 
     this.intervalId = setInterval(() => {
       this.processMonthlyPayments().catch(error => {
@@ -76,7 +76,7 @@ export class PaymentPlanJob {
       });
     }, interval);
 
-    logger.info('Monthly payment job started', { 
+    logger.info('Monthly payment job started', {
       intervalMs: interval,
       environment: process.env.NODE_ENV || 'development',
     });
@@ -99,7 +99,7 @@ export class PaymentPlanJob {
   async processPaymentForAccount(accountId: AccountId): Promise<boolean> {
     try {
       const plan = await this.paymentPlanRepository.findByAccountId(accountId);
-      
+
       if (!plan) {
         logger.warn('No payment plan found for account', {
           accountId: accountId.toString(),

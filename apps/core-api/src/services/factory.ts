@@ -1,9 +1,3 @@
-import { 
-  AccountService, 
-  LoanService, 
-  PaymentProcessingService, 
-  CDCManagerService 
-} from '@core-poc/domain';
 import {
   DatabaseConnection,
   PaymentPlanRepository,
@@ -11,8 +5,14 @@ import {
   TigerBeetleService,
   getConfig,
   getTestConfig,
-  logger
+  logger,
 } from '@core-poc/core-services';
+import {
+  AccountService,
+  LoanService,
+  PaymentProcessingService,
+  CDCManagerService,
+} from '@core-poc/domain';
 import { createClient } from 'tigerbeetle-node';
 
 export interface ServiceContainer {
@@ -47,23 +47,25 @@ export class ServiceFactory {
         await database.initializeSchema();
         logger.info('Database schema initialized successfully');
       } catch (dbError) {
-        logger.error('Failed to initialize database schema', { 
+        logger.error('Failed to initialize database schema', {
           error: dbError,
           dbHost: config.database.host,
           dbPort: config.database.port,
-          dbName: config.database.name
+          dbName: config.database.name,
         });
-        throw new Error(`Database initialization failed: ${(dbError as Error)?.message || 'Unknown database error'}`);
+        throw new Error(
+          `Database initialization failed: ${(dbError as Error)?.message || 'Unknown database error'}`,
+        );
       }
 
       // Create TigerBeetle client
       logger.info('Initializing TigerBeetle client...');
       const tigerbeetleAddresses = [config.tigerbeetle.address];
       const clusterId = config.tigerbeetle.clusterId;
-      
+
       logger.info('TigerBeetle configuration', {
         clusterId: clusterId.toString(),
-        addresses: tigerbeetleAddresses
+        addresses: tigerbeetleAddresses,
       });
 
       let tigerBeetleClient;
@@ -74,16 +76,22 @@ export class ServiceFactory {
         });
         logger.info('TigerBeetle client created successfully');
       } catch (tbError) {
-        logger.error('Failed to create TigerBeetle client', { 
+        logger.error('Failed to create TigerBeetle client', {
           error: tbError,
           clusterId: clusterId.toString(),
-          addresses: tigerbeetleAddresses
+          addresses: tigerbeetleAddresses,
         });
-        throw new Error(`TigerBeetle client creation failed: ${(tbError as Error)?.message || 'Unknown TigerBeetle error'}`);
+        throw new Error(
+          `TigerBeetle client creation failed: ${(tbError as Error)?.message || 'Unknown TigerBeetle error'}`,
+        );
       }
 
       // Create core services
-      const tigerBeetleService = new TigerBeetleService(tigerBeetleClient, clusterId, tigerbeetleAddresses);
+      const tigerBeetleService = new TigerBeetleService(
+        tigerBeetleClient,
+        clusterId,
+        tigerbeetleAddresses,
+      );
       const accountService = new AccountService(tigerBeetleService);
 
       // Create repositories
@@ -96,7 +104,7 @@ export class ServiceFactory {
       // Create payment processing service
       const paymentProcessingService = new PaymentProcessingService(
         paymentPlanRepository,
-        accountService
+        accountService,
       );
 
       // Create CDC Manager
@@ -145,7 +153,11 @@ export class ServiceFactory {
       });
 
       // Create core services
-      const tigerBeetleService = new TigerBeetleService(tigerBeetleClient, clusterId, tigerbeetleAddresses);
+      const tigerBeetleService = new TigerBeetleService(
+        tigerBeetleClient,
+        clusterId,
+        tigerbeetleAddresses,
+      );
       const accountService = new AccountService(tigerBeetleService);
 
       // Create repositories
@@ -158,7 +170,7 @@ export class ServiceFactory {
       // Create payment processing service
       const paymentProcessingService = new PaymentProcessingService(
         paymentPlanRepository,
-        accountService
+        accountService,
       );
 
       // Create CDC Manager
@@ -185,23 +197,23 @@ export class ServiceFactory {
 
   static async cleanup(): Promise<void> {
     const activeInstance = ServiceFactory.instance || ServiceFactory.testInstance;
-    
+
     if (activeInstance) {
       try {
         logger.info('Cleaning up services...');
-        
+
         // Close TigerBeetle connection
         await activeInstance.tigerBeetleService.close();
-        
+
         // Shutdown CDC Manager
         await activeInstance.cdcManager.shutdown();
-        
+
         // Close database connection
         await activeInstance.database.close();
-        
+
         // Reset database singleton
         DatabaseConnection.resetInstance();
-        
+
         ServiceFactory.instance = null;
         ServiceFactory.testInstance = null;
         logger.info('Services cleaned up successfully');

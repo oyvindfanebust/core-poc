@@ -29,7 +29,10 @@ export const testCreditData = {
   currency: 'USD' as const,
 };
 
-export const createTestAccountRequest = (type: 'LOAN' | 'DEPOSIT' | 'CREDIT', customerId: string) => {
+export const createTestAccountRequest = (
+  type: 'LOAN' | 'DEPOSIT' | 'CREDIT',
+  customerId: string,
+) => {
   const base = {
     type,
     customerId,

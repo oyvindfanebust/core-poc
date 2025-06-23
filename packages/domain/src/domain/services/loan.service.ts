@@ -1,5 +1,19 @@
+import {
+  PaymentPlanRepository,
+  logger,
+  Money,
+  AccountId,
+  CustomerId,
+  Currency,
+  PaymentPlan,
+  LoanType,
+  PaymentFrequency,
+  LoanFee,
+  AmortizationSchedule,
+  PaymentScheduleEntry,
+} from '@core-poc/core-services';
+
 import { AccountService } from '../../services/account.service.js';
-import { PaymentPlanRepository, logger, Money, AccountId, CustomerId, Currency, PaymentPlan, LoanType, PaymentFrequency, LoanFee, AmortizationSchedule, PaymentScheduleEntry } from '@core-poc/core-services';
 
 export interface CreateLoanParams {
   customerId: CustomerId;
@@ -21,7 +35,7 @@ export interface LoanAccount {
 export class LoanService {
   constructor(
     private accountService: AccountService,
-    private paymentPlanRepository: PaymentPlanRepository
+    private paymentPlanRepository: PaymentPlanRepository,
   ) {}
 
   async createLoanWithPaymentPlan(params: CreateLoanParams): Promise<LoanAccount> {
@@ -46,7 +60,7 @@ export class LoanService {
         params.customerId.value,
         params.currency,
         totalLoanAmount.amount,
-        params.accountName
+        params.accountName,
       );
 
       // Calculate payment amount based on loan type
@@ -56,7 +70,7 @@ export class LoanService {
         params.interestRate,
         params.termMonths,
         params.loanType,
-        params.paymentFrequency
+        params.paymentFrequency,
       );
 
       // Calculate first payment date (30 days from now by default)
@@ -106,11 +120,11 @@ export class LoanService {
    */
   private calculateTotalFees(principalAmount: Money, fees: LoanFee[]): Money {
     let totalFees = new Money(0n, principalAmount.currency);
-    
+
     for (const fee of fees) {
       totalFees = totalFees.add(new Money(fee.amount, principalAmount.currency));
     }
-    
+
     return totalFees;
   }
 
@@ -120,9 +134,9 @@ export class LoanService {
   private calculateTotalPayments(termMonths: number, frequency: PaymentFrequency): number {
     switch (frequency) {
       case 'WEEKLY':
-        return Math.ceil(termMonths * 52 / 12);
+        return Math.ceil((termMonths * 52) / 12);
       case 'BI_WEEKLY':
-        return Math.ceil(termMonths * 26 / 12);
+        return Math.ceil((termMonths * 26) / 12);
       case 'MONTHLY':
         return termMonths;
       default:
@@ -139,7 +153,7 @@ export class LoanService {
     annualInterestRate: number,
     termMonths: number,
     loanType: LoanType,
-    paymentFrequency: PaymentFrequency
+    paymentFrequency: PaymentFrequency,
   ): Money {
     if (termMonths <= 0) {
       throw new Error('Term months must be greater than 0');
@@ -150,21 +164,21 @@ export class LoanService {
     }
 
     const totalPayments = this.calculateTotalPayments(termMonths, paymentFrequency);
-    
+
     switch (loanType) {
       case 'ANNUITY':
         return this.calculateAnnuityPayment(
           principalAmount,
           annualInterestRate,
           totalPayments,
-          paymentFrequency
+          paymentFrequency,
         );
       case 'SERIAL':
         return this.calculateSerialPayment(
           principalAmount,
           annualInterestRate,
           totalPayments,
-          paymentFrequency
+          paymentFrequency,
         );
       default:
         throw new Error(`Unsupported loan type: ${loanType}`);
@@ -179,12 +193,12 @@ export class LoanService {
     principalAmount: Money,
     annualInterestRate: number,
     totalPayments: number,
-    paymentFrequency: PaymentFrequency
+    paymentFrequency: PaymentFrequency,
   ): Money {
     // Convert to payment period interest rate
     const periodsPerYear = this.getPeriodsPerYear(paymentFrequency);
     const periodRate = annualInterestRate / 100 / periodsPerYear;
-    
+
     // If interest rate is 0, just divide principal by number of payments
     if (periodRate === 0) {
       return new Money(principalAmount.amount / BigInt(totalPayments), principalAmount.currency);
@@ -194,12 +208,12 @@ export class LoanService {
     const principal = Number(principalAmount.amount);
     const numerator = periodRate * Math.pow(1 + periodRate, totalPayments);
     const denominator = Math.pow(1 + periodRate, totalPayments) - 1;
-    
+
     const payment = principal * (numerator / denominator);
-    
+
     // Round to nearest cent and convert back to BigInt
     const roundedPayment = Math.round(payment);
-    
+
     return new Money(BigInt(roundedPayment), principalAmount.currency);
   }
 
@@ -211,24 +225,24 @@ export class LoanService {
     principalAmount: Money,
     annualInterestRate: number,
     totalPayments: number,
-    paymentFrequency: PaymentFrequency
+    paymentFrequency: PaymentFrequency,
   ): Money {
     // Convert to payment period interest rate
     const periodsPerYear = this.getPeriodsPerYear(paymentFrequency);
     const periodRate = annualInterestRate / 100 / periodsPerYear;
-    
+
     // Principal portion (constant for each payment)
     const principalPerPayment = Number(principalAmount.amount) / totalPayments;
-    
+
     // First payment has the highest interest (on full principal)
     const firstInterestPayment = Number(principalAmount.amount) * periodRate;
-    
+
     // First payment is principal + interest
     const firstPayment = principalPerPayment + firstInterestPayment;
-    
+
     // Round to nearest cent and convert back to BigInt
     const roundedPayment = Math.round(firstPayment);
-    
+
     return new Money(BigInt(roundedPayment), principalAmount.currency);
   }
 
@@ -277,7 +291,7 @@ export class LoanService {
       }
 
       const schedule = this.calculateAmortizationSchedule(paymentPlan);
-      
+
       logger.debug('Generated amortization schedule', {
         accountId: accountId.toString(),
         totalPayments: schedule.schedule.length,
@@ -295,19 +309,26 @@ export class LoanService {
 
   private calculateAmortizationSchedule(paymentPlan: PaymentPlan): AmortizationSchedule {
     const schedule: PaymentScheduleEntry[] = [];
-    const principalMoney = new Money(paymentPlan.principalAmount, 'USD');
-    
+    // const _principalMoney = new Money(paymentPlan.principalAmount, 'USD');
+
     let remainingBalance = Number(paymentPlan.principalAmount);
     let totalInterest = 0;
     let totalPayments = 0;
 
     const periodsPerYear = this.getPeriodsPerYear(paymentPlan.paymentFrequency);
     const periodRate = paymentPlan.interestRate / 100 / periodsPerYear;
-    const totalPaymentsCount = this.calculateTotalPayments(paymentPlan.termMonths, paymentPlan.paymentFrequency);
+    const totalPaymentsCount = this.calculateTotalPayments(
+      paymentPlan.termMonths,
+      paymentPlan.paymentFrequency,
+    );
 
     // Calculate payment interval in days
-    const paymentIntervalDays = paymentPlan.paymentFrequency === 'WEEKLY' ? 7 : 
-                               paymentPlan.paymentFrequency === 'BI_WEEKLY' ? 14 : 30;
+    const paymentIntervalDays =
+      paymentPlan.paymentFrequency === 'WEEKLY'
+        ? 7
+        : paymentPlan.paymentFrequency === 'BI_WEEKLY'
+          ? 14
+          : 30;
 
     for (let i = 1; i <= totalPaymentsCount && remainingBalance > 0; i++) {
       let interestAmount: number;
@@ -319,7 +340,7 @@ export class LoanService {
         paymentAmount = Number(paymentPlan.monthlyPayment);
         interestAmount = remainingBalance * periodRate;
         principalAmount = paymentAmount - interestAmount;
-        
+
         // Ensure we don't pay more principal than remaining
         if (principalAmount > remainingBalance) {
           principalAmount = remainingBalance;
@@ -330,7 +351,7 @@ export class LoanService {
         principalAmount = Number(paymentPlan.principalAmount) / totalPaymentsCount;
         interestAmount = remainingBalance * periodRate;
         paymentAmount = principalAmount + interestAmount;
-        
+
         // Ensure we don't pay more principal than remaining
         if (principalAmount > remainingBalance) {
           principalAmount = remainingBalance;

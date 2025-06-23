@@ -1,14 +1,9 @@
-import { PaymentPlanRepository } from '@core-poc/core-services';
-import { PaymentProcessingService, AccountService } from '@core-poc/domain';
-
 import { PaymentPlanJob } from '../../../src/jobs/payment-plan.job.js';
-
 describe('PaymentPlanJob', () => {
-  let paymentPlanJob: PaymentPlanJob;
-  let mockPaymentPlanRepository: jest.Mocked<PaymentPlanRepository>;
-  let mockAccountService: jest.Mocked<AccountService>;
-  let mockPaymentProcessingService: jest.Mocked<PaymentProcessingService>;
-
+  let paymentPlanJob;
+  let mockPaymentPlanRepository;
+  let mockAccountService;
+  let mockPaymentProcessingService;
   beforeEach(() => {
     mockPaymentPlanRepository = {
       findPaymentsDue: jest.fn(),
@@ -18,8 +13,7 @@ describe('PaymentPlanJob', () => {
       findAll: jest.fn(),
       updateRemainingPayments: jest.fn(),
       delete: jest.fn(),
-    } as any;
-
+    };
     mockAccountService = {
       getAccountsByCustomer: jest.fn(),
       transfer: jest.fn(),
@@ -29,52 +23,42 @@ describe('PaymentPlanJob', () => {
       getAccountBalance: jest.fn(),
       getAccountMetadata: jest.fn(),
       updateAccountName: jest.fn(),
-    } as any;
-
+    };
     mockPaymentProcessingService = {
       processScheduledPayments: jest.fn(),
       processPaymentPlan: jest.fn(),
-    } as any;
-
+    };
     paymentPlanJob = new PaymentPlanJob(
       mockPaymentPlanRepository,
       mockAccountService,
       mockPaymentProcessingService,
     );
   });
-
   afterEach(() => {
     jest.clearAllMocks();
   });
-
   describe('processMonthlyPayments', () => {
     it('should process monthly payments successfully', async () => {
       const mockResults = [{ paymentProcessed: true, transferId: 123n, error: undefined }];
-
       mockPaymentProcessingService.processScheduledPayments.mockResolvedValue(mockResults);
-
       await paymentPlanJob.processMonthlyPayments();
-
       expect(mockPaymentProcessingService.processScheduledPayments).toHaveBeenCalledWith();
     });
-
     it('should handle processing errors gracefully', async () => {
       mockPaymentProcessingService.processScheduledPayments.mockRejectedValue(
         new Error('Processing failed'),
       );
-
       // Should not throw
       await expect(paymentPlanJob.processMonthlyPayments()).resolves.not.toThrow();
     });
   });
-
   describe('startMonthlyJob', () => {
     it('should initialize monthly job', () => {
       // The method should initialize without throwing
       expect(() => paymentPlanJob.startMonthlyJob()).not.toThrow();
-
       // Clean up after test
       paymentPlanJob.stopMonthlyJob();
     });
   });
 });
+//# sourceMappingURL=payment-plan.test.js.map

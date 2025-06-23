@@ -1,11 +1,17 @@
-import request from 'supertest';
 import express from 'express';
+import request from 'supertest';
+
 import { AccountController } from '../../src/controllers/account.controller';
 import { validateRequest, errorHandler } from '../../src/middleware/validation';
-import { CreateAccountSchema, TransferSchema, AccountIdParamSchema, CustomerIdParamSchema } from '../../src/validation/schemas';
+import { ServiceContainer } from '../../src/services/factory.js';
+import {
+  CreateAccountSchema,
+  TransferSchema,
+  AccountIdParamSchema,
+  CustomerIdParamSchema,
+} from '../../src/validation/schemas';
 import { resetTestData } from '../helpers/test-setup.js';
 import { getGlobalTestServices } from '../setup.js';
-import { ServiceContainer } from '../../src/services/factory.js';
 
 describe('Banking Workflows E2E', () => {
   let services: ServiceContainer;
@@ -14,34 +20,38 @@ describe('Banking Workflows E2E', () => {
   beforeAll(async () => {
     // Use global test services
     services = getGlobalTestServices();
-    
+
     const accountController = new AccountController(
       services.accountService,
       services.loanService,
-      services.transferRepository
+      services.transferRepository,
     );
 
     app = express();
     app.use(express.json());
-    
+
     // Add validation middleware for routes
-    app.post('/accounts', 
+    app.post(
+      '/accounts',
       validateRequest(CreateAccountSchema),
-      accountController.createAccount.bind(accountController)
+      accountController.createAccount.bind(accountController),
     );
-    app.get('/accounts/:accountId/balance', 
+    app.get(
+      '/accounts/:accountId/balance',
       validateRequest(AccountIdParamSchema, 'params'),
-      accountController.getAccountBalance.bind(accountController)
+      accountController.getAccountBalance.bind(accountController),
     );
-    app.post('/transfers', 
+    app.post(
+      '/transfers',
       validateRequest(TransferSchema),
-      accountController.transfer.bind(accountController)
+      accountController.transfer.bind(accountController),
     );
-    app.get('/customers/:customerId/accounts',
+    app.get(
+      '/customers/:customerId/accounts',
       validateRequest(CustomerIdParamSchema, 'params'),
-      accountController.getAccountsByCustomer.bind(accountController)
+      accountController.getAccountsByCustomer.bind(accountController),
     );
-    
+
     // Add error handling middleware (must be last)
     app.use(errorHandler);
   });
@@ -54,34 +64,38 @@ describe('Banking Workflows E2E', () => {
   describe('Complete Banking Scenario', () => {
     it('should handle a complete customer banking workflow', async () => {
       // 1. Create customer accounts
-      const savingsRequest = await request(app)
-        .post('/accounts')
-        .send({
-          type: 'DEPOSIT',
-          customerId: 'CUST001',
-          currency: 'USD',
-          initialBalance: '50000',
-        });
-        
+      const savingsRequest = await request(app).post('/accounts').send({
+        type: 'DEPOSIT',
+        customerId: 'CUST001',
+        currency: 'USD',
+        initialBalance: '50000',
+      });
+
       if (savingsRequest.status !== 201) {
-        console.error('Savings account creation failed:', savingsRequest.status, savingsRequest.body);
+        console.error(
+          'Savings account creation failed:',
+          savingsRequest.status,
+          savingsRequest.body,
+        );
       }
       expect(savingsRequest.status).toBe(201);
       const savingsResponse = savingsRequest;
 
-      const loanResponseRequest = await request(app)
-        .post('/accounts')
-        .send({
-          type: 'LOAN',
-          customerId: 'CUST001',
-          currency: 'USD',
-          principalAmount: '200000',
-          interestRate: '4.5',
-          termMonths: '360', // 30 years
-        });
-        
+      const loanResponseRequest = await request(app).post('/accounts').send({
+        type: 'LOAN',
+        customerId: 'CUST001',
+        currency: 'USD',
+        principalAmount: '200000',
+        interestRate: '4.5',
+        termMonths: '360', // 30 years
+      });
+
       if (loanResponseRequest.status !== 201) {
-        console.error('Loan account creation failed:', loanResponseRequest.status, loanResponseRequest.body);
+        console.error(
+          'Loan account creation failed:',
+          loanResponseRequest.status,
+          loanResponseRequest.body,
+        );
       }
       expect(loanResponseRequest.status).toBe(201);
       const loanResponse = loanResponseRequest;
@@ -104,13 +118,11 @@ describe('Banking Workflows E2E', () => {
       const savingsBalance = await request(app)
         .get(`/accounts/${savingsAccountId}/balance`)
         .expect(200);
-      
+
       expect(savingsBalance.body.balance).toBe('50000');
 
-      const loanBalance = await request(app)
-        .get(`/accounts/${loanAccountId}/balance`)
-        .expect(200);
-      
+      const loanBalance = await request(app).get(`/accounts/${loanAccountId}/balance`).expect(200);
+
       expect(loanBalance.body.balance).toBe('200000');
 
       // 3. Transfer funds from loan to savings (loan disbursement)
@@ -128,7 +140,7 @@ describe('Banking Workflows E2E', () => {
       const updatedSavingsBalance = await request(app)
         .get(`/accounts/${savingsAccountId}/balance`)
         .expect(200);
-      
+
       const updatedLoanBalance = await request(app)
         .get(`/accounts/${loanAccountId}/balance`)
         .expect(200);
@@ -168,7 +180,7 @@ describe('Banking Workflows E2E', () => {
 
       // 7. Make loan payment from savings account
       const monthlyPayment = loanResponse.body.monthlyPayment;
-      
+
       await request(app)
         .post('/transfers')
         .send({
@@ -191,7 +203,6 @@ describe('Banking Workflows E2E', () => {
       const expectedSavingsBalance = 250000n - BigInt(monthlyPayment);
       expect(finalSavingsBalance.body.balance).toBe(expectedSavingsBalance.toString());
       expect(finalLoanBalance.body.balance).toBe(monthlyPayment);
-
     }, 10000);
   });
 
@@ -233,16 +244,12 @@ describe('Banking Workflows E2E', () => {
         .expect(201);
 
       // Verify balances
-      const balanceA = await request(app)
-        .get(`/accounts/${accountA}/balance`)
-        .expect(200);
+      const balanceA = await request(app).get(`/accounts/${accountA}/balance`).expect(200);
 
-      const balanceB = await request(app)
-        .get(`/accounts/${accountB}/balance`)
-        .expect(200);
+      const balanceB = await request(app).get(`/accounts/${accountB}/balance`).expect(200);
 
       expect(balanceA.body.balance).toBe('12000'); // 15000 - 3000
-      expect(balanceB.body.balance).toBe('8000');  // 5000 + 3000
+      expect(balanceB.body.balance).toBe('8000'); // 5000 + 3000
 
       // Transfer back from B to A
       await request(app)
@@ -256,31 +263,25 @@ describe('Banking Workflows E2E', () => {
         .expect(201);
 
       // Final verification
-      const finalBalanceA = await request(app)
-        .get(`/accounts/${accountA}/balance`)
-        .expect(200);
+      const finalBalanceA = await request(app).get(`/accounts/${accountA}/balance`).expect(200);
 
-      const finalBalanceB = await request(app)
-        .get(`/accounts/${accountB}/balance`)
-        .expect(200);
+      const finalBalanceB = await request(app).get(`/accounts/${accountB}/balance`).expect(200);
 
       expect(finalBalanceA.body.balance).toBe('13500'); // 12000 + 1500
-      expect(finalBalanceB.body.balance).toBe('6500');  // 8000 - 1500
+      expect(finalBalanceB.body.balance).toBe('6500'); // 8000 - 1500
     }, 10000);
   });
 
   describe('Multi-Currency Scenario', () => {
     it('should handle accounts in different currencies', async () => {
       // Create accounts in different currencies
-      const usdResponse = await request(app)
-        .post('/accounts')
-        .send({
-          type: 'DEPOSIT',
-          customerId: 'MULTI1',
-          currency: 'USD',
-          initialBalance: '10000',
-        });
-        
+      const usdResponse = await request(app).post('/accounts').send({
+        type: 'DEPOSIT',
+        customerId: 'MULTI1',
+        currency: 'USD',
+        initialBalance: '10000',
+      });
+
       if (usdResponse.status !== 201) {
         console.error('USD account creation failed:', usdResponse.status, usdResponse.body);
       }
@@ -329,11 +330,10 @@ describe('Banking Workflows E2E', () => {
     }, 10000);
   });
 
-
   describe('Customer Account Management Scenario', () => {
     it('should list all accounts for a specific customer', async () => {
       const customerId = 'CUSTLIST';
-      
+
       // Create multiple accounts for the same customer
       const depositAccount = await request(app)
         .post('/accounts')
@@ -400,7 +400,7 @@ describe('Banking Workflows E2E', () => {
 
     it('should return empty array for customer with no accounts', async () => {
       const nonExistentCustomerId = 'NOACCNT';
-      
+
       const accountsResponse = await request(app)
         .get(`/customers/${nonExistentCustomerId}/accounts`)
         .expect(200);
@@ -412,24 +412,18 @@ describe('Banking Workflows E2E', () => {
     it('should handle customer ID validation', async () => {
       // Test invalid customer ID (too long - over 50 characters)
       const tooLongId = 'A'.repeat(51); // 51 characters, exceeds max of 50
-      await request(app)
-        .get(`/customers/${tooLongId}/accounts`)
-        .expect(400);
+      await request(app).get(`/customers/${tooLongId}/accounts`).expect(400);
 
       // Test invalid customer ID (invalid characters)
-      await request(app)
-        .get('/customers/cust@123/accounts')
-        .expect(400);
+      await request(app).get('/customers/cust@123/accounts').expect(400);
 
       // Test empty customer ID
-      await request(app)
-        .get('/customers//accounts')
-        .expect(404); // Route not found
+      await request(app).get('/customers//accounts').expect(404); // Route not found
     }, 10000);
 
     it('should return accounts ordered by creation date (newest first)', async () => {
       const customerId = 'CUSTORD';
-      
+
       // Create accounts with small delays to ensure different creation times
       const firstAccount = await request(app)
         .post('/accounts')

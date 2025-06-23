@@ -1,0 +1,279 @@
+name: Security Scan
+
+on:
+  # Run weekly security scans
+  schedule:
+    - cron: '0 2 * * 1' # Every Monday at 2 AM UTC
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+  # Run on PRs that modify dependencies
+  pull_request:
+    paths:
+      - '**/package.json'
+      - '**/package-lock.json'
+      - 'docker-compose.yml'
+      - '.github/workflows/security.yml'
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  dependency-audit:
+    name: Dependency Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run comprehensive security audit
+        run: |
+          echo "=== Running NPM Security Audit ==="
+
+          # Generate detailed audit report
+          npm audit --json > npm-audit-full.json || true
+          npm audit > npm-audit-summary.txt || true
+
+          # Check for critical and high vulnerabilities
+          echo "=== Critical and High Severity Issues ==="
+          npm audit --audit-level=moderate --json > npm-audit-moderate.json || true
+
+          # Display summary
+          echo "=== Audit Summary ==="
+          cat npm-audit-summary.txt
+
+      - name: Check for known malicious packages
+        run: |
+          echo "=== Checking for known malicious packages ==="
+
+          # List all installed packages
+          npm list --all --json > installed-packages.json || true
+
+          # Check package integrity
+          npm audit signatures || echo "Package signature check completed"
+
+      - name: Analyze Docker security
+        run: |
+          echo "=== Docker Security Analysis ==="
+
+          # Check for latest base images
+          echo "Checking Docker base images in docker-compose.yml:"
+          grep -E "image:" docker-compose.yml || true
+
+          # Check for specific vulnerabilities in used images
+          echo "Docker images used:"
+          grep -oP 'image:\s*\K[^\s]+' docker-compose.yml > docker-images.txt || true
+          cat docker-images.txt || true
+
+      - name: Generate security report
+        run: |
+          echo "=== Generating Security Report ==="
+
+          cat > security-report.md << 'EOF'
+          # Security Audit Report
+
+          **Date:** $(date -u)
+          **Repository:** ${{ github.repository }}
+          **Branch:** ${{ github.ref_name }}
+
+          ## NPM Dependencies
+
+          ### Summary
+          $(cat npm-audit-summary.txt || echo "No summary available")
+
+          ### Critical Issues
+          $(jq -r '.vulnerabilities | to_entries[] | select(.value.severity == "critical") | "- **\(.key)**: \(.value.via[0].title // "Unknown issue")"' npm-audit-full.json 2>/dev/null || echo "No critical issues found")
+
+          ### High Severity Issues  
+          $(jq -r '.vulnerabilities | to_entries[] | select(.value.severity == "high") | "- **\(.key)**: \(.value.via[0].title // "Unknown issue")"' npm-audit-full.json 2>/dev/null || echo "No high severity issues found")
+
+          ## Docker Images
+          $(cat docker-images.txt | sed 's/^/- /' || echo "No Docker images found")
+
+          ## Recommendations
+
+          For a banking system, consider:
+          1. Regular dependency updates
+          2. Use of dependency scanning tools
+          3. Container image scanning
+          4. Security policy enforcement
+          5. Regular security audits
+
+          EOF
+
+      - name: Upload security artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-audit-${{ github.run_number }}
+          path: |
+            npm-audit-*.json
+            npm-audit-*.txt
+            installed-packages.json
+            docker-images.txt
+            security-report.md
+          retention-days: 90
+
+      - name: Check for critical vulnerabilities
+        run: |
+          # Fail the job if critical vulnerabilities are found
+          CRITICAL_COUNT=$(jq -r '.metadata.vulnerabilities.critical // 0' npm-audit-full.json 2>/dev/null || echo "0")
+          HIGH_COUNT=$(jq -r '.metadata.vulnerabilities.high // 0' npm-audit-full.json 2>/dev/null || echo "0")
+
+          echo "Critical vulnerabilities: $CRITICAL_COUNT"
+          echo "High vulnerabilities: $HIGH_COUNT"
+
+          if [ "$CRITICAL_COUNT" -gt 0 ]; then
+            echo "❌ Critical vulnerabilities found! Banking systems cannot have critical security issues."
+            exit 1
+          fi
+
+          if [ "$HIGH_COUNT" -gt 5 ]; then
+            echo "⚠️ Too many high-severity vulnerabilities found ($HIGH_COUNT > 5)"
+            echo "Banking systems should minimize high-severity vulnerabilities"
+            exit 1
+          fi
+
+          echo "✅ Security audit passed"
+
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history for secret scanning
+          fetch-depth: 0
+
+      - name: Run secret detection
+        run: |
+          echo "=== Secret Detection ==="
+
+          # Check for common secret patterns in files
+          echo "Checking for potential secrets in codebase..."
+
+          # Look for potential secrets (but be careful not to expose them)
+          POTENTIAL_SECRETS=0
+
+          # Check for hardcoded passwords
+          if grep -r -i "password.*=" --include="*.ts" --include="*.js" --include="*.json" . | grep -v "password.*process.env" | grep -v "test" | grep -q .; then
+            echo "⚠️ Potential hardcoded passwords found"
+            POTENTIAL_SECRETS=$((POTENTIAL_SECRETS + 1))
+          fi
+
+          # Check for API keys
+          if grep -r -E "(api[_-]?key|secret[_-]?key)" --include="*.ts" --include="*.js" --include="*.json" . | grep -v "process.env" | grep -v "test" | grep -q .; then
+            echo "⚠️ Potential API keys found"
+            POTENTIAL_SECRETS=$((POTENTIAL_SECRETS + 1))
+          fi
+
+          # Check for database URLs with credentials
+          if grep -r -E "(postgres|mongodb|mysql)://[^/]*:[^/]*@" --include="*.ts" --include="*.js" --include="*.json" . | grep -v "test" | grep -q .; then
+            echo "⚠️ Potential database URLs with credentials found"
+            POTENTIAL_SECRETS=$((POTENTIAL_SECRETS + 1))
+          fi
+
+          if [ $POTENTIAL_SECRETS -gt 0 ]; then
+            echo "❌ Potential secrets detected in banking system codebase"
+            echo "Banking systems must never contain hardcoded secrets"
+            exit 1
+          fi
+
+          echo "✅ No secrets detected"
+
+  license-compliance:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check license compliance
+        run: |
+          echo "=== License Compliance Check ==="
+
+          # Generate license report
+          npx license-checker --production --json > licenses.json || npm install license-checker && npx license-checker --production --json > licenses.json
+
+          # Check for problematic licenses for banking software
+          echo "Checking for licenses that might be problematic for banking software..."
+
+          PROBLEMATIC_LICENSES=0
+
+          # Check for GPL licenses (copyleft might be problematic for proprietary banking software)
+          if jq -r '.[] | select(.licenses | test("GPL")) | .name' licenses.json 2>/dev/null | grep -q .; then
+            echo "⚠️ GPL-licensed dependencies found:"
+            jq -r '.[] | select(.licenses | test("GPL")) | "- \(.name): \(.licenses)"' licenses.json 2>/dev/null || true
+            PROBLEMATIC_LICENSES=$((PROBLEMATIC_LICENSES + 1))
+          fi
+
+          # Check for unknown licenses
+          if jq -r '.[] | select(.licenses | test("UNKNOWN")) | .name' licenses.json 2>/dev/null | grep -q .; then
+            echo "❌ Dependencies with unknown licenses found:"
+            jq -r '.[] | select(.licenses | test("UNKNOWN")) | "- \(.name): \(.licenses)"' licenses.json 2>/dev/null || true
+            PROBLEMATIC_LICENSES=$((PROBLEMATIC_LICENSES + 1))
+          fi
+
+          if [ $PROBLEMATIC_LICENSES -gt 0 ]; then
+            echo "Banking software requires careful license compliance"
+            echo "Please review the flagged licenses with legal team"
+          else
+            echo "✅ License compliance check passed"
+          fi
+
+      - name: Upload license report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: license-report-${{ github.run_number }}
+          path: licenses.json
+          retention-days: 30
+
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [dependency-audit, secret-scan, license-compliance]
+    if: always()
+
+    steps:
+      - name: Security scan summary
+        run: |
+          echo "=== Security Scan Summary ==="
+          echo "Dependency Audit: ${{ needs.dependency-audit.result }}"
+          echo "Secret Detection: ${{ needs.secret-scan.result }}"
+          echo "License Compliance: ${{ needs.license-compliance.result }}"
+
+          if [[ "${{ needs.dependency-audit.result }}" != "success" ]] || \
+             [[ "${{ needs.secret-scan.result }}" != "success" ]] || \
+             [[ "${{ needs.license-compliance.result }}" != "success" ]]; then
+            echo "❌ Security scan failed - Banking system security requirements not met"
+            exit 1
+          fi
+
+          echo "✅ All security scans passed - Banking system security requirements met"

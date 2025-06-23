@@ -101,9 +101,6 @@ TigerBeetle streams the following event types:
 ### Environment Variables
 
 ```bash
-# Enable/disable CDC
-CDC_ENABLED=true
-
 # RabbitMQ connection
 AMQP_URL=amqp://guest:guest@localhost:5672
 
@@ -251,14 +248,6 @@ Events are logged with structured data:
 }
 ```
 
-## Testing
-
-CDC is disabled in test environments by default. To test CDC functionality:
-
-1. Set `CDC_ENABLED=true` in test config
-2. Use test containers for RabbitMQ
-3. Mock event handlers for unit tests
-
 ## Security Considerations
 
 - Use secure AMQP connections (amqps://) in production
@@ -278,7 +267,6 @@ CDC is disabled in test environments by default. To test CDC functionality:
 ### Common Issues
 
 1. **CDC Not Starting**
-   - Check `CDC_ENABLED=true`
    - Verify RabbitMQ is running
    - Check AMQP connection URL
 

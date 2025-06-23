@@ -72,7 +72,8 @@ export const ToggleableId: React.FC<ToggleableIdProps> = ({
   }, [disabled, showFull, isControlled, onToggle, type]);
 
   const handleCopy = useCallback(async () => {
-    if (!id || !navigator.clipboard) return;
+    if (!id) return;
+    if (!navigator.clipboard) return;
 
     try {
       await navigator.clipboard.writeText(id);

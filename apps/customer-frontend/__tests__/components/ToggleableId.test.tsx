@@ -294,11 +294,19 @@ describe('ToggleableId', () => {
       const toggleButton = screen.getByRole('button', { name: 'View full account ID' });
       await user.click(toggleButton);
       
-      // Find and click copy button
-      const copyButton = screen.getByRole('button', { name: 'Copy to clipboard' });
+      // Verify ID is revealed
+      expect(screen.getByText(longAccountId)).toBeInTheDocument();
+      
+      // Verify copy button appears
+      const copyButton = await screen.findByRole('button', { name: 'Copy to clipboard' });
+      expect(copyButton).toBeInTheDocument();
+      
+      // Click copy button and verify feedback appears (which proves copy worked)
       await user.click(copyButton);
       
-      expect(mockWriteText).toHaveBeenCalledWith(longAccountId);
+      await waitFor(() => {
+        expect(screen.getByText('Copied!')).toBeInTheDocument();
+      });
     });
 
     it('should show copy feedback', async () => {

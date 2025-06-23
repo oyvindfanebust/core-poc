@@ -3,23 +3,25 @@ import express from 'express';
 import { AccountController } from '../../src/controllers/account.controller';
 import { validateRequest, errorHandler } from '../../src/middleware/validation';
 import { CreateAccountSchema, TransferSchema } from '../../src/validation/schemas';
-import { createTestContext, cleanupTestContext, resetTestData, waitForTransferRecord, TestContext } from '../helpers/test-setup.js';
+import { resetTestData, waitForTransferRecord } from '../helpers/test-setup.js';
+import { getGlobalTestServices } from '../setup.js';
 import { DatabaseConnection } from '@core-poc/core-services';
+import { ServiceContainer } from '../../src/services/factory.js';
 
 describe('CDC Transfer Integration', () => {
-  let context: TestContext;
+  let services: ServiceContainer;
   let app: express.Application;
   let database: DatabaseConnection;
 
   beforeAll(async () => {
-    // Create test context with CDC enabled
-    context = await createTestContext();
+    // Use global test services
+    services = getGlobalTestServices();
     database = DatabaseConnection.getInstance();
     
     const accountController = new AccountController(
-      context.services.accountService,
-      context.services.loanService,
-      context.services.transferRepository
+      services.accountService,
+      services.loanService,
+      services.transferRepository
     );
 
     app = express();
@@ -38,11 +40,7 @@ describe('CDC Transfer Integration', () => {
     );
     
     app.use(errorHandler);
-  }, 30000);
-
-  afterAll(async () => {
-    await cleanupTestContext();
-  }, 10000);
+  });
 
   beforeEach(async () => {
     await resetTestData();
@@ -218,7 +216,7 @@ describe('CDC Transfer Integration', () => {
   describe('CDC Health Check', () => {
     it('should verify CDC manager is connected', () => {
       // Verify CDC manager is initialized and connected
-      expect(context.services.cdcManager.isConnected).toBe(true);
+      expect(services.cdcManager.isConnected).toBe(true);
     });
   });
 });

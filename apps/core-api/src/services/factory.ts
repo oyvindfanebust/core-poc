@@ -27,6 +27,7 @@ export interface ServiceContainer {
 
 export class ServiceFactory {
   private static instance: ServiceContainer | null = null;
+  private static testInstance: ServiceContainer | null = null;
 
   static async createServices(): Promise<ServiceContainer> {
     if (ServiceFactory.instance) {
@@ -121,6 +122,10 @@ export class ServiceFactory {
   }
 
   static async createTestServices(): Promise<ServiceContainer> {
+    if (ServiceFactory.testInstance) {
+      return ServiceFactory.testInstance;
+    }
+
     try {
       logger.info('Initializing test services...');
 
@@ -160,7 +165,7 @@ export class ServiceFactory {
       const cdcManager = new CDCManagerService(config);
       await cdcManager.initialize();
 
-      const container = {
+      ServiceFactory.testInstance = {
         accountService,
         loanService,
         paymentProcessingService,
@@ -171,7 +176,7 @@ export class ServiceFactory {
       };
 
       logger.info('Test services initialized successfully');
-      return container;
+      return ServiceFactory.testInstance;
     } catch (error) {
       logger.error('Failed to initialize test services', { error });
       throw error;
@@ -179,23 +184,26 @@ export class ServiceFactory {
   }
 
   static async cleanup(): Promise<void> {
-    if (ServiceFactory.instance) {
+    const activeInstance = ServiceFactory.instance || ServiceFactory.testInstance;
+    
+    if (activeInstance) {
       try {
         logger.info('Cleaning up services...');
         
         // Close TigerBeetle connection
-        await ServiceFactory.instance.tigerBeetleService.close();
+        await activeInstance.tigerBeetleService.close();
         
         // Shutdown CDC Manager
-        await ServiceFactory.instance.cdcManager.shutdown();
+        await activeInstance.cdcManager.shutdown();
         
         // Close database connection
-        await ServiceFactory.instance.database.close();
+        await activeInstance.database.close();
         
         // Reset database singleton
         DatabaseConnection.resetInstance();
         
         ServiceFactory.instance = null;
+        ServiceFactory.testInstance = null;
         logger.info('Services cleaned up successfully');
       } catch (error) {
         logger.error('Failed to cleanup services', { error });

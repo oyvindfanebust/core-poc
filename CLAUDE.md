@@ -6,8 +6,8 @@ Banking ledger PoC with Node.js, TypeScript, TigerBeetle, and PostgreSQL.
 ```bash
 npm run dev:all          # Start all services
 npm run build            # TypeScript check (run before commits)
-npm run test:core-api    # Test core API
-npm run test:batch-processor  # Test batch processor
+npm test                 # Fast tests (unit + fast integration)
+npm run test:all         # All tests including slow integration
 docker-compose up -d     # Start infrastructure
 direnv allow            # Reload env after .envrc changes
 ```
@@ -15,7 +15,7 @@ direnv allow            # Reload env after .envrc changes
 ## ✅ Task Completion Checklist
 **Before marking ANY task complete:**
 1. `npm run build` - TypeScript compiles
-2. `npm run test:*` - All tests pass
+2. `npm test` - Fast tests pass (or `npm run test:all` for full coverage)
 3. Frontend changes → Add translations (`/en`, `/no`, `/sr`)
 4. API changes → Update docs
 5. TodoWrite tasks → Mark complete

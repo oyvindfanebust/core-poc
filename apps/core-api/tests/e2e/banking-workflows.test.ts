@@ -3,20 +3,22 @@ import express from 'express';
 import { AccountController } from '../../src/controllers/account.controller';
 import { validateRequest, errorHandler } from '../../src/middleware/validation';
 import { CreateAccountSchema, TransferSchema, AccountIdParamSchema, CustomerIdParamSchema } from '../../src/validation/schemas';
-import { createTestContext, cleanupTestContext, resetTestData, TestContext } from '../helpers/test-setup.js';
+import { resetTestData } from '../helpers/test-setup.js';
+import { getGlobalTestServices } from '../setup.js';
+import { ServiceContainer } from '../../src/services/factory.js';
 
 describe('Banking Workflows E2E', () => {
-  let context: TestContext;
+  let services: ServiceContainer;
   let app: express.Application;
 
   beforeAll(async () => {
-    // Create test context (external services assumed to be running)
-    context = await createTestContext();
+    // Use global test services
+    services = getGlobalTestServices();
     
     const accountController = new AccountController(
-      context.services.accountService,
-      context.services.loanService,
-      context.services.transferRepository
+      services.accountService,
+      services.loanService,
+      services.transferRepository
     );
 
     app = express();
@@ -42,11 +44,7 @@ describe('Banking Workflows E2E', () => {
     
     // Add error handling middleware (must be last)
     app.use(errorHandler);
-  }, 30000);
-
-  afterAll(async () => {
-    await cleanupTestContext();
-  }, 10000);
+  });
 
   beforeEach(async () => {
     // Reset test data between tests for isolation

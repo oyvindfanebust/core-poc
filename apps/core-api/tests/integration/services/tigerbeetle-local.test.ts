@@ -1,20 +1,16 @@
 import { TigerBeetleService } from '@core-poc/core-services';
-import { createTestContext, cleanupTestContext, resetTestData, TestContext } from '../../helpers/test-setup.js';
+import { resetTestData } from '../../helpers/test-setup.js';
+import { getGlobalTestServices } from '../../setup.js';
 import { testCustomers, testAmounts } from '../../fixtures/test-data.js';
 
 describe('TigerBeetleService Integration', () => {
-  let context: TestContext;
   let tigerBeetleService: TigerBeetleService;
 
   beforeAll(async () => {
-    // Create test context (external services assumed to be running)
-    context = await createTestContext();
-    tigerBeetleService = context.services.tigerBeetleService;
-  }, 20000);
-
-  afterAll(async () => {
-    await cleanupTestContext();
-  }, 10000);
+    // Use global test services (initialized once in setup.ts)
+    const services = getGlobalTestServices();
+    tigerBeetleService = services.tigerBeetleService;
+  });
 
   beforeEach(async () => {
     // Reset test data between tests for isolation

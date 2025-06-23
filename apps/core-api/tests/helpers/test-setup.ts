@@ -21,7 +21,9 @@ export function loadTestEnvironment(): void {
     // Database Configuration (using external PostgreSQL instance)
     process.env.DB_HOST = 'localhost';
     process.env.DB_PORT = '5432';
-    process.env.DB_NAME = 'banking_poc_test';
+    // Create unique database name per Jest worker to avoid conflicts
+    const workerId = process.env.JEST_WORKER_ID || '1';
+    process.env.DB_NAME = `banking_poc_test_${workerId}`;
     process.env.DB_USER = 'postgres';
     process.env.DB_PASSWORD = 'postgres';
     process.env.DB_POOL_SIZE = '5';
@@ -100,10 +102,27 @@ export async function cleanTestDatabase(): Promise<void> {
     
     const testDbName = process.env.DB_NAME;
     
+    // Close any existing database connections to the test database
+    try {
+      const existingDb = DatabaseConnection.getInstance();
+      await existingDb.close();
+      DatabaseConnection.resetInstance();
+    } catch (error) {
+      // Ignore if no connection exists
+      logger.debug('No existing database connection to close', { error });
+    }
+    
     // Connect to postgres database to drop/create test database
     process.env.DB_NAME = 'postgres';
     
     let adminDatabase = DatabaseConnection.getInstance();
+    
+    // Force close all connections to the test database before dropping
+    await adminDatabase.query(`
+      SELECT pg_terminate_backend(pid) 
+      FROM pg_stat_activity 
+      WHERE datname = '${testDbName}' AND pid <> pg_backend_pid()
+    `);
     
     // Drop and recreate test database for clean state
     await adminDatabase.query(`DROP DATABASE IF EXISTS ${testDbName}`);
@@ -130,7 +149,7 @@ export async function cleanTestDatabase(): Promise<void> {
  */
 export async function waitForTigerBeetle(maxRetries = 10, delayMs = 500): Promise<void> {
   for (let i = 0; i < maxRetries; i++) {
-    let testClient = null;
+    let testClient: any = null;
     try {
       const address = process.env.TIGERBEETLE_ADDRESSES || '6000';
       testClient = createClient({
@@ -141,6 +160,10 @@ export async function waitForTigerBeetle(maxRetries = 10, delayMs = 500): Promis
       // Test the connection
       await testClient.lookupAccounts([1n]);
       
+      // Clean up test client immediately after successful test
+      await testClient.close();
+      testClient = null;
+      
       logger.debug('TigerBeetle is ready');
       return;
     } catch (error) {
@@ -149,13 +172,15 @@ export async function waitForTigerBeetle(maxRetries = 10, delayMs = 500): Promis
       });
       await new Promise(resolve => setTimeout(resolve, delayMs));
     } finally {
-      // Clean up test client to avoid open handles
+      // Cleanup any remaining test client (in case of error)
       if (testClient) {
         try {
-          testClient = null;
+          await testClient.close();
         } catch (e) {
-          // Ignore cleanup errors
+          // Ignore cleanup errors - connection might already be closed
+          logger.debug('Error during TigerBeetle test client cleanup', { error: e });
         }
+        testClient = null;
       }
     }
   }

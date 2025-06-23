@@ -64,7 +64,15 @@ jobs:
         run: npm ci
 
       - name: TypeScript compilation check
-        run: npm run build
+        run: |
+          # Build packages in dependency order
+          npm run build --workspace=@core-poc/shared
+          npm run build --workspace=@core-poc/eslint-config
+          npm run build --workspace=@core-poc/core-services
+          npm run build --workspace=@core-poc/domain
+          npm run build --workspace=@core-poc/batch-processor
+          npm run build --workspace=@core-poc/core-api
+          npm run build --workspace=@core-poc/customer-frontend
 
       - name: Code formatting check
         run: npm run format:check
@@ -166,8 +174,14 @@ jobs:
         run: |
           echo "Building production release ${{ steps.version.outputs.version }}"
 
-          # Build all workspaces for production
-          NODE_ENV=production npm run build
+          # Build all workspaces for production in dependency order
+          NODE_ENV=production npm run build --workspace=@core-poc/shared
+          NODE_ENV=production npm run build --workspace=@core-poc/eslint-config
+          NODE_ENV=production npm run build --workspace=@core-poc/core-services
+          NODE_ENV=production npm run build --workspace=@core-poc/domain
+          NODE_ENV=production npm run build --workspace=@core-poc/batch-processor
+          NODE_ENV=production npm run build --workspace=@core-poc/core-api
+          NODE_ENV=production npm run build --workspace=@core-poc/customer-frontend
 
           # Create release directory structure
           mkdir -p release-artifacts

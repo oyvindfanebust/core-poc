@@ -126,8 +126,13 @@
     "createFirst": "Креирајте свој први рачун",
     "currentBalance": "Тренутно стање",
     "accountId": "ИД рачуна",
+    "editName": "Измени назив рачуна",
+    "saveName": "Сачувај назив рачуна",
+    "cancelEdit": "Откажи измену",
+    "accountNamePlaceholder": "Унесите назив рачуна",
     "errors": {
-      "loadFailed": "Неуспешно учитавање рачуна. Молимо покушајте поново."
+      "loadFailed": "Неуспешно учитавање рачуна. Молимо покушајте поново.",
+      "updateNameFailed": "Неуспешна измена назива рачуна. Молимо покушајте поново."
     }
   },
   "accountDetails": {
@@ -144,6 +149,10 @@
     "receivedFrom": "Примљено од",
     "sentTo": "Послато за",
     "transferButton": "Пренос",
+    "viewFullId": "Прикажи пун ИД рачуна",
+    "transactionReference": "Референца",
+    "viewDetails": "Прикажи детаље",
+    "accountNickname": "Назив рачуна",
     "accountType": {
       "DEPOSIT": "Депозитни рачун",
       "LOAN": "Кредитни рачун",
@@ -153,5 +162,23 @@
       "loadFailed": "Неуспешно учитавање детаља рачуна. Молимо покушајте поново.",
       "notFound": "Рачун није пронађен"
     }
+  },
+  "transactions": {
+    "categories": {
+      "transfer": "Пренос",
+      "deposit": "Депозит",
+      "withdrawal": "Подизање",
+      "payment": "Плаћање"
+    },
+    "status": {
+      "completed": "Завршено",
+      "pending": "На чекању",
+      "failed": "Неуспешно"
+    }
+  },
+  "tooltips": {
+    "accountId": "Ваш јединствени идентификатор рачуна",
+    "transactionId": "Референтни број трансакције",
+    "balance": "Тренутно доступно стање"
   }
 }

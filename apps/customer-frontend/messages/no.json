@@ -149,6 +149,10 @@
     "receivedFrom": "Mottatt fra",
     "sentTo": "Sendt til",
     "transferButton": "Overfør",
+    "viewFullId": "Vis full konto-ID",
+    "transactionReference": "Referanse",
+    "viewDetails": "Vis detaljer",
+    "accountNickname": "Kontonavn",
     "accountType": {
       "DEPOSIT": "Innskuddskonto",
       "LOAN": "Lånekonto",
@@ -158,5 +162,23 @@
       "loadFailed": "Kunne ikke laste kontodetaljer. Vennligst prøv igjen.",
       "notFound": "Konto ikke funnet"
     }
+  },
+  "transactions": {
+    "categories": {
+      "transfer": "Overføring",
+      "deposit": "Innskudd",
+      "withdrawal": "Uttak",
+      "payment": "Betaling"
+    },
+    "status": {
+      "completed": "Fullført",
+      "pending": "Venter",
+      "failed": "Mislyktes"
+    }
+  },
+  "tooltips": {
+    "accountId": "Din unike kontoidentifikator",
+    "transactionId": "Transaksjonsreferansenummer",
+    "balance": "Nåværende tilgjengelig saldo"
   }
 }

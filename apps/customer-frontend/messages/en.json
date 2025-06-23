@@ -149,6 +149,10 @@
     "receivedFrom": "Received from",
     "sentTo": "Sent to",
     "transferButton": "Transfer",
+    "viewFullId": "View full account ID",
+    "transactionReference": "Reference",
+    "viewDetails": "View details",
+    "accountNickname": "Account nickname",
     "accountType": {
       "DEPOSIT": "Deposit Account",
       "LOAN": "Loan Account",
@@ -158,5 +162,23 @@
       "loadFailed": "Failed to load account details. Please try again.",
       "notFound": "Account not found"
     }
+  },
+  "transactions": {
+    "categories": {
+      "transfer": "Transfer",
+      "deposit": "Deposit",
+      "withdrawal": "Withdrawal",
+      "payment": "Payment"
+    },
+    "status": {
+      "completed": "Completed",
+      "pending": "Pending",
+      "failed": "Failed"
+    }
+  },
+  "tooltips": {
+    "accountId": "Your unique account identifier",
+    "transactionId": "Transaction reference number",
+    "balance": "Current available balance"
   }
 }

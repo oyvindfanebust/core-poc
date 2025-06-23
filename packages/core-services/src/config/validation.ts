@@ -22,7 +22,6 @@ const ConfigSchema = z.object({
   PORT: z.string().transform(val => parseInt(val)).pipe(z.number().min(1).max(65535)).default('7001'),
 
   // CDC/AMQP
-  CDC_ENABLED: z.string().transform(val => val.toLowerCase() === 'true').pipe(z.boolean()).default('false'),
   AMQP_URL: z.string().url().default('amqp://guest:guest@localhost:5672'),
   CDC_EXCHANGE: z.string().min(1).default('banking-events'),
   CDC_QUEUE: z.string().min(1).default('banking-queue'),

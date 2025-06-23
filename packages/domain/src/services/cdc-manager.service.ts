@@ -5,7 +5,6 @@ import { logger } from '@core-poc/core-services';
 
 interface Config {
   cdc: {
-    enabled: boolean;
     amqpUrl: string;
     exchange: string;
     queue: string;
@@ -25,10 +24,6 @@ export class CDCManagerService {
   }
 
   async initialize(): Promise<void> {
-    if (!this.config.cdc.enabled) {
-      logger.info('CDC is disabled, skipping CDC service initialization');
-      return;
-    }
 
     try {
       logger.info('Initializing CDC Manager...');
@@ -107,10 +102,6 @@ export class CDCManagerService {
 
   get isConnected(): boolean {
     return this.cdcService?.connected ?? false;
-  }
-
-  get isEnabled(): boolean {
-    return this.config.cdc.enabled;
   }
 
   // Method to get audit trail (exposed from audit handler)

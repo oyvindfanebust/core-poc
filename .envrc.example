@@ -16,5 +16,12 @@ export TIGERBEETLE_ADDRESSES=6000
 export NODE_ENV=development
 export PORT=7001
 
+# CDC Configuration
+export AMQP_URL=amqp://guest:guest@localhost:5672
+export CDC_EXCHANGE=banking-events
+export CDC_QUEUE=banking-queue
+export CDC_ROUTING_KEYS=#
+export CDC_AUTO_ACK=false
+
 # Logging Configuration
 export LOG_LEVEL=debug

@@ -1,20 +1,16 @@
 import request from 'supertest';
 import express from 'express';
 import { AccountController } from '../../src/controllers/account.controller';
-import { validateRequest } from '../../src/middleware/validation';
+import { validateRequest, errorHandler } from '../../src/middleware/validation';
 import { CreateAccountSchema, TransferSchema, AccountIdParamSchema, CustomerIdParamSchema } from '../../src/validation/schemas';
-import { createTestContext, cleanupTestContext, TestContext } from '../helpers/test-utils.js';
-import { setupTestTigerBeetle, teardownTestTigerBeetle } from '../helpers/test-tigerbeetle.js';
+import { createTestContext, cleanupTestContext, resetTestData, TestContext } from '../helpers/test-setup.js';
 
 describe('Banking Workflows E2E', () => {
   let context: TestContext;
   let app: express.Application;
 
   beforeAll(async () => {
-    // Setup TigerBeetle container first
-    await setupTestTigerBeetle();
-    
-    // Then create test context
+    // Create test context (external services assumed to be running)
     context = await createTestContext();
     
     const accountController = new AccountController(
@@ -43,12 +39,19 @@ describe('Banking Workflows E2E', () => {
       validateRequest(CustomerIdParamSchema, 'params'),
       accountController.getAccountsByCustomer.bind(accountController)
     );
-  }, 60000);
+    
+    // Add error handling middleware (must be last)
+    app.use(errorHandler);
+  }, 30000);
 
   afterAll(async () => {
-    await cleanupTestContext(context);
-    await teardownTestTigerBeetle();
-  }, 30000);
+    await cleanupTestContext();
+  }, 10000);
+
+  beforeEach(async () => {
+    // Reset test data between tests for isolation
+    await resetTestData();
+  });
 
   describe('Complete Banking Scenario', () => {
     it('should handle a complete customer banking workflow', async () => {
@@ -191,7 +194,7 @@ describe('Banking Workflows E2E', () => {
       expect(finalSavingsBalance.body.balance).toBe(expectedSavingsBalance.toString());
       expect(finalLoanBalance.body.balance).toBe(monthlyPayment);
 
-    });
+    }, 10000);
   });
 
   describe('Multi-Customer Transfer Scenario', () => {
@@ -265,7 +268,7 @@ describe('Banking Workflows E2E', () => {
 
       expect(finalBalanceA.body.balance).toBe('13500'); // 12000 + 1500
       expect(finalBalanceB.body.balance).toBe('6500');  // 8000 - 1500
-    });
+    }, 10000);
   });
 
   describe('Multi-Currency Scenario', () => {
@@ -325,7 +328,7 @@ describe('Banking Workflows E2E', () => {
 
       // Note: Cross-currency transfers would require exchange rate handling
       // which is not implemented in this POC, but accounts can exist independently
-    });
+    }, 10000);
   });
 
 
@@ -395,7 +398,7 @@ describe('Banking Workflows E2E', () => {
       expect(accountIds).toContain(depositAccount.body.accountId);
       expect(accountIds).toContain(loanAccount.body.accountId);
       expect(accountIds).toContain(creditAccount.body.accountId);
-    });
+    }, 10000);
 
     it('should return empty array for customer with no accounts', async () => {
       const nonExistentCustomerId = 'NOACCNT';
@@ -406,7 +409,7 @@ describe('Banking Workflows E2E', () => {
 
       expect(accountsResponse.body).toHaveLength(0);
       expect(Array.isArray(accountsResponse.body)).toBe(true);
-    });
+    }, 10000);
 
     it('should handle customer ID validation', async () => {
       // Test invalid customer ID (too long - over 50 characters)
@@ -424,7 +427,7 @@ describe('Banking Workflows E2E', () => {
       await request(app)
         .get('/customers//accounts')
         .expect(404); // Route not found
-    });
+    }, 10000);
 
     it('should return accounts ordered by creation date (newest first)', async () => {
       const customerId = 'CUSTORD';
@@ -482,6 +485,6 @@ describe('Banking Workflows E2E', () => {
 
       // Verify the newest account is first
       expect(accounts[0].accountId).toBe(thirdAccount.body.accountId);
-    });
+    }, 10000);
   });
 });

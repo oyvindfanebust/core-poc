@@ -17,7 +17,6 @@ export interface Config {
     connectionTimeout: number;
   };
   cdc: {
-    enabled: boolean;
     amqpUrl: string;
     exchange: string;
     queue: string;
@@ -54,7 +53,6 @@ export const getConfig = (): Config => {
       connectionTimeout: envConfig.DB_CONNECTION_TIMEOUT,
     },
     cdc: {
-      enabled: envConfig.CDC_ENABLED,
       amqpUrl: envConfig.AMQP_URL,
       exchange: envConfig.CDC_EXCHANGE,
       queue: envConfig.CDC_QUEUE,
@@ -69,31 +67,31 @@ export const getConfig = (): Config => {
 };
 
 export const getTestConfig = (tigerbeetlePort?: number): Config => {
+  // For test mode, use environment variables if available, otherwise fall back to defaults
   return {
     port: 0, // Random port for tests
     tigerbeetle: {
-      address: tigerbeetlePort ? `${tigerbeetlePort}` : '6000',
-      clusterId: 0n,
+      address: process.env.TIGERBEETLE_ADDRESSES || tigerbeetlePort?.toString() || '6000',
+      clusterId: BigInt(process.env.TIGERBEETLE_CLUSTER_ID || '0'),
     },
     database: {
-      host: 'localhost',
-      port: 5432,
-      name: 'banking_poc_test',
-      user: 'postgres',
-      password: 'postgres',
-      poolSize: 5,
-      idleTimeout: 30000,
-      connectionTimeout: 2000,
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT || '5432'),
+      name: process.env.DB_NAME || 'banking_poc_test',
+      user: process.env.DB_USER || 'postgres',
+      password: process.env.DB_PASSWORD || 'postgres',
+      poolSize: parseInt(process.env.DB_POOL_SIZE || '5'),
+      idleTimeout: parseInt(process.env.DB_IDLE_TIMEOUT || '30000'),
+      connectionTimeout: parseInt(process.env.DB_CONNECTION_TIMEOUT || '2000'),
     },
     cdc: {
-      enabled: false, // Disable CDC in tests by default
-      amqpUrl: 'amqp://guest:guest@localhost:5672',
-      exchange: 'test-banking-events',
-      queue: 'test-banking-queue',
-      routingKeys: ['#'],
-      autoAck: true,
+      amqpUrl: process.env.AMQP_URL || 'amqp://guest:guest@localhost:5672',
+      exchange: process.env.CDC_EXCHANGE || 'test-banking-events',
+      queue: process.env.CDC_QUEUE || 'test-banking-queue',
+      routingKeys: (process.env.CDC_ROUTING_KEYS || '#').split(','),
+      autoAck: process.env.CDC_AUTO_ACK === 'true',
     },
-    env: 'test',
-    logLevel: 'error', // Reduce noise in tests
+    env: process.env.NODE_ENV || 'test',
+    logLevel: process.env.LOG_LEVEL || 'error',
   };
 };

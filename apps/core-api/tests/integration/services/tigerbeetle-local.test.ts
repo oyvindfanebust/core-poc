@@ -1,6 +1,5 @@
 import { TigerBeetleService } from '@core-poc/core-services';
-import { createTestContext, cleanupTestContext, TestContext } from '../../helpers/test-utils.js';
-import { setupTestTigerBeetle, teardownTestTigerBeetle } from '../../helpers/test-tigerbeetle.js';
+import { createTestContext, cleanupTestContext, resetTestData, TestContext } from '../../helpers/test-setup.js';
 import { testCustomers, testAmounts } from '../../fixtures/test-data.js';
 
 describe('TigerBeetleService Integration', () => {
@@ -8,18 +7,19 @@ describe('TigerBeetleService Integration', () => {
   let tigerBeetleService: TigerBeetleService;
 
   beforeAll(async () => {
-    // Setup TigerBeetle container first
-    await setupTestTigerBeetle();
-    
-    // Then create test context
+    // Create test context (external services assumed to be running)
     context = await createTestContext();
     tigerBeetleService = context.services.tigerBeetleService;
-  }, 60000);
+  }, 20000);
 
   afterAll(async () => {
-    await cleanupTestContext(context);
-    await teardownTestTigerBeetle();
-  }, 30000);
+    await cleanupTestContext();
+  }, 10000);
+
+  beforeEach(async () => {
+    // Reset test data between tests for isolation
+    await resetTestData();
+  });
 
   describe('createAccount', () => {
     it('should create a deposit account without initial balance', async () => {
@@ -35,7 +35,7 @@ describe('TigerBeetleService Integration', () => {
       
       const balance = await tigerBeetleService.getAccountBalance(accountId);
       expect(balance.balance).toBe(0n);
-    });
+    }, 10000);
 
     it('should create a deposit account with initial balance', async () => {
       const accountId = await tigerBeetleService.createAccount({
@@ -49,7 +49,7 @@ describe('TigerBeetleService Integration', () => {
       
       const balance = await tigerBeetleService.getAccountBalance(accountId);
       expect(balance.balance).toBe(testAmounts.small);
-    });
+    }, 10000);
   });
 
   describe('createTransfer', () => {
@@ -70,7 +70,7 @@ describe('TigerBeetleService Integration', () => {
         currency: 'USD',
         initialBalance: 0n,
       });
-    });
+    }, 10000);
 
     it('should transfer funds between accounts', async () => {
       const transferAmount = 2500n;
@@ -89,7 +89,7 @@ describe('TigerBeetleService Integration', () => {
 
       expect(fromBalance.balance).toBe(7500n); // 10000 - 2500
       expect(toBalance.balance).toBe(2500n);
-    });
+    }, 10000);
   });
 
   describe('getAccountBalance', () => {
@@ -99,6 +99,6 @@ describe('TigerBeetleService Integration', () => {
       await expect(
         tigerBeetleService.getAccountBalance(nonExistentId)
       ).rejects.toThrow('Account not found');
-    });
+    }, 10000);
   });
 });

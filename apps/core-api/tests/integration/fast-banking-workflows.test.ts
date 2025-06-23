@@ -4,7 +4,6 @@ import request from 'supertest';
 import { AccountController } from '../../src/controllers/account.controller.js';
 import { validateRequest, errorHandler } from '../../src/middleware/validation.js';
 import { CreateAccountSchema, TransferSchema } from '../../src/validation/schemas.js';
-import { resetTestData } from '../helpers/test-setup.js';
 import {
   createTestServicesWithMocks,
   MockServiceContainer,
@@ -46,8 +45,9 @@ describe('Fast Banking Workflows (Mock Services)', () => {
   });
 
   beforeEach(async () => {
-    // Reset mock state and test data
-    await resetTestData();
+    // Reset mock state only - no database access needed for fast tests
+    services.mockTigerBeetleService.reset();
+    services.mockCDCManager.clearEvents();
     services.tigerBeetleService.reset();
     services.cdcManager.clearEvents();
   });

@@ -48,7 +48,11 @@ jobs:
         run: npm run lint
 
       - name: Fast tests (unit + mocked integration)
-        run: npm test
+        run: |
+          # Run only unit tests and truly mocked fast integration tests
+          npm run test:unit --workspace=@core-poc/core-api
+          npm run test --workspace=@core-poc/batch-processor
+          npm run test --workspace=@core-poc/customer-frontend
         env:
           NODE_ENV: test
           LOG_LEVEL: error
@@ -173,10 +177,10 @@ jobs:
           export CDC_AUTO_ACK=false
           export TEST_MODE=true
 
-          # Run all tests including slow integration tests
-          npm run test:all || echo "Warning: test:all script not found, running workspace tests"
-          npm run test:core-api || true
-          npm run test:batch-processor || true
+          # Run all integration tests (including fast-integration that need database)
+          npm run test:all --workspace=@core-poc/core-api || true
+          npm run test --workspace=@core-poc/batch-processor || true
+          npm run test --workspace=@core-poc/customer-frontend || true
 
       - name: Upload integration test results
         uses: actions/upload-artifact@v4

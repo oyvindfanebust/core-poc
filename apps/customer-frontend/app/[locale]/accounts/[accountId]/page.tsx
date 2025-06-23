@@ -7,6 +7,7 @@ import { ProtectedLayout } from '@/components/protected-layout';
 import { accountsApi, Account, Balance, Transaction } from '@/lib/api';
 import { ArrowLeft, CreditCard, TrendingUp, Download, Send, ArrowUpRight, ArrowDownLeft, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { ToggleableId } from '@/components/ToggleableId';
 
 export default function AccountDetailsPage() {
   const router = useRouter();
@@ -181,9 +182,14 @@ export default function AccountDetailsPage() {
                 <h1 className="text-2xl font-bold text-gray-900">
                   {t(`accountType.${account.accountType}`)}
                 </h1>
-                <p className="text-sm text-gray-500 mt-1">
-                  {t('accountId')}: {account.accountId}
-                </p>
+                <div className="text-sm text-gray-500 mt-1 flex items-center">
+                  <span className="mr-2">{t('accountId')}:</span>
+                  <ToggleableId 
+                    id={account.accountId} 
+                    type="account"
+                    className="text-sm"
+                  />
+                </div>
                 <p className="text-sm text-gray-500">
                   {t('currency')}: {account.currency}
                 </p>
@@ -331,9 +337,13 @@ export default function AccountDetailsPage() {
                               }`}>
                                 {isIncoming ? '+' : '-'}{formatCurrency(transaction.amount, transaction.currency)}
                               </p>
-                              <p className="text-xs text-gray-500">
-                                {transaction.transferId.slice(-8)}
-                              </p>
+                              <div className="text-xs text-gray-500">
+                                <ToggleableId 
+                                  id={transaction.transferId} 
+                                  type="transaction"
+                                  className="text-xs"
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>

@@ -367,8 +367,7 @@ describe('AccountHeader', () => {
       );
 
       expect(screen.getByRole('img')).toHaveAttribute('aria-label', 'Deposit Account');
-      expect(screen.getByText('•••• 3262708')).toHaveAttribute('role', 'button');
-      expect(screen.getByText('•••• 3262708')).toHaveAttribute('aria-label', 'View full account ID');
+      expect(screen.getByRole('button', { name: 'View full account ID' })).toBeInTheDocument();
     });
 
     it('should support keyboard navigation for account ID toggle', async () => {

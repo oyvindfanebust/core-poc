@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { AccountTypeIcon } from './AccountTypeIcon';
 import { Tooltip } from './Tooltip';
+import { ToggleableId } from './ToggleableId';
 import { formatLocalizedCurrency } from '../lib/formatting-utils';
 import { cn } from '../lib/utils';
 
@@ -31,7 +32,6 @@ export const AccountHeader: React.FC<AccountHeaderProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editingNickname, setEditingNickname] = useState(account.nickname || '');
   const [isSaving, setIsSaving] = useState(false);
-  const [showFullId, setShowFullId] = useState(false);
 
   const handleEditClick = () => {
     setEditingNickname(account.nickname || '');
@@ -68,25 +68,6 @@ export const AccountHeader: React.FC<AccountHeaderProps> = ({
     }
   };
 
-  const handleAccountIdClick = () => {
-    setShowFullId(!showFullId);
-  };
-
-  const handleAccountIdKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handleAccountIdClick();
-    }
-  };
-
-  const formatAccountId = (id: string): string => {
-    if (showFullId) {
-      return id;
-    }
-    // Show last 7 digits with bullet points
-    const lastDigits = id.slice(-7);
-    return `•••• ${lastDigits}`;
-  };
 
   const formattedBalance = formatLocalizedCurrency(account.balance, account.currency, locale);
 
@@ -169,18 +150,11 @@ export const AccountHeader: React.FC<AccountHeaderProps> = ({
             </div>
             
             <div className="account-header__id-section">
-              <Tooltip content={t('tooltips.accountId')}>
-                <button
-                  onClick={handleAccountIdClick}
-                  onKeyDown={handleAccountIdKeyDown}
-                  aria-label={t('accountDetails.viewFullId')}
-                  className="account-header__account-id"
-                  role="button"
-                  tabIndex={0}
-                >
-                  {formatAccountId(account.id)}
-                </button>
-              </Tooltip>
+              <ToggleableId 
+                id={account.id} 
+                type="account"
+                className="account-header__account-id"
+              />
             </div>
           </div>
         </div>

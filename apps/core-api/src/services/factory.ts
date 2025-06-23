@@ -156,9 +156,9 @@ export class ServiceFactory {
         accountService
       );
 
-      // Create CDC Manager (disabled for tests)
+      // Create CDC Manager
       const cdcManager = new CDCManagerService(config);
-      // Don't initialize CDC in tests
+      await cdcManager.initialize();
 
       const container = {
         accountService,

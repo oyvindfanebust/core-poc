@@ -40,7 +40,7 @@ async function createApp(): Promise<express.Application> {
       services.transferRepository
     );
     
-    const healthController = new HealthController(services.database);
+    const healthController = new HealthController(services.database, services.cdcManager);
     const metricsController = new MetricsController();
 
     const app = express();

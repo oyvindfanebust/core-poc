@@ -86,20 +86,41 @@ export class CDCService {
       { noAck: this.config.autoAck ?? false }
     );
 
-    logger.info('CDC Service started consuming events', { queue: this.config.queue });
+    logger.info('CDC Service started consuming events', { 
+      queue: this.config.queue,
+      exchange: this.config.exchange,
+      routingKeys: this.config.routingKeys,
+      autoAck: this.config.autoAck
+    });
   }
 
   private async handleMessage(msg: any | null): Promise<void> {
-    if (!msg || !this.channel) return;
+    if (!msg || !this.channel) {
+      logger.warn('Received null message or no channel available', { 
+        hasMessage: !!msg, 
+        hasChannel: !!this.channel 
+      });
+      return;
+    }
 
     try {
-      const content = msg.content.toString();
-      const event: TransferEvent = JSON.parse(content);
+      logger.info('CDC message received', { 
+        routingKey: msg.fields?.routingKey,
+        messageId: msg.properties?.messageId,
+        contentLength: msg.content?.length
+      });
 
-      logger.debug('Received CDC event', {
+      const content = msg.content.toString();
+      
+      const event: TransferEvent = JSON.parse(content);
+      
+      logger.info('Received CDC event', {
         type: event.type,
         transferId: event.transfer.id,
-        timestamp: event.timestamp
+        timestamp: event.timestamp,
+        debitAccountId: event.debit_account.id,
+        creditAccountId: event.credit_account.id,
+        amount: event.transfer.amount
       });
 
       // Process event with all matching handlers

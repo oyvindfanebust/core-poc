@@ -1,28 +1,45 @@
 export interface TransferEvent {
   type: 'single_phase' | 'two_phase_pending' | 'two_phase_posted' | 'two_phase_voided' | 'two_phase_expired';
   timestamp: string;
+  ledger: number;
   transfer: {
     id: string;
-    debit_account_id: string;
-    credit_account_id: string;
-    amount: string;
-    pending_id?: string;
-    user_data_128?: string;
-    user_data_64?: string;
-    user_data_32?: string;
-    timeout?: string;
-    ledger: string;
-    code: string;
-    flags?: string;
-  };
-  accounts: Array<{
-    id: string;
-    debits_pending: string;
-    debits_posted: string;
-    credits_pending: string;
-    credits_posted: string;
+    amount: number;
+    pending_id: number;
+    user_data_128: number;
+    user_data_64: number;
+    user_data_32: number;
+    timeout: number;
+    code: number;
+    flags: number;
     timestamp: string;
-  }>;
+  };
+  debit_account: {
+    id: string;
+    debits_pending: number;
+    debits_posted: number;
+    credits_pending: number;
+    credits_posted: number;
+    user_data_128: number;
+    user_data_64: number;
+    user_data_32: number;
+    code: number;
+    flags: number;
+    timestamp: string;
+  };
+  credit_account: {
+    id: string;
+    debits_pending: number;
+    debits_posted: number;
+    credits_pending: number;
+    credits_posted: number;
+    user_data_128: number;
+    user_data_64: number;
+    user_data_32: number;
+    code: number;
+    flags: number;
+    timestamp: string;
+  };
 }
 
 export interface EventHandlerConfig {

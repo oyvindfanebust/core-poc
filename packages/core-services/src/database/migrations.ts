@@ -540,6 +540,48 @@ export class MigrationRunner {
           `);
         },
       },
+      {
+        id: '013_fix_transfer_id_lengths',
+        name: 'Increase transfer_id and account_id column lengths for TigerBeetle IDs',
+        up: async (db: DatabaseConnection) => {
+          // TigerBeetle generates 34-character IDs, but transfers table was created with VARCHAR(20)
+          // This causes "22001: value too long for type character varying(20)" errors
+          
+          // Increase transfer_id column length
+          await db.query(`
+            ALTER TABLE transfers 
+            ALTER COLUMN transfer_id TYPE VARCHAR(50)
+          `);
+          
+          // Increase from_account_id and to_account_id column lengths
+          await db.query(`
+            ALTER TABLE transfers 
+            ALTER COLUMN from_account_id TYPE VARCHAR(50)
+          `);
+          
+          await db.query(`
+            ALTER TABLE transfers 
+            ALTER COLUMN to_account_id TYPE VARCHAR(50)
+          `);
+        },
+        down: async (db: DatabaseConnection) => {
+          // Revert back to VARCHAR(20) - this might fail if there are existing long IDs
+          await db.query(`
+            ALTER TABLE transfers 
+            ALTER COLUMN transfer_id TYPE VARCHAR(20)
+          `);
+          
+          await db.query(`
+            ALTER TABLE transfers 
+            ALTER COLUMN from_account_id TYPE VARCHAR(20)
+          `);
+          
+          await db.query(`
+            ALTER TABLE transfers 
+            ALTER COLUMN to_account_id TYPE VARCHAR(20)
+          `);
+        },
+      },
     ];
   }
 }

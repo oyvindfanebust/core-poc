@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { DatabaseConnection, logger } from '@core-poc/core-services';
+import { CDCManagerService } from '@core-poc/domain';
 
 export interface HealthCheck {
   service: string;
@@ -19,7 +20,10 @@ export interface HealthResponse {
 }
 
 export class HealthController {
-  constructor(private database: DatabaseConnection) {}
+  constructor(
+    private database: DatabaseConnection,
+    private cdcManager?: CDCManagerService
+  ) {}
 
   async getHealth(req: Request, res: Response): Promise<void> {
     const startTime = Date.now();
@@ -29,6 +33,7 @@ export class HealthController {
         this.checkDatabase(),
         this.checkMemory(),
         this.checkDisk(),
+        this.checkCDC(),
       ]);
 
       const overallStatus = this.determineOverallStatus(checks);
@@ -68,6 +73,7 @@ export class HealthController {
       // Readiness checks - ensure service can handle requests
       const checks = await Promise.all([
         this.checkDatabase(),
+        this.checkCDC(),
       ]);
 
       const isReady = checks.every(check => check.status === 'healthy');
@@ -195,6 +201,45 @@ export class HealthController {
         service: 'disk',
         status: 'unhealthy',
         error: error instanceof Error ? error.message : 'Unknown disk error',
+      };
+    }
+  }
+
+  private async checkCDC(): Promise<HealthCheck> {
+    try {
+      if (!this.cdcManager) {
+        return {
+          service: 'cdc',
+          status: 'degraded',
+          error: 'CDC Manager not available',
+          details: {
+            initialized: false,
+            connected: false,
+          },
+        };
+      }
+
+      const isConnected = this.cdcManager.isConnected;
+      
+      return {
+        service: 'cdc',
+        status: isConnected ? 'healthy' : 'unhealthy',
+        details: {
+          initialized: true,
+          connected: isConnected,
+          type: 'rabbitmq-amqp',
+        },
+        ...(isConnected ? {} : { error: 'CDC Manager not connected to RabbitMQ' }),
+      };
+    } catch (error) {
+      return {
+        service: 'cdc',
+        status: 'unhealthy',
+        error: error instanceof Error ? error.message : 'Unknown CDC error',
+        details: {
+          initialized: false,
+          connected: false,
+        },
       };
     }
   }

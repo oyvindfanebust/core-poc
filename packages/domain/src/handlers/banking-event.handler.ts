@@ -9,12 +9,13 @@ export class BankingEventHandler implements CDCEventHandler {
   }
   
   async handleTransferEvent(event: TransferEvent): Promise<void> {
-    logger.info('Processing banking event', {
+    logger.info('BankingEventHandler: Processing banking event', {
       type: event.type,
       transferId: event.transfer.id,
       amount: event.transfer.amount,
-      debitAccount: event.transfer.debit_account_id,
-      creditAccount: event.transfer.credit_account_id
+      debitAccount: event.debit_account.id,
+      creditAccount: event.credit_account.id,
+      timestamp: event.timestamp
     });
 
     switch (event.type) {
@@ -39,28 +40,36 @@ export class BankingEventHandler implements CDCEventHandler {
   }
 
   private async handleSinglePhaseTransfer(event: TransferEvent): Promise<void> {
-    logger.info('Processing single phase transfer', {
+    logger.info('BankingEventHandler: Processing single phase transfer', {
       transferId: event.transfer.id,
       amount: event.transfer.amount,
-      from: event.transfer.debit_account_id,
-      to: event.transfer.credit_account_id
+      from: event.debit_account.id,
+      to: event.credit_account.id
     });
 
     // Save transfer record to PostgreSQL for transaction history
     try {
       // Extract currency from ledger code (assuming ledger codes follow pattern like USD_LEDGER)
-      const currency = this.extractCurrencyFromLedger(event.transfer.ledger);
+      const currency = this.extractCurrencyFromLedger(event.ledger.toString());
       
+      logger.info('BankingEventHandler: Attempting to save transfer record to database', {
+        transferId: event.transfer.id,
+        fromAccountId: event.debit_account.id,
+        toAccountId: event.credit_account.id,
+        amount: event.transfer.amount,
+        currency
+      });
+
       await this.transferRepository.save({
         transferId: event.transfer.id,
-        fromAccountId: event.transfer.debit_account_id,
-        toAccountId: event.transfer.credit_account_id,
+        fromAccountId: event.debit_account.id,
+        toAccountId: event.credit_account.id,
         amount: BigInt(event.transfer.amount),
         currency,
         description: this.extractDescription(event),
       });
       
-      logger.info('Transfer record saved to database', {
+      logger.info('BankingEventHandler: Transfer record saved to database successfully', {
         transferId: event.transfer.id
       });
     } catch (error) {
@@ -104,12 +113,12 @@ export class BankingEventHandler implements CDCEventHandler {
 
     // Save transfer record to PostgreSQL for transaction history
     try {
-      const currency = this.extractCurrencyFromLedger(event.transfer.ledger);
+      const currency = this.extractCurrencyFromLedger(event.ledger.toString());
       
       await this.transferRepository.save({
         transferId: event.transfer.id,
-        fromAccountId: event.transfer.debit_account_id,
-        toAccountId: event.transfer.credit_account_id,
+        fromAccountId: event.debit_account.id,
+        toAccountId: event.credit_account.id,
         amount: BigInt(event.transfer.amount),
         currency,
         description: this.extractDescription(event),
@@ -169,8 +178,8 @@ export class BankingEventHandler implements CDCEventHandler {
     logger.info('Sending transfer notification', {
       transferId: event.transfer.id,
       message,
-      creditAccount: event.transfer.credit_account_id,
-      debitAccount: event.transfer.debit_account_id
+      creditAccount: event.credit_account.id,
+      debitAccount: event.debit_account.id
     });
 
     // Example implementation:
@@ -192,7 +201,7 @@ export class BankingEventHandler implements CDCEventHandler {
     
     logger.debug('Updating transfer analytics', {
       transferId: event.transfer.id,
-      ledger: event.transfer.ledger,
+      ledger: event.ledger,
       code: event.transfer.code,
       amount: event.transfer.amount
     });
@@ -241,7 +250,8 @@ export class BankingEventHandler implements CDCEventHandler {
     // TODO: Sync with external systems (CRM, ERP, etc.)
     logger.debug('Syncing with external systems', {
       transferId: event.transfer.id,
-      accounts: event.accounts.map(a => a.id)
+      debitAccountId: event.debit_account.id,
+      creditAccountId: event.credit_account.id
     });
   }
 
@@ -277,7 +287,7 @@ export class BankingEventHandler implements CDCEventHandler {
 
   private extractDescription(event: TransferEvent): string | undefined {
     // Extract transfer type from user_data_32 and create description
-    const transferType = event.transfer.user_data_32 ? parseInt(event.transfer.user_data_32) : TransferType.CUSTOMER_TRANSFER;
+    const transferType = event.transfer.user_data_32 ? event.transfer.user_data_32 : TransferType.CUSTOMER_TRANSFER;
     
     switch (transferType) {
       case TransferType.INITIAL_DEPOSIT:

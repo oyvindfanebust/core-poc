@@ -33,9 +33,10 @@ export class AuditEventHandler implements CDCEventHandler {
   
   async handleTransferEvent(event: TransferEvent): Promise<void> {
     try {
-      logger.debug('Starting audit log creation', {
+      logger.info('AuditEventHandler: Starting audit log creation', {
         transferId: event.transfer.id,
-        eventType: event.type
+        eventType: event.type,
+        timestamp: event.timestamp
       });
       
       const auditEntry = this.createAuditLogEntry(event);
@@ -76,24 +77,33 @@ export class AuditEventHandler implements CDCEventHandler {
       timestamp: event.timestamp,
       event_type: event.type,
       transfer_id: event.transfer.id,
-      debit_account_id: event.transfer.debit_account_id,
-      credit_account_id: event.transfer.credit_account_id,
-      amount: event.transfer.amount,
-      ledger: event.transfer.ledger,
-      code: event.transfer.code,
-      pending_id: event.transfer.pending_id,
+      debit_account_id: event.debit_account.id,
+      credit_account_id: event.credit_account.id,
+      amount: event.transfer.amount.toString(),
+      ledger: event.ledger.toString(),
+      code: event.transfer.code.toString(),
+      pending_id: event.transfer.pending_id.toString(),
       user_data: {
-        user_data_128: event.transfer.user_data_128,
-        user_data_64: event.transfer.user_data_64,
-        user_data_32: event.transfer.user_data_32
+        user_data_128: event.transfer.user_data_128.toString(),
+        user_data_64: event.transfer.user_data_64.toString(),
+        user_data_32: event.transfer.user_data_32.toString()
       },
-      account_balances: event.accounts?.map(account => ({
-        account_id: account.id,
-        debits_pending: account.debits_pending,
-        debits_posted: account.debits_posted,
-        credits_pending: account.credits_pending,
-        credits_posted: account.credits_posted
-      })) || [],
+      account_balances: [
+        {
+          account_id: event.debit_account.id,
+          debits_pending: event.debit_account.debits_pending.toString(),
+          debits_posted: event.debit_account.debits_posted.toString(),
+          credits_pending: event.debit_account.credits_pending.toString(),
+          credits_posted: event.debit_account.credits_posted.toString()
+        },
+        {
+          account_id: event.credit_account.id,
+          debits_pending: event.credit_account.debits_pending.toString(),
+          debits_posted: event.credit_account.debits_posted.toString(),
+          credits_pending: event.credit_account.credits_pending.toString(),
+          credits_posted: event.credit_account.credits_posted.toString()
+        }
+      ],
       metadata: {
         processed_at: new Date().toISOString(),
         source: 'tigerbeetle_cdc'

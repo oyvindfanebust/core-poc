@@ -33,9 +33,10 @@ export function loadTestEnvironment(): void {
     process.env.TIGERBEETLE_ADDRESSES = '6000';
     
     // RabbitMQ Configuration (using external RabbitMQ instance)
+    // Use the same exchange as TigerBeetle CDC publishes to
     process.env.AMQP_URL = 'amqp://guest:guest@localhost:5672';
-    process.env.CDC_EXCHANGE = 'banking-events-test';
-    process.env.CDC_QUEUE = 'banking-queue-test';
+    process.env.CDC_EXCHANGE = 'banking-events';  // Same as TigerBeetle CDC
+    process.env.CDC_QUEUE = 'banking-queue-test'; // Test-specific queue
     process.env.CDC_ROUTING_KEYS = '#';
     process.env.CDC_AUTO_ACK = 'false';
     
@@ -236,4 +237,45 @@ export async function resetTestData(): Promise<void> {
     logger.error('Failed to reset test data', { error });
     throw error;
   }
+}
+
+/**
+ * Wait for CDC event processing to complete
+ * CDC events are processed asynchronously, so tests need to wait for them
+ */
+export async function waitForCDCProcessing(delayMs: number = 2000): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, delayMs));
+}
+
+/**
+ * Wait for specific transfer to appear in PostgreSQL via CDC
+ */
+export async function waitForTransferRecord(
+  transferId: string, 
+  maxRetries: number = 10, 
+  delayMs: number = 500
+): Promise<boolean> {
+  const database = DatabaseConnection.getInstance();
+  
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const result = await database.query(
+        'SELECT COUNT(*) as count FROM transfers WHERE transfer_id = $1',
+        [transferId]
+      );
+      
+      if (parseInt(result.rows[0].count) > 0) {
+        logger.debug(`Transfer record found after ${i + 1} attempts`);
+        return true;
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    } catch (error) {
+      logger.debug(`Error checking for transfer record, attempt ${i + 1}/${maxRetries}`, { error });
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+  }
+  
+  logger.warn(`Transfer record not found after ${maxRetries} attempts`, { transferId });
+  return false;
 }

@@ -38,7 +38,7 @@ direnv allow            # Reload env after .envrc changes
 2. **Plan** - Use TodoWrite for complex tasks
 3. **Code** - Follow existing patterns, check package.json
 4. **Test** - TDD when possible, verify with curl
-5. **Commit** - Clear messages, no Claude attribution
+5. **Commit** - Clear messages, NO Claude/AI attribution lines
 
 ## 🎨 Frontend
 - Next.js 15, App Router (port 7002)
@@ -53,6 +53,7 @@ direnv allow            # Reload env after .envrc changes
 - Commits → Run build & tests first
 - Batch ops → Must be idempotent
 - Test customer: `CUSTOMER-ABC-123`
+- **NEVER add Claude/AI attribution to commits**
 
 ## 🔌 Ports
 - 6000-6001: TigerBeetle (dev/test)

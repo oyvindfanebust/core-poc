@@ -18,6 +18,13 @@ export type AccountType = 'DEPOSIT' | 'LOAN' | 'CREDIT';
 export enum TransferType {
   CUSTOMER_TRANSFER = 1,
   INITIAL_DEPOSIT = 2,
+  ACH_CREDIT = 3,
+  ACH_DEBIT = 4,
+  WIRE_TRANSFER = 5,
+  LOAN_FUNDING = 6,
+  LOAN_PAYMENT = 7,
+  EXTERNAL_CREDIT = 8,
+  EXTERNAL_DEBIT = 9,
 }
 
 export interface Account {

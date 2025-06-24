@@ -300,6 +300,20 @@ export class BankingEventHandler implements CDCEventHandler {
     switch (transferType) {
       case TransferType.INITIAL_DEPOSIT:
         return 'Initial account deposit';
+      case TransferType.ACH_CREDIT:
+        return 'ACH credit from external bank';
+      case TransferType.ACH_DEBIT:
+        return 'ACH debit to external bank';
+      case TransferType.WIRE_TRANSFER:
+        return 'Wire transfer';
+      case TransferType.LOAN_FUNDING:
+        return 'Loan disbursement';
+      case TransferType.LOAN_PAYMENT:
+        return 'Loan payment';
+      case TransferType.EXTERNAL_CREDIT:
+        return 'External bank credit';
+      case TransferType.EXTERNAL_DEBIT:
+        return 'External bank debit';
       case TransferType.CUSTOMER_TRANSFER:
       default:
         return 'Customer transfer';

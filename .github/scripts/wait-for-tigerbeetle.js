@@ -20,13 +20,13 @@ async function waitForTigerBeetle() {
       await client.lookupAccounts([1n]);
 
       console.log('TigerBeetle is ready!');
-      await client.close();
+      client.destroy();
       process.exit(0);
     } catch (error) {
       console.log(`TigerBeetle not ready yet: ${error.message}`);
       if (client) {
         try {
-          await client.close();
+          client.destroy();
         } catch (e) {
           // Ignore cleanup errors
         }

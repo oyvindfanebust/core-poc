@@ -162,7 +162,7 @@ export async function waitForTigerBeetle(maxRetries = 10, delayMs = 500): Promis
       await testClient.lookupAccounts([1n]);
 
       // Clean up test client immediately after successful test
-      await testClient.close();
+      testClient.destroy();
       testClient = null;
 
       logger.debug('TigerBeetle is ready');
@@ -176,7 +176,7 @@ export async function waitForTigerBeetle(maxRetries = 10, delayMs = 500): Promis
       // Cleanup any remaining test client (in case of error)
       if (testClient) {
         try {
-          await testClient.close();
+          testClient.destroy();
         } catch (e) {
           // Ignore cleanup errors - connection might already be closed
           logger.debug('Error during TigerBeetle test client cleanup', { error: e });

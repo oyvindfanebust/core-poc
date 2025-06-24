@@ -27,6 +27,7 @@
     "customerIdLabel": "ИД корисника",
     "customerIdPlaceholder": "Унесите свој ИД корисника",
     "signInButton": "Пријави се",
+    "signingIn": "Пријављујем се...",
     "useTestCustomer": "Користи тест корисника (CUSTOMER-ABC-123)",
     "demoText": "Ово је демо апликација.",
     "instructionText": "Унесите било који ИД корисника или користите тест корисника.",

@@ -1,10 +1,10 @@
 'use client';
 
-import { LogIn, CreditCard } from 'lucide-react';
+import { LogIn, CreditCard, Loader2 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, FormEvent } from 'react';
 
-import { LanguageSwitcher } from '@/components/language-switcher';
+import { LanguageSwitcher } from '../../components/language-switcher';
 
 interface LoginFormProps {
   translations: {
@@ -13,6 +13,7 @@ interface LoginFormProps {
     customerIdLabel: string;
     customerIdPlaceholder: string;
     signInButton: string;
+    signingIn: string;
     useTestCustomer: string;
     demoText: string;
     instructionText: string;
@@ -28,6 +29,7 @@ export function LoginForm({ translations }: LoginFormProps) {
   const pathname = usePathname();
   const [customerId, setCustomerId] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const getLocalizedPath = (path: string) => {
     // Extract locale from current pathname
@@ -42,7 +44,7 @@ export function LoginForm({ translations }: LoginFormProps) {
     return path;
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     if (!customerId.trim()) {
@@ -56,16 +58,42 @@ export function LoginForm({ translations }: LoginFormProps) {
       return;
     }
 
-    // Store customer ID and redirect to dashboard
-    localStorage.setItem('customerId', customerId);
-    router.push(getLocalizedPath('/dashboard'));
+    setIsLoading(true);
+    setError('');
+
+    try {
+      // Simulate authentication process
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Store customer ID and redirect to dashboard
+      localStorage.setItem('customerId', customerId);
+      router.push(getLocalizedPath('/dashboard'));
+    } catch {
+      setError('Authentication failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const useTestCustomer = () => {
+  const useTestCustomer = async () => {
+    if (isLoading) return;
+
     const testId = 'CUSTOMER-ABC-123';
     setCustomerId(testId);
-    localStorage.setItem('customerId', testId);
-    router.push(getLocalizedPath('/dashboard'));
+    setIsLoading(true);
+    setError('');
+
+    try {
+      // Simulate authentication process
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      localStorage.setItem('customerId', testId);
+      router.push(getLocalizedPath('/dashboard'));
+    } catch {
+      setError('Authentication failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -92,29 +120,52 @@ export function LoginForm({ translations }: LoginFormProps) {
                 name="customerId"
                 type="text"
                 required
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                disabled={isLoading}
+                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder={translations.customerIdPlaceholder}
                 value={customerId}
                 onChange={e => {
                   setCustomerId(e.target.value);
                   setError('');
                 }}
+                aria-describedby={error ? 'login-error' : undefined}
+                aria-invalid={error ? 'true' : 'false'}
               />
             </div>
           </div>
 
-          {error && <div className="text-red-600 text-sm text-center">{error}</div>}
+          {error && (
+            <div
+              id="login-error"
+              className="text-red-600 text-sm text-center"
+              role="alert"
+              aria-live="polite"
+            >
+              {error}
+            </div>
+          )}
 
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              disabled={isLoading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400 disabled:cursor-not-allowed disabled:hover:bg-blue-400"
+              aria-describedby={isLoading ? 'signing-in-status' : undefined}
             >
               <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                <LogIn className="h-5 w-5 text-blue-500 group-hover:text-blue-400" />
+                {isLoading ? (
+                  <Loader2 className="h-5 w-5 text-blue-200 animate-spin" />
+                ) : (
+                  <LogIn className="h-5 w-5 text-blue-500 group-hover:text-blue-400" />
+                )}
               </span>
-              {translations.signInButton}
+              {isLoading ? translations.signingIn : translations.signInButton}
             </button>
+            {isLoading && (
+              <div id="signing-in-status" className="sr-only" aria-live="polite">
+                {translations.signingIn}
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-between">
@@ -122,7 +173,8 @@ export function LoginForm({ translations }: LoginFormProps) {
               <button
                 type="button"
                 onClick={useTestCustomer}
-                className="font-medium text-blue-600 hover:text-blue-500"
+                disabled={isLoading}
+                className="font-medium text-blue-600 hover:text-blue-500 disabled:text-blue-300 disabled:cursor-not-allowed"
               >
                 {translations.useTestCustomer}
               </button>

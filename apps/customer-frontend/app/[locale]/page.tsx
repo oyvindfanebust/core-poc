@@ -11,6 +11,7 @@ export default async function LoginPage() {
     customerIdLabel: t('customerIdLabel'),
     customerIdPlaceholder: t('customerIdPlaceholder'),
     signInButton: t('signInButton'),
+    signingIn: t('signingIn'),
     useTestCustomer: t('useTestCustomer'),
     demoText: t('demoText'),
     instructionText: t('instructionText'),

@@ -27,6 +27,7 @@
     "customerIdLabel": "Customer ID",
     "customerIdPlaceholder": "Enter your Customer ID",
     "signInButton": "Sign in",
+    "signingIn": "Signing in...",
     "useTestCustomer": "Use test customer (CUSTOMER-ABC-123)",
     "demoText": "This is a demo application.",
     "instructionText": "Enter any customer ID or use the test customer.",

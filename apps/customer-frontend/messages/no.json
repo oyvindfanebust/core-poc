@@ -27,6 +27,7 @@
     "customerIdLabel": "Kunde-ID",
     "customerIdPlaceholder": "Skriv inn din kunde-ID",
     "signInButton": "Logg inn",
+    "signingIn": "Logger inn...",
     "useTestCustomer": "Bruk testkunde (CUSTOMER-ABC-123)",
     "demoText": "Dette er en demoapplikasjon.",
     "instructionText": "Skriv inn en hvilken som helst kunde-ID eller bruk testkunden.",

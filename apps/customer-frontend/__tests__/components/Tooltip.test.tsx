@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { Tooltip } from '../../components/Tooltip';
@@ -325,7 +325,9 @@ describe('Tooltip', () => {
       expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
 
       // Fast-forward time
-      jest.advanceTimersByTime(500);
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
 
       await waitFor(() => {
         expect(screen.getByRole('tooltip')).toBeInTheDocument();
@@ -356,7 +358,9 @@ describe('Tooltip', () => {
       expect(screen.getByRole('tooltip')).toBeInTheDocument();
 
       // Fast-forward time
-      jest.advanceTimersByTime(300);
+      act(() => {
+        jest.advanceTimersByTime(300);
+      });
 
       await waitFor(() => {
         expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();

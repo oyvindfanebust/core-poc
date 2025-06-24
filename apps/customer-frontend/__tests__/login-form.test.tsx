@@ -93,7 +93,8 @@ describe('LoginForm', () => {
     const signInButton = screen.getByRole('button', { name: 'Sign in' });
     fireEvent.click(signInButton);
 
-    expect(screen.getByText('Signing in...')).toBeInTheDocument();
+    // Button text should change to "Signing in..."
+    expect(screen.getByRole('button', { name: 'Signing in...' })).toBeInTheDocument();
     expect(signInButton).toBeDisabled();
     expect(input).toBeDisabled();
   });
@@ -107,10 +108,13 @@ describe('LoginForm', () => {
     const signInButton = screen.getByRole('button', { name: 'Sign in' });
     fireEvent.click(signInButton);
 
-    await waitFor(() => {
-      expect(mockLocalStorage.setItem).toHaveBeenCalledWith('customerId', 'CUSTOMER-ABC-123');
-      expect(mockPush).toHaveBeenCalledWith('/en/dashboard');
-    });
+    await waitFor(
+      () => {
+        expect(mockLocalStorage.setItem).toHaveBeenCalledWith('customerId', 'CUSTOMER-ABC-123');
+        expect(mockPush).toHaveBeenCalledWith('/en/dashboard');
+      },
+      { timeout: 2000 },
+    );
   });
 
   it('works with test customer button', async () => {

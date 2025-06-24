@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { ToggleableId } from '../../components/ToggleableId';
@@ -108,7 +108,9 @@ describe('ToggleableId', () => {
       render(<ToggleableId id={longAccountId} type="account" />);
 
       const button = screen.getByRole('button');
-      button.focus();
+      act(() => {
+        button.focus();
+      });
 
       await user.keyboard('{Enter}');
       expect(screen.getByText(longAccountId)).toBeInTheDocument();
@@ -123,7 +125,9 @@ describe('ToggleableId', () => {
       render(<ToggleableId id={longAccountId} type="account" />);
 
       const button = screen.getByRole('button');
-      button.focus();
+      act(() => {
+        button.focus();
+      });
 
       await user.keyboard(' ');
       expect(screen.getByText(longAccountId)).toBeInTheDocument();

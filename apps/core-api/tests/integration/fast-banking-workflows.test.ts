@@ -46,8 +46,6 @@ describe('Fast Banking Workflows (Mock Services)', () => {
 
   beforeEach(async () => {
     // Reset mock state only - no database access needed for fast tests
-    services.mockTigerBeetleService.reset();
-    services.mockCDCManager.clearEvents();
     services.tigerBeetleService.reset();
     services.cdcManager.clearEvents();
   });

@@ -156,6 +156,60 @@ export const UpdateAccountNameSchema = z.object({
     .nullable(),
 });
 
+// External bank transaction schemas (international-friendly)
+export const ExternalBankInfoSchema = z.object({
+  bankIdentifier: z
+    .string()
+    .min(1, 'Bank identifier is required')
+    .max(50, 'Bank identifier cannot exceed 50 characters')
+    .regex(/^[A-Za-z0-9\-\s]+$/, 'Bank identifier contains invalid characters'),
+  accountNumber: z
+    .string()
+    .min(1, 'Account number is required')
+    .max(50, 'Account number cannot exceed 50 characters')
+    .regex(/^[A-Za-z0-9\-\s]+$/, 'Account number contains invalid characters'),
+  bankName: z
+    .string()
+    .min(1, 'Bank name is required')
+    .max(100, 'Bank name cannot exceed 100 characters'),
+  country: z
+    .string()
+    .regex(/^[A-Z]{2}$/, 'Country must be a valid ISO 3166-1 alpha-2 code')
+    .optional(),
+});
+
+export const HighValueTransferInfoSchema = ExternalBankInfoSchema.extend({
+  recipientName: z
+    .string()
+    .min(1, 'Recipient name is required')
+    .max(100, 'Recipient name cannot exceed 100 characters'),
+  transferMessage: z.string().max(140, 'Transfer message cannot exceed 140 characters').optional(),
+});
+
+export const IncomingTransferRequestSchema = z.object({
+  accountId: AccountIdSchema,
+  amount: MoneyAmountSchema,
+  currency: CurrencySchema,
+  externalBankInfo: ExternalBankInfoSchema,
+  description: z.string().max(200, 'Description cannot exceed 200 characters').optional(),
+});
+
+export const OutgoingTransferRequestSchema = z.object({
+  accountId: AccountIdSchema,
+  amount: MoneyAmountSchema,
+  currency: CurrencySchema,
+  externalBankInfo: ExternalBankInfoSchema,
+  description: z.string().max(200, 'Description cannot exceed 200 characters').optional(),
+});
+
+export const HighValueTransferRequestSchema = z.object({
+  accountId: AccountIdSchema,
+  amount: MoneyAmountSchema,
+  currency: CurrencySchema,
+  transferInfo: HighValueTransferInfoSchema,
+  description: z.string().max(200, 'Description cannot exceed 200 characters').optional(),
+});
+
 // Type exports for use in controllers
 export type CreateAccountRequest = z.infer<typeof CreateAccountSchema>;
 export type CreateDepositAccountRequest = z.infer<typeof CreateDepositAccountSchema>;
@@ -165,3 +219,10 @@ export type TransferRequest = z.infer<typeof TransferSchema>;
 export type AccountIdParam = z.infer<typeof AccountIdParamSchema>;
 export type CustomerIdParam = z.infer<typeof CustomerIdParamSchema>;
 export type UpdateAccountNameRequest = z.infer<typeof UpdateAccountNameSchema>;
+
+// External transaction type exports
+export type ExternalBankInfo = z.infer<typeof ExternalBankInfoSchema>;
+export type HighValueTransferInfo = z.infer<typeof HighValueTransferInfoSchema>;
+export type IncomingTransferRequest = z.infer<typeof IncomingTransferRequestSchema>;
+export type OutgoingTransferRequest = z.infer<typeof OutgoingTransferRequestSchema>;
+export type HighValueTransferRequest = z.infer<typeof HighValueTransferRequestSchema>;

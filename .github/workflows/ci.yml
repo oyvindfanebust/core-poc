@@ -131,16 +131,9 @@ jobs:
           # Start TigerBeetle in background
           nohup ./tigerbeetle start --addresses=127.0.0.1:6000 --development ./tigerbeetle-data/app.tigerbeetle > tigerbeetle.log 2>&1 &
 
-          # Wait for TigerBeetle to be ready
+          # Wait for TigerBeetle to be ready using proper client check
           echo "Waiting for TigerBeetle to start..."
-          for i in {1..30}; do
-            if curl -s http://127.0.0.1:6000 >/dev/null 2>&1 || nc -z 127.0.0.1 6000; then
-              echo "TigerBeetle is ready!"
-              break
-            fi
-            echo "Attempt $i/30: TigerBeetle not ready yet..."
-            sleep 2
-          done
+          node .github/scripts/wait-for-tigerbeetle.js
 
       - name: Setup RabbitMQ exchanges and queues
         run: |

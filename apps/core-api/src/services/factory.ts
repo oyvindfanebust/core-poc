@@ -13,6 +13,7 @@ import {
   AccountService,
   LoanService,
   PaymentProcessingService,
+  SEPAService,
   CDCManagerService,
 } from '@core-poc/domain';
 import { createClient } from 'tigerbeetle-node';
@@ -21,6 +22,7 @@ export interface ServiceContainer {
   accountService: AccountService;
   loanService: LoanService;
   paymentProcessingService: PaymentProcessingService;
+  sepaService: SEPAService;
   database: DatabaseConnection;
   tigerBeetleService: TigerBeetleService;
   cdcManager: CDCManagerService;
@@ -125,6 +127,13 @@ export class ServiceFactory {
         accountService,
       );
 
+      // Create SEPA service
+      const sepaService = new SEPAService(
+        accountService,
+        tigerBeetleService,
+        sepaSuspenseAccountService,
+      );
+
       // Create CDC Manager
       const cdcManager = new CDCManagerService(config);
       await cdcManager.initialize();
@@ -133,6 +142,7 @@ export class ServiceFactory {
         accountService,
         loanService,
         paymentProcessingService,
+        sepaService,
         database,
         tigerBeetleService,
         cdcManager,
@@ -207,6 +217,13 @@ export class ServiceFactory {
         accountService,
       );
 
+      // Create SEPA service
+      const sepaService = new SEPAService(
+        accountService,
+        tigerBeetleService,
+        sepaSuspenseAccountService,
+      );
+
       // Create CDC Manager
       const cdcManager = new CDCManagerService(config);
       await cdcManager.initialize();
@@ -215,6 +232,7 @@ export class ServiceFactory {
         accountService,
         loanService,
         paymentProcessingService,
+        sepaService,
         database,
         tigerBeetleService,
         cdcManager,

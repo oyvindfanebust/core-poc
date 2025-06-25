@@ -13,6 +13,7 @@ import swaggerUi from 'swagger-ui-express';
 import { AccountController } from './controllers/account.controller.js';
 import { HealthController } from './controllers/health.controller.js';
 import { MetricsController, metricsMiddleware } from './controllers/metrics.controller.js';
+import { SEPAController } from './controllers/sepa.controller.js';
 import { SystemAccountController } from './controllers/system-account.controller.js';
 import { specs } from './docs/swagger.js';
 import { validateRequest, errorHandler, requestLogger } from './middleware/validation.js';
@@ -25,6 +26,9 @@ import {
   UpdateAccountNameSchema,
   SystemIdentifierParamSchema,
   AccountTypeParamSchema,
+  SEPAOutgoingTransferSchema,
+  SEPAIncomingTransferSchema,
+  SEPACurrencyParamSchema,
 } from './validation/schemas.js';
 
 let services: ServiceContainer;
@@ -48,6 +52,8 @@ async function createApp(): Promise<express.Application> {
     const systemAccountController = new SystemAccountController(
       services.systemAccountConfigService,
     );
+
+    const sepaController = new SEPAController(services.sepaService);
 
     const app = express();
 
@@ -136,6 +142,27 @@ async function createApp(): Promise<express.Application> {
       accountController.getAccountsByCustomer.bind(accountController),
     );
 
+    // SEPA routes
+    app.post(
+      '/sepa/transfers/outgoing',
+      validateRequest(SEPAOutgoingTransferSchema),
+      sepaController.processOutgoingTransfer.bind(sepaController),
+    );
+
+    app.post(
+      '/sepa/transfers/incoming',
+      validateRequest(SEPAIncomingTransferSchema),
+      sepaController.processIncomingTransfer.bind(sepaController),
+    );
+
+    app.get(
+      '/sepa/suspense/:currency',
+      validateRequest(SEPACurrencyParamSchema, 'params'),
+      sepaController.getSuspenseBalances.bind(sepaController),
+    );
+
+    app.get('/sepa/status', sepaController.getServiceStatus.bind(sepaController));
+
     // System account routes (specific routes before parameterized ones)
     app.get(
       '/api/system-accounts',
@@ -185,6 +212,7 @@ async function createApp(): Promise<express.Application> {
           metrics: '/metrics',
           accounts: '/accounts',
           transfers: '/transfers',
+          sepa: '/sepa',
           systemAccounts: '/api/system-accounts',
         },
       });
@@ -202,6 +230,10 @@ async function createApp(): Promise<express.Application> {
         'GET /accounts/:accountId/payment-plan',
         'GET /accounts/:accountId/amortization-schedule',
         'GET /customers/:customerId/accounts',
+        'POST /sepa/transfers/outgoing',
+        'POST /sepa/transfers/incoming',
+        'GET /sepa/suspense/:currency',
+        'GET /sepa/status',
         'GET /api/system-accounts',
         'GET /api/system-accounts/:systemIdentifier',
         'GET /api/system-accounts/type/:accountType',

@@ -242,6 +242,63 @@ export type UpdateAccountNameRequest = z.infer<typeof UpdateAccountNameSchema>;
 export type SystemIdentifierParam = z.infer<typeof SystemIdentifierParamSchema>;
 export type AccountTypeParam = z.infer<typeof AccountTypeParamSchema>;
 
+// SEPA validation schemas
+export const SEPACurrencySchema = z.enum(['EUR', 'NOK', 'SEK', 'DKK'] as const);
+
+export const SEPABankInfoSchema = z.object({
+  iban: z
+    .string()
+    .min(15, 'IBAN must be at least 15 characters')
+    .max(34, 'IBAN cannot exceed 34 characters')
+    .regex(/^[A-Z]{2}[0-9]{2}[A-Z0-9]+$/, 'Invalid IBAN format'),
+  bic: z
+    .string()
+    .regex(/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/, 'Invalid BIC format')
+    .optional(),
+  bankName: z
+    .string()
+    .min(1, 'Bank name is required')
+    .max(100, 'Bank name cannot exceed 100 characters'),
+  recipientName: z
+    .string()
+    .min(1, 'Recipient name is required')
+    .max(100, 'Recipient name cannot exceed 100 characters'),
+  country: z.string().regex(/^[A-Z]{2}$/, 'Country must be a valid ISO 3166-1 alpha-2 code'),
+});
+
+export const SEPAOutgoingTransferSchema = z.object({
+  accountId: AccountIdSchema,
+  amount: MoneyAmountSchema,
+  currency: SEPACurrencySchema,
+  bankInfo: SEPABankInfoSchema,
+  description: z.string().max(140, 'Description cannot exceed 140 characters').optional(),
+  urgency: z
+    .enum(['STANDARD', 'EXPRESS', 'INSTANT'] as const)
+    .optional()
+    .default('STANDARD'),
+});
+
+export const SEPAIncomingTransferSchema = z.object({
+  amount: MoneyAmountSchema,
+  currency: SEPACurrencySchema,
+  bankInfo: SEPABankInfoSchema,
+  targetAccountId: AccountIdSchema,
+  sepaTransactionId: z
+    .string()
+    .min(1, 'SEPA transaction ID is required')
+    .max(50, 'SEPA transaction ID cannot exceed 50 characters'),
+  description: z.string().max(140, 'Description cannot exceed 140 characters').optional(),
+});
+
+export const SEPACurrencyParamSchema = z.object({
+  currency: SEPACurrencySchema,
+});
+
+// SEPA type exports
+export type SEPAOutgoingTransferRequest = z.infer<typeof SEPAOutgoingTransferSchema>;
+export type SEPAIncomingTransferRequest = z.infer<typeof SEPAIncomingTransferSchema>;
+export type SEPACurrencyParam = z.infer<typeof SEPACurrencyParamSchema>;
+
 // External transaction type exports
 export type ExternalBankInfo = z.infer<typeof ExternalBankInfoSchema>;
 export type HighValueTransferInfo = z.infer<typeof HighValueTransferInfoSchema>;

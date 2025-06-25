@@ -25,6 +25,9 @@ export enum TransferType {
   LOAN_PAYMENT = 7,
   EXTERNAL_CREDIT = 8,
   EXTERNAL_DEBIT = 9,
+  SEPA_CREDIT = 10,
+  SEPA_DEBIT = 11,
+  SEPA_INSTANT = 12,
 }
 
 export interface Account {

@@ -1,579 +1,244 @@
 # Banking Ledger POC
 
-A comprehensive banking ledger proof-of-concept built with Node.js, TypeScript, TigerBeetle, and PostgreSQL. This monorepo contains both the backend API and frontend applications for enterprise-grade banking functionality including account management, transfers, loans, and invoice processing.
+A comprehensive banking ledger proof-of-concept built with Node.js, TypeScript, TigerBeetle, and PostgreSQL. This monorepo provides enterprise-grade banking functionality including account management, transfers, loans, and SEPA payment processing.
 
-## Repository Structure
-
-```
-core-poc/
-├── apps/
-│   ├── core-api/           # Core API server (port 7001)
-│   ├── batch-processor/   # Background job processor (port 7003)
-│   └── customer-frontend/ # Customer web application (port 7002)
-├── packages/
-│   ├── core-services/     # Database, TigerBeetle, repositories
-│   ├── domain/           # Domain logic and services
-│   └── shared/           # Shared types and utilities
-├── docs/                 # Documentation
-├── docker-compose.yml
-└── package.json          # Root workspace configuration
-```
-
-## Features
-
-### Core Banking Operations
-
-- **Account Management**: Create and manage deposit, loan, and credit accounts
-- **Transfers**: Secure money transfers between accounts with full audit trails
-- **Loan Processing**: Automated loan payment calculations and payment plan management
-- **Invoice Management**: Create, track, and process invoices with overdue handling
-
-### Enterprise Features
-
-- **Type Safety**: Full TypeScript implementation with runtime validation using Zod
-- **Database Persistence**: PostgreSQL with automated migrations
-- **Monitoring**: Comprehensive health checks, metrics, and Prometheus integration
-- **API Documentation**: Interactive Swagger/OpenAPI documentation
-- **Structured Logging**: Winston-based logging with different levels for dev/prod
-- **Graceful Shutdown**: Proper resource cleanup and background job management
-- **Value Objects**: Type-safe Money, AccountId, and CustomerId implementations
-
-### Architecture Highlights
-
-- **Domain-Driven Design**: Clear separation between domain logic and infrastructure
-- **Repository Pattern**: Abstracted data access layer
-- **Service Layer**: Business logic encapsulated in domain services
-- **Background Jobs**: Automated payment processing and invoice management
-- **Request Validation**: Comprehensive input validation with detailed error messages
-
-### Payment Plan Features
-
-- **Multiple Loan Types**: Support for annuity and serial loan structures
-- **Flexible Payment Frequencies**: Weekly, bi-weekly, monthly, quarterly, semi-annually, and annually
-- **Fee Management**: Comprehensive fee structures (origination, processing, insurance, late payment, prepayment, appraisal, administration)
-- **Automated Invoice Generation**: Scheduled payment invoice creation
-- **Amortization Schedules**: Complete payment breakdowns with principal/interest calculations
-- **Payment Processing Integration**: Direct TigerBeetle transfer processing for loan payments
-
-### Multi-Currency Support
-
-- **10 Supported Currencies**: USD, EUR, GBP, NOK, SEK, DKK, JPY, CAD, AUD, CHF
-- **ISO 4217 Standards**: All currencies mapped to standard ISO codes
-- **Currency-Specific Accounts**: Each account tied to a single currency for compliance
-
-### SEPA Payment Infrastructure
-
-- **SEPA Support**: Full Single Euro Payments Area integration for EUR, NOK, SEK, DKK
-- **System Account Management**: Dual account ID scheme supporting both customer (numeric) and system (prefixed) accounts
-- **Suspense Accounts**: Dedicated SEPA suspense accounts for outgoing, incoming, and settlement operations
-- **Account Type Isolation**: Clean separation between customer accounts and system accounts
-- **Configuration-Based Mappings**: System account ID mappings stored in JSON configuration files for simplicity
-
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
 
 - Node.js 18+ and npm
 - PostgreSQL 12+
-- TigerBeetle database (for accounting ledger)
-- direnv (for environment variable management)
+- TigerBeetle database
+- direnv (for environment management)
 
-### 1. Installation
+### Installation
 
 ```bash
 git clone <repository-url>
 cd core-poc
-npm install  # This will install all workspace dependencies
-```
+npm install
 
-### 2. Environment Setup with direnv
-
-```bash
-# Install direnv if not already installed
-# macOS: brew install direnv
-# Ubuntu: sudo apt install direnv
-# Or visit: https://direnv.net/docs/installation.html
-
-# Set up your shell hook (add to ~/.bashrc, ~/.zshrc, etc.)
-# For bash: echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
-# For zsh: echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
-
-# Copy the template and customize for your environment
+# Set up environment variables
 cp .envrc.example .envrc
-# Edit .envrc with your configuration
-
-# Allow direnv to load the environment variables
 direnv allow
-```
 
-### 3. Database Setup
-
-```bash
-# Create PostgreSQL database
-createdb banking_poc
-
-# Database schema will be automatically created on first run
-```
-
-### 4. Infrastructure Setup
-
-```bash
-# Start all required services (PostgreSQL, TigerBeetle, RabbitMQ)
+# Start infrastructure and services
 docker-compose up -d
-
-# Verify services are running
-docker-compose ps
-```
-
-### 5. Start the Application
-
-#### Backend Only
-
-```bash
-# Development with auto-reload
-npm run dev:backend
-
-# Or from the root
-npm run dev  # Defaults to backend
-```
-
-#### Frontend Only
-
-```bash
-# Development server
-npm run dev:frontend
-```
-
-#### Both Backend and Frontend
-
-```bash
-# Run both concurrently
 npm run dev:all
 ```
 
-#### Production Build
-
-```bash
-# Build all workspaces
-npm run build
-
-# Build specific workspace
-npm run build:backend
-npm run build:frontend
-```
-
-## API Documentation
-
-### Backend API
-
-Once the backend is running, visit:
+### Access Points
 
 - **API Documentation**: http://localhost:7001/api-docs
-- **Health Checks**: http://localhost:7001/health
-- **Metrics**: http://localhost:7001/metrics
-- **API Info**: http://localhost:7001/api/info
+- **Customer Frontend**: http://localhost:7002
 
-### Frontend Application
+## 📁 Repository Structure
 
-Once the frontend is running:
+```
+core-poc/
+├── apps/
+│   ├── core-api/           # Main API server (port 7001)
+│   ├── batch-processor/    # Background jobs (port 7003)
+│   └── customer-frontend/  # Next.js app (port 7002)
+├── packages/
+│   ├── core-services/      # TigerBeetle, database services
+│   ├── domain/            # Business logic
+│   └── shared/            # Shared utilities
+├── docs/                  # Documentation
+└── config/               # Configuration files
+```
 
-- **Customer Banking**: http://localhost:7002
-- **Next.js Dev Tools**: Available in development mode
+## 🇪🇺 SEPA Operations
 
-## Configuration
-
-### Environment Variables (managed with direnv)
-
-The application uses direnv to manage environment variables. Copy `.envrc.example` to `.envrc` and customize as needed.
-
-| Variable                 | Description                               | Default     |
-| ------------------------ | ----------------------------------------- | ----------- |
-| `NODE_ENV`               | Environment (development/production/test) | development |
-| `PORT`                   | Server port                               | 7001        |
-| `DB_HOST`                | PostgreSQL host                           | localhost   |
-| `DB_PORT`                | PostgreSQL port                           | 5432        |
-| `DB_NAME`                | Database name                             | banking_poc |
-| `DB_USER`                | Database user                             | postgres    |
-| `DB_PASSWORD`            | Database password                         | postgres    |
-| `TIGERBEETLE_CLUSTER_ID` | TigerBeetle cluster ID                    | 0           |
-| `TIGERBEETLE_ADDRESSES`  | TigerBeetle server addresses              | 3000        |
-| `LOG_LEVEL`              | Logging level (error/warn/info/debug)     | info        |
-
-### Development vs Production
-
-**Development:**
-
-- Detailed console logging with colors
-- Background jobs run every 30-60 seconds for testing
-- Swagger UI enabled
-- Detailed error messages
-
-**Production:**
-
-- JSON structured logging to files
-- Background jobs run on realistic schedules (daily/monthly)
-- Reduced error details for security
-- Performance optimizations
-
-## API Usage Examples
-
-### Create a Deposit Account
+SEPA accounts are automatically initialized on startup:
 
 ```bash
+# Verify SEPA accounts exist
+curl http://localhost:7001/api/system-accounts | grep SEPA
+
+# Create SEPA-enabled test account
 curl -X POST http://localhost:7001/accounts \
   -H "Content-Type: application/json" \
-  -d '{
-    "type": "DEPOSIT",
-    "customerId": "CUSTOMER-ABC-123",
-    "currency": "EUR",
-    "initialBalance": "100000"
-  }'
+  -d '{"type": "DEPOSIT", "customerId": "CUSTOMER-ABC-123", "currency": "EUR", "initialBalance": "100000"}'
 ```
 
-### Create a Loan Account
+> 📖 **Detailed SEPA Guide**: See [SEPA Architecture](docs/SEPA_ARCHITECTURE.md) for transfer flows and advanced configuration.
+
+## 🏦 Core Features
+
+### Banking Operations
+
+- **Account Management**: Multi-currency deposit, loan, and credit accounts
+- **Money Transfers**: Secure transfers with full audit trails
+- **Loan Processing**: Payment plans, amortization schedules
+- **Invoice Management**: Automated invoice generation and tracking
+
+### SEPA Integration
+
+- **Supported Currencies**: EUR, NOK, SEK, DKK with automatic initialization
+- **System Accounts**: 12 accounts created automatically (3 types × 4 currencies)
+- **Account Types**: Outgoing suspense, incoming suspense, settlement accounts
+- **Configuration**: JSON-based mapping in `config/system-accounts.json`
+- **API Endpoint**: `/api/system-accounts` for account inspection
+
+### Enterprise Features
+
+- **Type Safety**: Full TypeScript with Zod validation
+- **Monitoring**: Health checks, metrics, structured logging
+- **Internationalization**: English, Norwegian, Serbian support
+- **Background Jobs**: Automated payment and invoice processing
+
+## 🛠 Development Commands
 
 ```bash
-curl -X POST http://localhost:7001/accounts \
-  -H "Content-Type: application/json" \
-  -d '{
-    "type": "LOAN",
-    "customerId": "CUSTOMER-ABC-123",
-    "currency": "GBP",
-    "principalAmount": "20000000",
-    "interestRate": "4.5",
-    "termMonths": "360",
-    "loanType": "ANNUITY",
-    "paymentFrequency": "QUARTERLY",
-    "fees": [
-      {
-        "type": "ORIGINATION",
-        "amount": "50000",
-        "description": "Loan origination fee"
-      },
-      {
-        "type": "INSURANCE",
-        "amount": "25000",
-        "description": "Loan protection insurance"
-      }
-    ]
-  }'
+# Development
+npm run dev:all          # Start all services
+npm run dev:backend      # Backend only
+npm run dev:frontend     # Frontend only
+
+# Quality Assurance
+npm run build            # TypeScript compilation
+npm run lint             # ESLint validation
+npm test                 # Fast tests
+npm run test:all         # Full test suite
+
+# Infrastructure
+docker-compose up -d     # Start PostgreSQL, TigerBeetle
+direnv allow            # Reload environment
+
+# SEPA Operations
+curl http://localhost:7001/api/system-accounts           # View all system accounts
+curl http://localhost:7001/api/system-accounts | grep SEPA  # SEPA accounts only
+npm run test -- --testNamePattern=sepa                  # Run SEPA tests
 ```
 
-### Transfer Money
+## 🏗 Architecture Highlights
+
+### Data Storage
+
+- **TigerBeetle**: ALL financial transactions and balances
+- **PostgreSQL**: Metadata only (never financial data)
+- **JSON Config**: System account mappings
+
+### Design Patterns
+
+- **Domain-Driven Design**: Clear separation of concerns
+- **Repository Pattern**: Clean data access abstraction
+- **Value Objects**: Type-safe Money, AccountId, CustomerId
+- **Background Jobs**: Automated processing with proper scheduling
+
+## 📚 Documentation
+
+Detailed documentation is available in the `docs/` folder:
+
+- **[API Usage](docs/API_USAGE.md)** - REST API examples and validation rules
+- **[Configuration](docs/CONFIGURATION.md)** - Environment setup and deployment settings
+- **[Architecture](docs/ARCHITECTURE.md)** - Design decisions and system architecture
+- **[Features](docs/FEATURES.md)** - Detailed feature descriptions and capabilities
+- **[Development](docs/DEVELOPMENT.md)** - Development workflow, testing, and debugging
+- **[Internationalization](docs/INTERNATIONALIZATION.md)** - Multi-language setup and usage
+- **[SEPA Architecture](docs/SEPA_ARCHITECTURE.md)** - SEPA payment infrastructure details
+
+## 🧪 Testing
 
 ```bash
-curl -X POST http://localhost:7001/transfers \
-  -H "Content-Type: application/json" \
-  -d '{
-    "fromAccountId": "1234567890",
-    "toAccountId": "0987654321",
-    "amount": "50000",
-    "currency": "USD"
-  }'
+npm test                 # Unit and fast integration tests
+npm run test:all         # Full test suite including E2E
+npm run test:coverage    # Coverage reports
+npm run test:watch       # Watch mode for development
 ```
 
-### Create Invoice
+**Test Customer**: Use `CUSTOMER-ABC-123` for all testing scenarios.
 
-```bash
-curl -X POST http://localhost:7001/invoices \
-  -H "Content-Type: application/json" \
-  -d '{
-    "accountId": "1234567890",
-    "amount": "250000",
-    "dueDate": "2024-12-01"
-  }'
-```
+## 🌍 Multi-Language Support
 
-### Get Payment Plan
+The frontend supports three languages with complete translations:
 
-```bash
-curl -X GET http://localhost:7001/accounts/1234567890/payment-plan
-```
+- **English** (`/en`) - Default
+- **Norwegian** (`/no`) - Norsk
+- **Serbian** (`/sr`) - Српски
 
-### Get Amortization Schedule
+Language switching available in the navigation header.
 
-```bash
-curl -X GET http://localhost:7001/accounts/1234567890/amortization-schedule
-```
+## 💰 Supported Currencies
 
-### SEPA Operations
+**10 currencies**: USD, EUR, GBP, NOK, SEK, DKK, JPY, CAD, AUD, CHF
 
-The system automatically handles SEPA account initialization and management. System accounts are created and managed transparently:
+**SEPA currencies**: EUR, NOK, SEK, DKK with dedicated suspense accounts (auto-initialized on startup)
 
-```bash
-# System accounts are automatically created with prefixed identifiers:
-# SEPA-OUT-SUSPENSE-EUR, SEPA-IN-SUSPENSE-EUR, SEPA-SETTLEMENT-EUR
-# SEPA-OUT-SUSPENSE-NOK, SEPA-IN-SUSPENSE-NOK, SEPA-SETTLEMENT-NOK
-# And similar for SEK and DKK currencies
+### SEPA Account Structure
 
-# Check system account mappings (internal)
-curl -X GET http://localhost:7001/api/system-accounts
-```
+Each SEPA currency gets 3 system accounts:
 
-### List Customer Accounts
+- `SEPA-OUT-SUSPENSE-{CURRENCY}` - Outgoing transfers
+- `SEPA-IN-SUSPENSE-{CURRENCY}` - Incoming transfers
+- `SEPA-SETTLEMENT-{CURRENCY}` - Final settlement
 
-```bash
-# Get all accounts for a specific customer
-curl -X GET http://localhost:7001/customers/CUSTOMER-ABC-123/accounts
+## 🔧 Configuration
 
-# Example response:
-# [
-#   {
-#     "accountId": "1234567890123456789",
-#     "customerId": "CUSTOMER-ABC-123",
-#     "accountType": "DEPOSIT",
-#     "currency": "EUR",
-#     "createdAt": "2024-01-01T12:00:00.000Z",
-#     "updatedAt": "2024-01-01T12:00:00.000Z"
-#   },
-#   {
-#     "accountId": "9876543210987654321",
-#     "customerId": "CUSTOMER-ABC-123",
-#     "accountType": "LOAN",
-#     "currency": "GBP",
-#     "createdAt": "2024-01-02T10:30:00.000Z",
-#     "updatedAt": "2024-01-02T10:30:00.000Z"
-#   }
-# ]
-```
+### Service Ports
 
-## Validation Rules and Constraints
+- **6000-6001**: TigerBeetle (development/test)
+- **7001**: Core API
+- **7002**: Customer Frontend
+- **7003**: Batch Processor
+- **5432**: PostgreSQL
 
-### Customer IDs
+### Environment Variables
 
-- **Length**: 1-50 characters
-- **Format**: Letters, numbers, hyphens, and underscores only (`[A-Za-z0-9\-_]+`)
-- **Examples**: `CUSTOMER-ABC-123`, `CUST001`, `User_12345`
+Key variables in `.envrc`:
 
-### Currencies
+- `NODE_ENV`: development/production/test
+- `DB_*`: PostgreSQL connection settings
+- `TIGERBEETLE_*`: TigerBeetle configuration
+- `LOG_LEVEL`: Logging verbosity
 
-- **Supported**: USD, EUR, GBP, NOK, SEK, DKK, JPY, CAD, AUD, CHF
-- **Standard**: ISO 4217 currency codes
-- **Validation**: Currency must be supported and valid for the operation
+### SEPA Configuration Files
 
-### Money Amounts
+- **`config/system-accounts.json`** - System account mappings (auto-created)
+- **Location**: Project root, committed to version control
+- **Format**: JSON with TigerBeetle ID mappings
+- **Backup**: Template available at `config/system-accounts.json.template`
 
-- **Format**: Positive integers as strings (representing cents/smallest unit)
-- **Examples**: `"100000"` = $1,000.00, `"50000"` = $500.00
-- **Validation**: Must be valid BigInt values >= 0
+See [Configuration Guide](docs/CONFIGURATION.md) and [SEPA Architecture](docs/SEPA_ARCHITECTURE.md) for complete setup details.
 
-### Payment Frequencies
+## 🚦 Health & Monitoring
 
-- **Supported**: WEEKLY, BI_WEEKLY, MONTHLY, QUARTERLY, SEMI_ANNUALLY, ANNUALLY
-- **Use Cases**: Flexible loan payment schedules and invoice generation
+### Health Endpoints
 
-### Fee Types
-
-- **Supported**: ORIGINATION, PROCESSING, INSURANCE, LATE_PAYMENT, PREPAYMENT, APPRAISAL, ADMINISTRATION
-- **Structure**: Each fee includes type, amount (in cents), and description
-
-## Testing
-
-```bash
-# Run all tests
-npm test
-
-# Run specific test suites
-npm run test:unit
-npm run test:integration
-npm run test:e2e
-
-# Run with coverage
-npm run test:coverage
-
-# Watch mode for development
-npm run test:watch
-```
-
-### Test Structure
-
-- **Unit Tests**: Domain logic, value objects, and services
-- **Integration Tests**: Database interactions and repository layer
-- **E2E Tests**: Full API workflows with real TigerBeetle instances
-
-## Monitoring and Observability
-
-### Health Checks
-
-- `GET /health` - Comprehensive health status
-- `GET /health/ready` - Readiness probe for Kubernetes
-- `GET /health/live` - Liveness probe for Kubernetes
+- `/health` - Comprehensive system health
+- `/health/ready` - Kubernetes readiness probe
+- `/health/live` - Kubernetes liveness probe
 
 ### Metrics
 
-- `GET /metrics` - Application metrics (JSON)
-- `GET /metrics/http` - HTTP-specific metrics
-- `GET /metrics/prometheus` - Prometheus-format metrics
+- `/metrics` - Application metrics (JSON)
+- `/metrics/prometheus` - Prometheus format
 
-### Logging
+## 🔒 Security & Compliance
 
-- Structured JSON logging in production
-- Colored console logging in development
-- Request/response logging with correlation IDs
-- Error tracking with stack traces
+- **Input Validation**: Zod schemas for all API inputs
+- **SQL Injection Prevention**: Parameterized queries
+- **Financial Data Isolation**: TigerBeetle-only storage
+- **Audit Trails**: Immutable transaction history
+- **Error Handling**: No sensitive data in responses
 
-## Database Migrations
+## 📝 Contributing
 
-The application uses an automated migration system:
+1. **Follow TDD**: Write tests before implementation
+2. **Code Quality**: Run `npm run build && npm run lint && npm test`
+3. **Translations**: Add all three languages for frontend changes
+4. **Documentation**: Update relevant docs for API/architecture changes
 
-```typescript
-// Migrations run automatically on startup
-// To add new migrations, edit src/database/migrations.ts
+See [Development Guide](docs/DEVELOPMENT.md) for detailed workflow.
 
-// Manual migration management (if needed)
-const migrationRunner = new MigrationRunner(db);
-await migrationRunner.runMigrations();
-await migrationRunner.rollbackMigration('migration_id');
-```
+## 📄 License
 
-## Background Jobs
+ISC License - see LICENSE file for details.
 
-### Payment Plan Processing
+## 🆘 Support
 
-- **Development**: Runs every 30 seconds
-- **Production**: Runs monthly
-- Processes loan payments and updates remaining balances
-
-### Invoice Processing
-
-- **Development**: Runs every 60 seconds
-- **Production**: Runs daily
-- Marks overdue invoices and triggers notifications
-
-## Architecture Decisions
-
-### Why TigerBeetle?
-
-- **Performance**: Optimized for high-frequency financial transactions
-- **ACID Compliance**: Ensures data consistency for financial operations
-- **Double-Entry Bookkeeping**: Built-in accounting principles
-- **Audit Trail**: Immutable transaction history
-
-### Why PostgreSQL?
-
-- **Reliability**: ACID transactions and data integrity
-- **Scalability**: Excellent performance for analytical queries
-- **JSON Support**: Flexible data storage when needed
-- **Ecosystem**: Rich tooling and monitoring support
-
-### Design Patterns Used
-
-- **Repository Pattern**: Clean data access abstraction
-- **Domain Services**: Business logic encapsulation
-- **Value Objects**: Type-safe financial primitives
-- **Factory Pattern**: Service instantiation and dependency injection
-- **Command Pattern**: Background job processing
-
-### System Account Architecture
-
-The system implements a dual account ID scheme to support both customer accounts and system accounts:
-
-#### **Customer Accounts**
-
-- **Format**: Numeric IDs generated by TigerBeetle (e.g., `123456789`)
-- **Usage**: Regular customer deposit, loan, and credit accounts
-- **Storage**: Account metadata in PostgreSQL, financial data in TigerBeetle
-
-#### **System Accounts**
-
-- **Format**: Prefixed string identifiers (e.g., `SYSTEM-EXTERNAL-USD`, `SEPA-OUT-SUSPENSE-EUR`)
-- **Types**:
-  - `SYSTEM-EQUITY-{CURRENCY}` - Equity accounts for external transactions
-  - `SYSTEM-LIABILITY-{CURRENCY}` - Liability accounts for system operations
-  - `SEPA-OUT-SUSPENSE-{CURRENCY}` - SEPA outgoing transfer suspense
-  - `SEPA-IN-SUSPENSE-{CURRENCY}` - SEPA incoming transfer suspense
-  - `SEPA-SETTLEMENT-{CURRENCY}` - SEPA settlement accounts
-- **Mapping**: String identifiers mapped to TigerBeetle numeric IDs via configuration file
-- **Persistence**: `config/system-accounts.json` stores identifier-to-numeric-ID mappings
-
-#### **SEPA Suspense Account Flow**
-
-1. **Outgoing Transfer**: Customer Account → SEPA Outgoing Suspense → SEPA Settlement
-2. **Incoming Transfer**: SEPA Settlement → SEPA Incoming Suspense → Customer Account
-3. **Internal Transfer**: Customer Account A → Customer Account B (direct)
-
-## Security Considerations
-
-- **Input Validation**: All inputs validated using Zod schemas
-- **SQL Injection Prevention**: Parameterized queries throughout
-- **Error Handling**: No sensitive data leaked in error responses
-- **Rate Limiting**: Ready for implementation (middleware structure in place)
-- **CORS**: Configurable cross-origin request handling
-- **Helmet**: Security headers for web protection
-
-## Performance Features
-
-- **Connection Pooling**: PostgreSQL connection management
-- **Background Processing**: Non-blocking job execution
-- **Metrics Collection**: Performance monitoring and alerting
-- **Graceful Shutdown**: Clean resource cleanup
-- **Memory Management**: Monitoring and alerting for memory usage
-
-## Internationalization (i18n)
-
-The frontend application supports multiple languages with full internationalization using next-intl.
-
-### Supported Languages
-
-- **English**: Default language (`en`)
-- **Norwegian**: Complete translations (`no`)
-- **Serbian**: Complete translations with Cyrillic script (`sr`)
-
-### Features
-
-- **Language Switching**: Dynamic language switching via dropdown in navigation
-- **URL-based Locale**: Language preference reflected in URL (`/en`, `/no`, `/sr`)
-- **Complete Coverage**: All UI text, navigation, forms, and messages translated
-- **Type-safe Translations**: TypeScript integration for translation keys
-- **Fallback Support**: Graceful fallback to English if translations missing
-
-### Usage
-
-1. **Language Switcher**: Click the globe icon in the top navigation
-2. **Direct URL Access**: Navigate directly to `/en`, `/no`, or `/sr` for specific languages
-3. **Persistent State**: Language preference maintained across page navigation
-4. **Root URL**: Automatically redirects to user's preferred language based on browser settings
-
-### Translation Files
-
-Translation files are located in `frontend/messages/`:
-
-- `en.json` - English (default)
-- `no.json` - Norwegian (Norsk)
-- `sr.json` - Serbian (Српски)
-
-### Adding New Languages
-
-1. Create new translation file in `frontend/messages/[locale].json`
-2. Add locale to `frontend/i18n/config.ts` locales array
-3. Add locale name to `localeNames` mapping
-4. Update middleware pattern if needed
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make changes with tests
-4. Run the full test suite
-5. Submit a pull request
-
-### Code Style
-
-- TypeScript strict mode enabled
-- ESLint and Prettier for code formatting
-- Comprehensive error handling
-- Structured logging throughout
-- Domain-driven design principles
-
-## License
-
-ISC License - see LICENSE file for details
-
-## Support
-
-For issues and questions:
-
-- Check the API documentation at `/api-docs`
-- Review health status at `/health`
-- Check application logs
-- Open an issue in the repository
+- **API Documentation**: http://localhost:7001/api-docs
+- **Health Status**: http://localhost:7001/health
+- **Application Logs**: Check console output or log files
+- **Issues**: Open GitHub issue for bugs or questions

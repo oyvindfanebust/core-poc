@@ -6,6 +6,53 @@ This document describes the SEPA (Single Euro Payments Area) payment infrastruct
 
 The SEPA infrastructure enables processing of EUR, NOK, SEK, and DKK payments through dedicated system accounts and services. It implements a clean separation between customer accounts and system accounts while maintaining all financial data in TigerBeetle.
 
+## Quick Setup & Verification
+
+### Automatic SEPA Account Initialization
+
+The system automatically creates SEPA suspense accounts on first startup:
+
+```bash
+# Start the services - SEPA accounts are created automatically
+npm run dev:all
+
+# Verify SEPA accounts were created successfully
+curl http://localhost:7001/api/system-accounts
+```
+
+### SEPA Account Structure
+
+For each SEPA currency (EUR, NOK, SEK, DKK), three accounts are created:
+
+- **`SEPA-OUT-SUSPENSE-{CURRENCY}`** - Outgoing transfer processing
+- **`SEPA-IN-SUSPENSE-{CURRENCY}`** - Incoming transfer processing
+- **`SEPA-SETTLEMENT-{CURRENCY}`** - Final settlement operations
+
+### Configuration Files
+
+SEPA account mappings are stored in:
+
+- **Location**: `config/system-accounts.json`
+- **Format**: JSON configuration with TigerBeetle ID mappings
+- **Backup**: Automatically created on first run
+
+### Testing SEPA Operations
+
+```bash
+# Create a test account in SEPA currency
+curl -X POST http://localhost:7001/accounts \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "DEPOSIT",
+    "customerId": "CUSTOMER-ABC-123",
+    "currency": "EUR",
+    "initialBalance": "100000"
+  }'
+
+# Verify system accounts exist
+curl http://localhost:7001/api/system-accounts | grep SEPA
+```
+
 ## System Account Architecture
 
 ### Dual Account ID Scheme

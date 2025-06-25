@@ -1,4 +1,11 @@
-import { TigerBeetleService, logger, Currency } from '@core-poc/core-services';
+import {
+  TigerBeetleService,
+  logger,
+  Currency,
+  generateSystemAccountId,
+  getSystemAccountNumericId,
+  registerSystemAccountId,
+} from '@core-poc/core-services';
 
 import { AccountService } from './account.service.js';
 
@@ -222,24 +229,42 @@ export class ExternalTransactionService {
     }
 
     try {
-      // Create system account for external transactions
-      const systemAccountId = await this.tigerBeetleService.createAccount({
-        type: 'EQUITY',
-        customerId: 'SYSTEM',
-        currency,
-      });
+      // Generate system account identifier using the new scheme
+      const systemIdentifier = generateSystemAccountId('EXTERNAL_TRANSACTION', currency);
+
+      // Try to get existing numeric ID
+      let systemAccountId: bigint;
+      try {
+        systemAccountId = getSystemAccountNumericId(systemIdentifier);
+        logger.info('Found existing system account for external transactions', {
+          currency,
+          systemIdentifier,
+          accountId: systemAccountId.toString(),
+        });
+      } catch {
+        // Account doesn't exist, create it
+        systemAccountId = await this.tigerBeetleService.createAccount({
+          type: 'EQUITY',
+          customerId: 'SYSTEM',
+          currency,
+        });
+
+        // Register the mapping
+        registerSystemAccountId(systemIdentifier, systemAccountId);
+
+        logger.info('Created new system account for external transactions', {
+          currency,
+          systemIdentifier,
+          accountId: systemAccountId.toString(),
+        });
+      }
 
       // Cache the system account ID
       this.systemAccounts.set(currency, systemAccountId);
 
-      logger.info('Created system account for external transactions', {
-        currency,
-        accountId: systemAccountId.toString(),
-      });
-
       return systemAccountId;
     } catch (error) {
-      logger.error('Failed to create system account', { currency, error });
+      logger.error('Failed to get or create system account', { currency, error });
       throw error;
     }
   }

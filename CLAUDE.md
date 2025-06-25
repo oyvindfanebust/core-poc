@@ -35,10 +35,16 @@ direnv allow            # Reload env after .envrc changes
 - **Validation**: Zod schemas for all API inputs
 - **Money**: Always integers (cents), never decimals
 - **Design**: Domain → Repository → Service → Controller
+- **Account IDs**: Dual scheme - numeric (customer) vs string (system)
+- **SEPA**: Dedicated suspense accounts for EUR/NOK/SEK/DKK
 
 ## 📁 Key Files
 
 - `packages/core-services/src/value-objects.ts` - Money, AccountId types
+- `packages/core-services/src/system-account-id.ts` - System account ID management
+- `packages/core-services/src/services/sepa-suspense-account.service.ts` - SEPA account service
+- `packages/core-services/src/config/system-accounts.service.ts` - System account config service
+- `config/system-accounts.json` - System account mappings storage
 - `packages/domain/src/services/` - Business logic
 - `apps/*/src/services/factory.ts` - Service containers
 - `.envrc.example` - Environment template

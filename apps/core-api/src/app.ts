@@ -13,6 +13,7 @@ import swaggerUi from 'swagger-ui-express';
 import { AccountController } from './controllers/account.controller.js';
 import { HealthController } from './controllers/health.controller.js';
 import { MetricsController, metricsMiddleware } from './controllers/metrics.controller.js';
+import { SystemAccountController } from './controllers/system-account.controller.js';
 import { specs } from './docs/swagger.js';
 import { validateRequest, errorHandler, requestLogger } from './middleware/validation.js';
 import { ServiceFactory, ServiceContainer } from './services/factory.js';
@@ -22,6 +23,8 @@ import {
   AccountIdParamSchema,
   CustomerIdParamSchema,
   UpdateAccountNameSchema,
+  SystemIdentifierParamSchema,
+  AccountTypeParamSchema,
 } from './validation/schemas.js';
 
 let services: ServiceContainer;
@@ -42,6 +45,9 @@ async function createApp(): Promise<express.Application> {
 
     const healthController = new HealthController(services.database, services.cdcManager);
     const metricsController = new MetricsController();
+    const systemAccountController = new SystemAccountController(
+      services.systemAccountConfigService,
+    );
 
     const app = express();
 
@@ -130,6 +136,29 @@ async function createApp(): Promise<express.Application> {
       accountController.getAccountsByCustomer.bind(accountController),
     );
 
+    // System account routes (specific routes before parameterized ones)
+    app.get(
+      '/api/system-accounts',
+      systemAccountController.getSystemAccounts.bind(systemAccountController),
+    );
+
+    app.get(
+      '/api/system-accounts/validate',
+      systemAccountController.validateConfiguration.bind(systemAccountController),
+    );
+
+    app.get(
+      '/api/system-accounts/type/:accountType',
+      validateRequest(AccountTypeParamSchema, 'params'),
+      systemAccountController.getSystemAccountsByType.bind(systemAccountController),
+    );
+
+    app.get(
+      '/api/system-accounts/:systemIdentifier',
+      validateRequest(SystemIdentifierParamSchema, 'params'),
+      systemAccountController.getSystemAccount.bind(systemAccountController),
+    );
+
     // API info endpoint
     app.get('/api/info', (req, res) => {
       res.json({
@@ -156,6 +185,7 @@ async function createApp(): Promise<express.Application> {
           metrics: '/metrics',
           accounts: '/accounts',
           transfers: '/transfers',
+          systemAccounts: '/api/system-accounts',
         },
       });
     });
@@ -172,6 +202,10 @@ async function createApp(): Promise<express.Application> {
         'GET /accounts/:accountId/payment-plan',
         'GET /accounts/:accountId/amortization-schedule',
         'GET /customers/:customerId/accounts',
+        'GET /api/system-accounts',
+        'GET /api/system-accounts/:systemIdentifier',
+        'GET /api/system-accounts/type/:accountType',
+        'GET /api/system-accounts/validate',
         'GET /health',
         'GET /metrics',
         'GET /api-docs',

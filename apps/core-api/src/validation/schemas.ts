@@ -210,6 +210,26 @@ export const HighValueTransferRequestSchema = z.object({
   description: z.string().max(200, 'Description cannot exceed 200 characters').optional(),
 });
 
+// System account validation schemas
+export const SystemIdentifierParamSchema = z.object({
+  systemIdentifier: z
+    .string()
+    .min(1, 'System identifier is required')
+    .max(100, 'System identifier cannot exceed 100 characters')
+    .regex(
+      /^[A-Z0-9\-_]+$/,
+      'System identifier must contain only uppercase letters, numbers, hyphens, and underscores',
+    ),
+});
+
+export const AccountTypeParamSchema = z.object({
+  accountType: z
+    .string()
+    .min(1, 'Account type is required')
+    .max(50, 'Account type cannot exceed 50 characters')
+    .regex(/^[A-Z_]+$/, 'Account type must contain only uppercase letters and underscores'),
+});
+
 // Type exports for use in controllers
 export type CreateAccountRequest = z.infer<typeof CreateAccountSchema>;
 export type CreateDepositAccountRequest = z.infer<typeof CreateDepositAccountSchema>;
@@ -219,6 +239,8 @@ export type TransferRequest = z.infer<typeof TransferSchema>;
 export type AccountIdParam = z.infer<typeof AccountIdParamSchema>;
 export type CustomerIdParam = z.infer<typeof CustomerIdParamSchema>;
 export type UpdateAccountNameRequest = z.infer<typeof UpdateAccountNameSchema>;
+export type SystemIdentifierParam = z.infer<typeof SystemIdentifierParamSchema>;
+export type AccountTypeParam = z.infer<typeof AccountTypeParamSchema>;
 
 // External transaction type exports
 export type ExternalBankInfo = z.infer<typeof ExternalBankInfoSchema>;

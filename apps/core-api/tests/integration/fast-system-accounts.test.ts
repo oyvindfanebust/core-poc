@@ -1,31 +1,25 @@
-import axios from 'axios';
+import request from 'supertest';
 
 describe('System Accounts API Integration Tests', () => {
-  const baseURL = 'http://localhost:7001';
-
-  // Helper function to make API calls
-  const api = axios.create({
-    baseURL,
-    timeout: 5000,
-    validateStatus: () => true, // Don't throw on HTTP error status codes
-  });
+  // Use supertest to test the Express app directly
+  const api = request('http://localhost:7001');
 
   describe('GET /api/system-accounts', () => {
     it('should return all system accounts with proper structure', async () => {
       const response = await api.get('/api/system-accounts');
 
       expect(response.status).toBe(200);
-      expect(response.data).toHaveProperty('metadata');
-      expect(response.data).toHaveProperty('accounts');
-      expect(response.data).toHaveProperty('count');
+      expect(response.body).toHaveProperty('metadata');
+      expect(response.body).toHaveProperty('accounts');
+      expect(response.body).toHaveProperty('count');
 
       // Should have 12 SEPA accounts (3 types × 4 currencies)
-      expect(response.data.count).toBe(12);
-      expect(Array.isArray(response.data.accounts)).toBe(true);
-      expect(response.data.accounts).toHaveLength(12);
+      expect(response.body.count).toBe(12);
+      expect(Array.isArray(response.body.accounts)).toBe(true);
+      expect(response.body.accounts).toHaveLength(12);
 
       // Verify account structure
-      const account = response.data.accounts[0];
+      const account = response.body.accounts[0];
       expect(account).toHaveProperty('systemIdentifier');
       expect(account).toHaveProperty('tigerBeetleId');
       expect(account).toHaveProperty('accountType');
@@ -39,7 +33,7 @@ describe('System Accounts API Integration Tests', () => {
 
       expect(response.status).toBe(200);
 
-      const accountTypes = response.data.accounts.map((account: any) => account.accountType);
+      const accountTypes = response.body.accounts.map((account: any) => account.accountType);
       const uniqueAccountTypes = [...new Set(accountTypes)];
 
       expect(uniqueAccountTypes).toContain('SEPA_OUTGOING_SUSPENSE');
@@ -53,7 +47,7 @@ describe('System Accounts API Integration Tests', () => {
 
       expect(response.status).toBe(200);
 
-      const currencies = response.data.accounts.map((account: any) => account.currency);
+      const currencies = response.body.accounts.map((account: any) => account.currency);
       const uniqueCurrencies = [...new Set(currencies)];
 
       expect(uniqueCurrencies).toContain('EUR');
@@ -69,10 +63,10 @@ describe('System Accounts API Integration Tests', () => {
       const response = await api.get('/api/system-accounts/SEPA-OUT-SUSPENSE-EUR');
 
       expect(response.status).toBe(200);
-      expect(response.data).toHaveProperty('systemIdentifier', 'SEPA-OUT-SUSPENSE-EUR');
-      expect(response.data).toHaveProperty('currency', 'EUR');
-      expect(response.data).toHaveProperty('accountType', 'SEPA_OUTGOING_SUSPENSE');
-      expect(response.data.description).toContain(
+      expect(response.body).toHaveProperty('systemIdentifier', 'SEPA-OUT-SUSPENSE-EUR');
+      expect(response.body).toHaveProperty('currency', 'EUR');
+      expect(response.body).toHaveProperty('accountType', 'SEPA_OUTGOING_SUSPENSE');
+      expect(response.body.description).toContain(
         'SEPA outgoing transfer suspense account for EUR',
       );
     });
@@ -81,8 +75,8 @@ describe('System Accounts API Integration Tests', () => {
       const response = await api.get('/api/system-accounts/NON-EXISTENT-ACCOUNT');
 
       expect(response.status).toBe(404);
-      expect(response.data).toHaveProperty('error');
-      expect(response.data.error).toHaveProperty('code', 'SYSTEM_ACCOUNT_NOT_FOUND');
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toHaveProperty('code', 'SYSTEM_ACCOUNT_NOT_FOUND');
     });
   });
 
@@ -91,17 +85,17 @@ describe('System Accounts API Integration Tests', () => {
       const response = await api.get('/api/system-accounts/type/SEPA_SETTLEMENT');
 
       expect(response.status).toBe(200);
-      expect(response.data).toHaveProperty('accountType', 'SEPA_SETTLEMENT');
-      expect(response.data).toHaveProperty('count', 4);
+      expect(response.body).toHaveProperty('accountType', 'SEPA_SETTLEMENT');
+      expect(response.body).toHaveProperty('count', 4);
 
       // All accounts should be settlement type
-      response.data.accounts.forEach((account: any) => {
+      response.body.accounts.forEach((account: any) => {
         expect(account.accountType).toBe('SEPA_SETTLEMENT');
         expect(account.systemIdentifier).toMatch(/^SEPA-SETTLEMENT-/);
       });
 
       // Should have all 4 currencies
-      const currencies = response.data.accounts.map((account: any) => account.currency);
+      const currencies = response.body.accounts.map((account: any) => account.currency);
       expect(currencies).toContain('EUR');
       expect(currencies).toContain('NOK');
       expect(currencies).toContain('SEK');
@@ -112,10 +106,10 @@ describe('System Accounts API Integration Tests', () => {
       const response = await api.get('/api/system-accounts/type/SEPA_OUTGOING_SUSPENSE');
 
       expect(response.status).toBe(200);
-      expect(response.data).toHaveProperty('accountType', 'SEPA_OUTGOING_SUSPENSE');
-      expect(response.data).toHaveProperty('count', 4);
+      expect(response.body).toHaveProperty('accountType', 'SEPA_OUTGOING_SUSPENSE');
+      expect(response.body).toHaveProperty('count', 4);
 
-      response.data.accounts.forEach((account: any) => {
+      response.body.accounts.forEach((account: any) => {
         expect(account.accountType).toBe('SEPA_OUTGOING_SUSPENSE');
         expect(account.systemIdentifier).toMatch(/^SEPA-OUT-SUSPENSE-/);
       });
@@ -125,9 +119,9 @@ describe('System Accounts API Integration Tests', () => {
       const response = await api.get('/api/system-accounts/type/NON_EXISTENT_TYPE');
 
       expect(response.status).toBe(200);
-      expect(response.data).toHaveProperty('accountType', 'NON_EXISTENT_TYPE');
-      expect(response.data).toHaveProperty('accounts', []);
-      expect(response.data).toHaveProperty('count', 0);
+      expect(response.body).toHaveProperty('accountType', 'NON_EXISTENT_TYPE');
+      expect(response.body).toHaveProperty('accounts', []);
+      expect(response.body).toHaveProperty('count', 0);
     });
   });
 
@@ -136,9 +130,9 @@ describe('System Accounts API Integration Tests', () => {
       const response = await api.get('/api/system-accounts/validate');
 
       expect(response.status).toBe(200);
-      expect(response.data).toHaveProperty('valid', true);
-      expect(response.data).toHaveProperty('errors', []);
-      expect(response.data).toHaveProperty('message', 'Configuration is valid');
+      expect(response.body).toHaveProperty('valid', true);
+      expect(response.body).toHaveProperty('errors', []);
+      expect(response.body).toHaveProperty('message', 'Configuration is valid');
     });
   });
 
@@ -163,7 +157,7 @@ describe('System Accounts API Integration Tests', () => {
         'SEPA-SETTLEMENT-DKK',
       ];
 
-      const accountIdentifiers = response.data.accounts.map(
+      const accountIdentifiers = response.body.accounts.map(
         (account: any) => account.systemIdentifier,
       );
 
@@ -177,7 +171,7 @@ describe('System Accounts API Integration Tests', () => {
 
       expect(response.status).toBe(200);
 
-      response.data.accounts.forEach((account: any) => {
+      response.body.accounts.forEach((account: any) => {
         // TigerBeetle IDs should be numeric strings
         expect(account.tigerBeetleId).toMatch(/^\d+$/);
         // Should be able to convert to BigInt
@@ -192,7 +186,7 @@ describe('System Accounts API Integration Tests', () => {
 
       expect(response.status).toBe(200);
 
-      response.data.accounts.forEach((account: any) => {
+      response.body.accounts.forEach((account: any) => {
         // Should be valid ISO date strings
         expect(() => new Date(account.createdAt)).not.toThrow();
         expect(new Date(account.createdAt).toISOString()).toBe(account.createdAt);

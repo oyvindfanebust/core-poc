@@ -165,6 +165,52 @@ export const AccountTypeParamSchema = z.object({
     .regex(/^[A-Z_]+$/, 'Account type must contain only uppercase letters and underscores'),
 });
 
+// SEPA validation schemas
+export const IBANSchema = z
+  .string()
+  .min(15, 'IBAN must be at least 15 characters')
+  .max(34, 'IBAN cannot exceed 34 characters')
+  .regex(/^[A-Z]{2}[0-9]{2}[A-Z0-9]+$/, 'IBAN must be in valid format (e.g., NO9386011117947)')
+  .transform(val => val.replace(/\s/g, '').toUpperCase()); // Remove spaces and convert to uppercase
+
+export const BICSchema = z
+  .string()
+  .length(8, 'BIC must be exactly 8 characters')
+  .regex(/^[A-Z]{6}[A-Z0-9]{2}$/, 'BIC must be in valid format (6 letters + 2 alphanumeric)')
+  .optional();
+
+export const SEPAUrgencySchema = z.enum(['STANDARD', 'EXPRESS', 'INSTANT'] as const);
+
+export const SEPABankInfoSchema = z.object({
+  iban: IBANSchema,
+  bic: BICSchema,
+  bankName: z
+    .string()
+    .min(1, 'Bank name is required')
+    .max(100, 'Bank name cannot exceed 100 characters'),
+  recipientName: z
+    .string()
+    .min(1, 'Recipient name is required')
+    .max(100, 'Recipient name cannot exceed 100 characters'),
+  country: z
+    .string()
+    .length(2, 'Country must be a 2-letter ISO code')
+    .regex(/^[A-Z]{2}$/, 'Country must be uppercase letters'),
+});
+
+export const SEPATransferRequestSchema = z.object({
+  accountId: AccountIdSchema,
+  amount: MoneyAmountSchema,
+  currency: CurrencySchema,
+  bankInfo: SEPABankInfoSchema,
+  description: z.string().max(140, 'Description cannot exceed 140 characters').optional(),
+  urgency: SEPAUrgencySchema.optional().default('STANDARD'),
+});
+
+export const SEPACurrencyParamSchema = z.object({
+  currency: CurrencySchema,
+});
+
 // Type exports for use in controllers
 export type CreateAccountRequest = z.infer<typeof CreateAccountSchema>;
 export type CreateDepositAccountRequest = z.infer<typeof CreateDepositAccountSchema>;
@@ -176,3 +222,6 @@ export type CustomerIdParam = z.infer<typeof CustomerIdParamSchema>;
 export type UpdateAccountNameRequest = z.infer<typeof UpdateAccountNameSchema>;
 export type SystemIdentifierParam = z.infer<typeof SystemIdentifierParamSchema>;
 export type AccountTypeParam = z.infer<typeof AccountTypeParamSchema>;
+export type SEPATransferRequest = z.infer<typeof SEPATransferRequestSchema>;
+export type SEPABankInfo = z.infer<typeof SEPABankInfoSchema>;
+export type SEPACurrencyParam = z.infer<typeof SEPACurrencyParamSchema>;

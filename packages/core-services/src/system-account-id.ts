@@ -50,6 +50,52 @@ export const SEPA_SYSTEM_ACCOUNTS = {
 const systemAccountIdMap = new Map<string, bigint>();
 
 /**
+ * Generate a customer account ID using TigerBeetle's ID generation
+ * Customer IDs are always numeric (bigint)
+ * @returns A unique customer account ID
+ */
+export function generateCustomerAccountId(): bigint {
+  return id();
+}
+
+/**
+ * Validate that an account ID is a valid customer account ID
+ * Customer account IDs must be numeric and not start with 'SYSTEM-' or 'SEPA-'
+ * @param accountId The account ID to validate
+ * @returns true if the ID is valid for a customer account
+ */
+export function isValidCustomerAccountId(accountId: string | bigint): boolean {
+  const idStr = accountId.toString();
+
+  // Must be numeric only
+  if (!/^\d+$/.test(idStr)) {
+    return false;
+  }
+
+  // Must not be a system account
+  return !isSystemAccount(idStr);
+}
+
+/**
+ * Validate that an account ID is a valid system account ID
+ * System account IDs must follow the pattern: SYSTEM-{TYPE}-{CURRENCY} or SEPA-{TYPE}-{CURRENCY}
+ * @param accountId The account ID to validate
+ * @returns true if the ID is valid for a system account
+ */
+export function isValidSystemAccountId(accountId: string): boolean {
+  // Must start with SYSTEM- or SEPA-
+  if (!accountId.startsWith('SYSTEM-') && !accountId.startsWith('SEPA-')) {
+    return false;
+  }
+
+  // Check against known patterns
+  const systemPattern = /^SYSTEM-(EQUITY|LIABILITY|EXTERNAL)-(EUR|NOK|SEK|DKK)$/;
+  const sepaPattern = /^SEPA-(OUT-SUSPENSE|IN-SUSPENSE|SETTLEMENT)-(EUR|NOK|SEK|DKK)$/;
+
+  return systemPattern.test(accountId) || sepaPattern.test(accountId);
+}
+
+/**
  * Generate a system account ID with a specific prefix
  * @param type The type of system account
  * @param currency The currency for the account
@@ -91,7 +137,14 @@ export function isSystemAccount(accountId: AccountId | string): boolean {
  * @returns true if the account is a customer account
  */
 export function isCustomerAccount(accountId: AccountId | string): boolean {
-  return !isSystemAccount(accountId);
+  const idStr = typeof accountId === 'string' ? accountId : accountId.toString();
+
+  // Empty string is not a valid customer account
+  if (!idStr) {
+    return false;
+  }
+
+  return !isSystemAccount(accountId) && isValidCustomerAccountId(idStr);
 }
 
 /**

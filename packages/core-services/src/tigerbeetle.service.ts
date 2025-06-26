@@ -2,6 +2,13 @@ import { TransferType } from '@core-poc/shared';
 import { id, createClient } from 'tigerbeetle-node';
 
 import { ACCOUNT_TYPES, LEDGER_CODES } from './config/tigerbeetle.js';
+import {
+  generateCustomerAccountId,
+  isValidCustomerAccountId,
+  generateSystemAccountId,
+  getSystemAccountNumericId,
+  SystemAccountType,
+} from './system-account-id.js';
 import { CreateAccountRequest, CreateTransferRequest } from './types/index.js';
 import { logger } from './utils/logger.js';
 
@@ -94,7 +101,13 @@ export class TigerBeetleService {
 
   async createAccount(request: CreateAccountRequest): Promise<bigint> {
     return this.withRetry(async () => {
-      const accountId = id();
+      // Generate customer account ID
+      const accountId = generateCustomerAccountId();
+
+      // Validate it's a valid customer account ID
+      if (!isValidCustomerAccountId(accountId)) {
+        throw new Error('Generated invalid customer account ID');
+      }
 
       const account = {
         id: accountId,
@@ -172,37 +185,109 @@ export class TigerBeetleService {
     });
   }
 
+  /**
+   * Create a system account (equity, liability, SEPA suspense, etc.)
+   * @param type The type of system account
+   * @param currency The currency for the account
+   * @param code Optional account code (defaults based on type)
+   * @returns The system account's string identifier
+   */
+  async createSystemAccount(
+    type: SystemAccountType,
+    currency: keyof typeof LEDGER_CODES,
+    code?: number,
+  ): Promise<string> {
+    return this.withRetry(async () => {
+      // Generate the system account identifier
+      const systemAccountId = generateSystemAccountId(type, currency);
+
+      // Get or generate the numeric ID for TigerBeetle
+      const numericId = getSystemAccountNumericId(systemAccountId);
+
+      // Determine the account code based on type
+      let accountCode = code;
+      if (!accountCode) {
+        switch (type) {
+          case 'EQUITY':
+            accountCode = ACCOUNT_TYPES.EQUITY;
+            break;
+          case 'LIABILITY':
+            accountCode = ACCOUNT_TYPES.LIABILITY;
+            break;
+          case 'EXTERNAL_TRANSACTION':
+            accountCode = ACCOUNT_TYPES.ASSET;
+            break;
+          case 'SEPA_OUTGOING_SUSPENSE':
+          case 'SEPA_INCOMING_SUSPENSE':
+          case 'SEPA_SETTLEMENT':
+            accountCode = ACCOUNT_TYPES.ASSET; // SEPA accounts are asset accounts
+            break;
+          default:
+            accountCode = ACCOUNT_TYPES.ASSET; // Default for suspense accounts
+        }
+      }
+
+      const account = {
+        id: numericId,
+        debits_pending: 0n,
+        debits_posted: 0n,
+        credits_pending: 0n,
+        credits_posted: 0n,
+        user_data_128: 0n, // Could store account type info here
+        user_data_64: 0n, // Could store currency info here
+        user_data_32: 0,
+        reserved: 0,
+        ledger: LEDGER_CODES[currency],
+        code: accountCode,
+        flags: 0, // TODO: Add system account flags to prevent customer operations
+        timestamp: 0n,
+      };
+
+      const errors = await this.client.createAccounts([account]);
+      if (errors.length > 0) {
+        // Check if account already exists
+        const errorData = errors[0];
+        if (errorData.result === 'exists') {
+          logger.info('System account already exists', {
+            systemAccountId,
+            numericId: numericId.toString(),
+          });
+          return systemAccountId;
+        }
+        throw new Error(`Failed to create system account: ${JSON.stringify(errors)}`);
+      }
+
+      logger.info('Created system account', {
+        systemAccountId,
+        numericId: numericId.toString(),
+        type,
+        currency,
+      });
+
+      return systemAccountId;
+    });
+  }
+
   private async initialDeposit(
     accountId: bigint,
     amount: bigint,
     currency: keyof typeof LEDGER_CODES,
   ): Promise<void> {
-    const systemAccountId = id();
+    // Create or get the equity system account for this currency
+    const equityAccountId = generateSystemAccountId('EQUITY', currency);
+    const systemAccountNumericId = getSystemAccountNumericId(equityAccountId);
 
-    const systemAccount = {
-      id: systemAccountId,
-      debits_pending: 0n,
-      debits_posted: 0n,
-      credits_pending: 0n,
-      credits_posted: 0n,
-      user_data_128: 0n,
-      user_data_64: 0n,
-      user_data_32: 0,
-      reserved: 0,
-      ledger: LEDGER_CODES[currency],
-      code: ACCOUNT_TYPES.EQUITY,
-      flags: 0,
-      timestamp: 0n,
-    };
-
-    await this.ensureConnection();
-    const errors = await this.client.createAccounts([systemAccount]);
-    if (errors.length > 0) {
-      throw new Error(`Failed to create system account: ${JSON.stringify(errors)}`);
+    // Try to create the equity account (will succeed if it doesn't exist)
+    try {
+      await this.createSystemAccount('EQUITY', currency);
+    } catch (error) {
+      // Account might already exist, that's okay
+      logger.debug('Equity account creation skipped', { equityAccountId, error });
     }
 
+    // Transfer from equity account to customer account
     await this.createTransfer({
-      fromAccountId: systemAccountId,
+      fromAccountId: systemAccountNumericId,
       toAccountId: accountId,
       amount,
       currency,

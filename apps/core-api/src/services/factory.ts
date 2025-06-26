@@ -4,6 +4,7 @@ import {
   TransferRepository,
   TigerBeetleService,
   SystemAccountConfigService,
+  SEPASuspenseAccountService,
   getConfig,
   getTestConfig,
   logger,
@@ -25,6 +26,7 @@ export interface ServiceContainer {
   cdcManager: CDCManagerService;
   transferRepository: TransferRepository;
   systemAccountConfigService: SystemAccountConfigService;
+  sepaAccountService: SEPASuspenseAccountService;
 }
 
 export class ServiceFactory {
@@ -117,6 +119,48 @@ export class ServiceFactory {
       const cdcManager = new CDCManagerService(config);
       await cdcManager.initialize();
 
+      // Create SEPA suspense account service
+      const sepaAccountService = new SEPASuspenseAccountService(
+        tigerBeetleService,
+        systemAccountConfigService,
+      );
+
+      // Initialize SEPA accounts
+      logger.info('Initializing SEPA suspense accounts...');
+      try {
+        const initResult = await sepaAccountService.initializeAllSEPAAccounts();
+
+        if (initResult.errors.length > 0) {
+          logger.warn('Some SEPA accounts failed to initialize', {
+            errors: initResult.errors,
+            successCount: initResult.successCount,
+            totalAccounts: initResult.totalAccounts,
+          });
+        } else {
+          logger.info('All SEPA suspense accounts initialized successfully', {
+            successCount: initResult.successCount,
+            totalAccounts: initResult.totalAccounts,
+          });
+        }
+
+        // Validate that all accounts are properly created
+        const validation = await sepaAccountService.validateSEPAAccounts();
+        if (!validation.valid) {
+          logger.warn('SEPA account validation found missing accounts', {
+            missing: validation.missing,
+            configured: validation.configured,
+          });
+        } else {
+          logger.info('SEPA account validation passed - all accounts configured');
+        }
+      } catch (sepaError) {
+        logger.error('Failed to initialize SEPA accounts', {
+          error: sepaError,
+          message: (sepaError as Error)?.message || 'Unknown SEPA initialization error',
+        });
+        // Don't throw - continue startup but log the issue
+      }
+
       ServiceFactory.instance = {
         accountService,
         loanService,
@@ -126,6 +170,7 @@ export class ServiceFactory {
         cdcManager,
         transferRepository,
         systemAccountConfigService,
+        sepaAccountService,
       };
 
       logger.info('Core API services initialized successfully');
@@ -188,6 +233,12 @@ export class ServiceFactory {
       const cdcManager = new CDCManagerService(config);
       await cdcManager.initialize();
 
+      // Create SEPA suspense account service (for tests)
+      const sepaAccountService = new SEPASuspenseAccountService(
+        tigerBeetleService,
+        systemAccountConfigService,
+      );
+
       ServiceFactory.testInstance = {
         accountService,
         loanService,
@@ -197,6 +248,7 @@ export class ServiceFactory {
         cdcManager,
         transferRepository,
         systemAccountConfigService,
+        sepaAccountService,
       };
 
       logger.info('Test services initialized successfully');

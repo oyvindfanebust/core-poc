@@ -14,3 +14,4 @@ export * from './types/index.js';
 export * from './types/cdc.js';
 export * from './value-objects.js';
 export * from './system-account-id.js';
+export * from './services/sepa-suspense-account.service.js';

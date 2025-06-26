@@ -1,3 +1,4 @@
+import { validateBIC, validateSEPAIBAN, normalizeIBAN, normalizeBIC } from '@core-poc/shared';
 import { z } from 'zod';
 
 // import { Currency } from '../types/index.js';
@@ -248,13 +249,17 @@ export const SEPACurrencySchema = z.enum(['EUR', 'NOK', 'SEK', 'DKK'] as const);
 export const SEPABankInfoSchema = z.object({
   iban: z
     .string()
-    .min(15, 'IBAN must be at least 15 characters')
-    .max(34, 'IBAN cannot exceed 34 characters')
-    .regex(/^[A-Z]{2}[0-9]{2}[A-Z0-9]+$/, 'Invalid IBAN format'),
+    .min(1, 'IBAN is required')
+    .refine(iban => {
+      const validation = validateSEPAIBAN(iban);
+      return validation.isValid;
+    }, 'Invalid IBAN format, checksum, or not within SEPA zone')
+    .transform(normalizeIBAN),
   bic: z
     .string()
-    .regex(/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/, 'Invalid BIC format')
-    .optional(),
+    .optional()
+    .refine(bic => !bic || validateBIC(bic), 'Invalid BIC format')
+    .transform(bic => (bic ? normalizeBIC(bic) : undefined)),
   bankName: z
     .string()
     .min(1, 'Bank name is required')

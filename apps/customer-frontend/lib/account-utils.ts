@@ -1,3 +1,12 @@
+import {
+  validateIBAN as validateIBANComprehensive,
+  validateBIC as validateBICComprehensive,
+  formatIBAN as formatIBANComprehensive,
+  extractCountryFromIBAN as extractCountryFromIBANComprehensive,
+  validateSEPAIBAN,
+  getIBANDisplayInfo,
+} from '@core-poc/shared';
+
 import { Account } from './api';
 
 /**
@@ -47,38 +56,45 @@ export function maskAccountId(accountId: string): string {
 }
 
 /**
- * Validate IBAN format
+ * Validate IBAN format with comprehensive checksum verification
  */
 export function validateIBAN(iban: string): boolean {
-  const cleaned = iban.replace(/\s/g, '').toUpperCase();
-  return (
-    /^[A-Z]{2}[0-9]{2}[A-Z0-9]+$/.test(cleaned) && cleaned.length >= 15 && cleaned.length <= 34
-  );
+  return validateIBANComprehensive(iban);
+}
+
+/**
+ * Validate IBAN specifically for SEPA transfers
+ */
+export function validateSEPAIBANFormat(iban: string): { isValid: boolean; error?: string } {
+  return validateSEPAIBAN(iban);
+}
+
+/**
+ * Get detailed IBAN information for display and validation
+ */
+export function getIBANInfo(iban: string) {
+  return getIBANDisplayInfo(iban);
 }
 
 /**
  * Validate BIC format
  */
 export function validateBIC(bic: string): boolean {
-  if (!bic) return true; // BIC is optional
-  const cleaned = bic.replace(/\s/g, '').toUpperCase();
-  return /^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(cleaned);
+  return validateBICComprehensive(bic);
 }
 
 /**
  * Format IBAN with spaces for display
  */
 export function formatIBAN(iban: string): string {
-  const cleaned = iban.replace(/\s/g, '').toUpperCase();
-  return cleaned.replace(/(.{4})/g, '$1 ').trim();
+  return formatIBANComprehensive(iban);
 }
 
 /**
  * Extract country code from IBAN
  */
 export function extractCountryFromIBAN(iban: string): string {
-  const cleaned = iban.replace(/\s/g, '').toUpperCase();
-  return cleaned.substring(0, 2);
+  return extractCountryFromIBANComprehensive(iban);
 }
 
 /**

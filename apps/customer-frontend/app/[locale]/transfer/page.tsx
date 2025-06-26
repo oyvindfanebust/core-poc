@@ -16,13 +16,13 @@ import {
 } from '@/components/transfer-confirmation-dialog';
 import {
   formatAccountOption,
-  validateIBAN,
   validateBIC,
   formatIBAN,
-  extractCountryFromIBAN,
   isSEPACurrency,
   getCurrencySymbol,
   filterSEPACompatibleAccounts,
+  validateSEPAIBANFormat,
+  getIBANInfo,
 } from '@/lib/account-utils';
 import {
   accountsApi,
@@ -95,7 +95,18 @@ const sepaTransferSchema = z.object({
     const num = parseFloat(val);
     return !isNaN(num) && num > 0;
   }, 'Amount must be greater than 0'),
-  iban: z.string().min(1, 'IBAN is required').refine(validateIBAN, 'Invalid IBAN format'),
+  iban: z
+    .string()
+    .min(1, 'IBAN is required')
+    .refine(
+      iban => {
+        const validation = validateSEPAIBANFormat(iban);
+        return validation.isValid;
+      },
+      {
+        message: 'Invalid IBAN format, checksum, or not within SEPA zone',
+      },
+    ),
   bic: z
     .string()
     .optional()
@@ -139,6 +150,7 @@ export default function TransferPage() {
 
   const watchedIBAN = sepaForm.watch('iban');
   const watchedAccountId = sepaForm.watch('accountId');
+  const [ibanInfo, setIbanInfo] = useState<ReturnType<typeof getIBANInfo> | null>(null);
 
   useEffect(() => {
     const customerId = localStorage.getItem('customerId');
@@ -150,14 +162,20 @@ export default function TransferPage() {
     loadAccounts(customerId);
   }, [router]);
 
-  // Auto-fill country from IBAN
+  // Auto-fill country from IBAN and update IBAN info
   useEffect(() => {
-    if (watchedIBAN && validateIBAN(watchedIBAN)) {
-      const countryCode = extractCountryFromIBAN(watchedIBAN);
-      const country = SEPA_COUNTRIES.find(c => c.code === countryCode);
-      if (country) {
-        sepaForm.setValue('country', countryCode);
+    if (watchedIBAN) {
+      const info = getIBANInfo(watchedIBAN);
+      setIbanInfo(info);
+
+      if (info.isValid && info.isSEPA) {
+        const country = SEPA_COUNTRIES.find(c => c.code === info.countryCode);
+        if (country) {
+          sepaForm.setValue('country', info.countryCode);
+        }
       }
+    } else {
+      setIbanInfo(null);
     }
   }, [watchedIBAN, sepaForm]);
 
@@ -604,10 +622,30 @@ export default function TransferPage() {
                           const formatted = formatIBAN(e.target.value);
                           sepaForm.setValue('iban', formatted);
                         }}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 sm:text-sm ${
+                          ibanInfo && watchedIBAN
+                            ? ibanInfo.isValid && ibanInfo.isSEPA
+                              ? 'border-green-300 focus:border-green-500'
+                              : 'border-red-300 focus:border-red-500'
+                            : 'border-gray-300 focus:border-blue-500'
+                        }`}
                         placeholder={t('sepa.ibanPlaceholder')}
                         style={{ fontFamily: 'monospace' }}
                       />
+                      {ibanInfo && watchedIBAN && (
+                        <div className="mt-1">
+                          {ibanInfo.isValid && ibanInfo.isSEPA ? (
+                            <p className="text-sm text-green-600">
+                              ✓ Valid SEPA IBAN ({ibanInfo.countryCode})
+                            </p>
+                          ) : (
+                            <p className="text-sm text-red-600">
+                              {ibanInfo.error ||
+                                (!ibanInfo.isSEPA ? 'Not a SEPA country' : 'Invalid IBAN')}
+                            </p>
+                          )}
+                        </div>
+                      )}
                       {sepaForm.formState.errors.iban && (
                         <p className="mt-1 text-sm text-red-600">
                           {sepaForm.formState.errors.iban.message}

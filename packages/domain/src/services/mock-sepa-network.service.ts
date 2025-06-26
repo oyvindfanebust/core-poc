@@ -1,4 +1,5 @@
 import { logger } from '@core-poc/core-services';
+import { validateIBAN, validateSEPAIBAN } from '@core-poc/shared';
 
 export interface SEPAMessage {
   messageId: string;
@@ -298,11 +299,14 @@ export class MockSEPANetworkService {
    * Validate SEPA message format and content
    */
   private validateSEPAMessage(message: SEPAMessage): SEPAErrorType | null {
-    // Validate IBAN format
-    if (!this.isValidIBAN(message.debtorIBAN)) {
+    // Validate IBAN format with comprehensive validation
+    const debtorValidation = validateSEPAIBAN(message.debtorIBAN);
+    if (!debtorValidation.isValid) {
       return SEPAErrorType.INVALID_IBAN;
     }
-    if (!this.isValidIBAN(message.creditorIBAN)) {
+
+    const creditorValidation = validateSEPAIBAN(message.creditorIBAN);
+    if (!creditorValidation.isValid) {
       return SEPAErrorType.INVALID_IBAN;
     }
 
@@ -569,13 +573,10 @@ export class MockSEPANetworkService {
   }
 
   /**
-   * Validate IBAN format (basic check)
+   * Validate IBAN format (comprehensive validation)
    */
   private isValidIBAN(iban: string): boolean {
-    const cleaned = iban.replace(/\s/g, '');
-    return (
-      /^[A-Z]{2}[0-9]{2}[A-Z0-9]+$/.test(cleaned) && cleaned.length >= 15 && cleaned.length <= 34
-    );
+    return validateIBAN(iban);
   }
 
   /**

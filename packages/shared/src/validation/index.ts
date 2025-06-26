@@ -14,3 +14,6 @@ export const CurrencySchema = z.enum([
   'AUD',
   'CHF',
 ] as const);
+
+// Export IBAN validation utilities
+export * from './iban-validation.js';

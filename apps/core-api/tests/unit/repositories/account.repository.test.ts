@@ -27,7 +27,7 @@ describe('AccountRepository', () => {
         accountId: BigInt('123456789'),
         customerId: 'CUSTOMER-123',
         accountType: 'DEPOSIT',
-        currency: 'USD',
+        currency: 'EUR',
         accountName: 'My Savings Account',
       };
 
@@ -39,7 +39,7 @@ describe('AccountRepository', () => {
         expect.stringContaining(
           'INSERT INTO accounts (account_id, customer_id, account_type, currency, account_name)',
         ),
-        ['123456789', 'CUSTOMER-123', 'DEPOSIT', 'USD', 'My Savings Account'],
+        ['123456789', 'CUSTOMER-123', 'DEPOSIT', 'EUR', 'My Savings Account'],
       );
     });
 
@@ -48,7 +48,7 @@ describe('AccountRepository', () => {
         accountId: BigInt('123456789'),
         customerId: 'CUSTOMER-123',
         accountType: 'DEPOSIT',
-        currency: 'USD',
+        currency: 'EUR',
       };
 
       mockDbQuery.mockResolvedValue({ rows: [] });
@@ -59,7 +59,7 @@ describe('AccountRepository', () => {
         expect.stringContaining(
           'INSERT INTO accounts (account_id, customer_id, account_type, currency, account_name)',
         ),
-        ['123456789', 'CUSTOMER-123', 'DEPOSIT', 'USD', null],
+        ['123456789', 'CUSTOMER-123', 'DEPOSIT', 'EUR', null],
       );
     });
   });
@@ -113,7 +113,7 @@ describe('AccountRepository', () => {
           account_id: '123456789',
           customer_id: 'CUSTOMER-123',
           account_type: 'DEPOSIT',
-          currency: 'USD',
+          currency: 'EUR',
           account_name: 'My Savings',
           created_at: '2023-01-01T00:00:00Z',
           updated_at: '2023-01-01T00:00:00Z',

@@ -98,6 +98,37 @@
     "createAnother": "Креирај још један рачун",
     "backToDashboard": "Назад на контролну таблу",
     "success": "Пренос је успешно завршен! Преусмеравање на контролну таблу...",
+    "type": {
+      "internal": "Интерни пренос",
+      "sepa": "SEPA пренос",
+      "selectType": "Изаберите тип преноса",
+      "internalDescription": "Пренос између ваших рачуна",
+      "sepaDescription": "Пренос на европске банковне рачуне"
+    },
+    "sepa": {
+      "title": "SEPA пренос",
+      "iban": "IBAN",
+      "ibanPlaceholder": "Унесите примаочев IBAN",
+      "bic": "BIC/SWIFT код",
+      "bicPlaceholder": "Опционо - Унесите BIC код",
+      "recipientName": "Име примаоца",
+      "recipientNamePlaceholder": "Унесите пуно име примаоца",
+      "bankName": "Име банке",
+      "bankNamePlaceholder": "Унесите име примаочеве банке",
+      "country": "Земља",
+      "countryPlaceholder": "Изаберите земљу примаоца",
+      "transferMessage": "Порука преноса",
+      "transferMessagePlaceholder": "Опциона референтна порука",
+      "urgency": "Брзина преноса",
+      "urgencyOptions": {
+        "STANDARD": "Стандардно (1-2 радна дана)",
+        "EXPRESS": "Експрес (Исти дан)",
+        "INSTANT": "Тренутно (За неколико минута)"
+      },
+      "selectAccount": "Изаберите ваш рачун",
+      "selectCurrency": "Валута ће бити одређена изабраним рачуном",
+      "supportedCurrencies": "Подржане валуте: EUR, NOK, SEK, DKK"
+    },
     "confirmation": {
       "title": "Потврди пренос",
       "transferSummary": "Резиме преноса",
@@ -111,13 +142,34 @@
       "confirmTransfer": "Потврди пренос",
       "processing": "Обрада...",
       "insufficientFunds": "Недовољно средстава",
-      "insufficientFundsDescription": "Овај пренос би довео до негативног стања на изворном рачуну."
+      "insufficientFundsDescription": "Овај пренос би довео до негативног стања на изворном рачуну.",
+      "sepaDetails": {
+        "recipient": "Прималац",
+        "bank": "Банка",
+        "iban": "IBAN",
+        "bic": "BIC",
+        "message": "Порука",
+        "urgency": "Брзина",
+        "estimatedSettlement": "Процењено поравнање"
+      }
+    },
+    "validation": {
+      "invalidIBAN": "Неисправан IBAN формат",
+      "invalidBIC": "Неисправан BIC формат",
+      "recipientNameRequired": "Име примаоца је обавезно",
+      "bankNameRequired": "Име банке је обавезно",
+      "countryRequired": "Земља је обавезна",
+      "sepaCurrencyOnly": "SEPA преноси подржавају само EUR, NOK, SEK, DKK",
+      "accountRequired": "Молимо изаберите рачун",
+      "ibanRequired": "IBAN је обавезан за SEPA преносе"
     },
     "errors": {
       "transferFailed": "Неуспешна обрада преноса. Молимо покушајте поново.",
       "sameAccount": "Изворни и одредишни рачун морају бити различити",
       "amountRequired": "Износ мора бити већи од 0",
-      "loadFailed": "Неуспешно учитавање рачуна. Молимо покушајте поново."
+      "loadFailed": "Неуспешно учитавање рачуна. Молимо покушајте поново.",
+      "sepaTransferFailed": "Неуспешна обрада SEPA преноса. Молимо покушајте поново.",
+      "sepaNotAvailable": "SEPA преноси тренутно нису доступни"
     }
   },
   "accounts": {

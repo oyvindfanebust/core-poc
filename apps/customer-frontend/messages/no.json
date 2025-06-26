@@ -98,6 +98,37 @@
     "createAnother": "Opprett en konto til",
     "backToDashboard": "Tilbake til oversikt",
     "success": "Overføring fullført! Omdirigerer til oversikt...",
+    "type": {
+      "internal": "Intern overføring",
+      "sepa": "SEPA-overføring",
+      "selectType": "Velg overføringstype",
+      "internalDescription": "Overfør mellom dine egne kontoer",
+      "sepaDescription": "Overfør til europeiske bankkontoer"
+    },
+    "sepa": {
+      "title": "SEPA-overføring",
+      "iban": "IBAN",
+      "ibanPlaceholder": "Skriv inn mottakerens IBAN",
+      "bic": "BIC/SWIFT-kode",
+      "bicPlaceholder": "Valgfritt - Skriv inn BIC-kode",
+      "recipientName": "Mottakernavn",
+      "recipientNamePlaceholder": "Skriv inn mottakerens fulle navn",
+      "bankName": "Banknavn",
+      "bankNamePlaceholder": "Skriv inn mottakerens banknavn",
+      "country": "Land",
+      "countryPlaceholder": "Velg mottakerens land",
+      "transferMessage": "Overføringsmelding",
+      "transferMessagePlaceholder": "Valgfri referansemelding",
+      "urgency": "Overføringshastighet",
+      "urgencyOptions": {
+        "STANDARD": "Standard (1-2 virkedager)",
+        "EXPRESS": "Express (Samme dag)",
+        "INSTANT": "Øyeblikkelig (Innen minutter)"
+      },
+      "selectAccount": "Velg din konto",
+      "selectCurrency": "Valuta bestemmes av valgt konto",
+      "supportedCurrencies": "Støttede valutaer: EUR, NOK, SEK, DKK"
+    },
     "confirmation": {
       "title": "Bekreft overføring",
       "transferSummary": "Overføringssammendrag",
@@ -111,13 +142,34 @@
       "confirmTransfer": "Bekreft overføring",
       "processing": "Behandler...",
       "insufficientFunds": "Utilstrekkelige midler",
-      "insufficientFundsDescription": "Denne overføringen vil resultere i negativ saldo for kilden kontoen."
+      "insufficientFundsDescription": "Denne overføringen vil resultere i negativ saldo for kilden kontoen.",
+      "sepaDetails": {
+        "recipient": "Mottaker",
+        "bank": "Bank",
+        "iban": "IBAN",
+        "bic": "BIC",
+        "message": "Melding",
+        "urgency": "Hastighet",
+        "estimatedSettlement": "Estimert oppgjør"
+      }
+    },
+    "validation": {
+      "invalidIBAN": "Ugyldig IBAN-format",
+      "invalidBIC": "Ugyldig BIC-format",
+      "recipientNameRequired": "Mottakernavn er påkrevd",
+      "bankNameRequired": "Banknavn er påkrevd",
+      "countryRequired": "Land er påkrevd",
+      "sepaCurrencyOnly": "SEPA-overføringer støtter kun EUR, NOK, SEK, DKK",
+      "accountRequired": "Vennligst velg en konto",
+      "ibanRequired": "IBAN er påkrevd for SEPA-overføringer"
     },
     "errors": {
       "transferFailed": "Kunne ikke behandle overføring. Vennligst prøv igjen.",
       "sameAccount": "Kilde- og destinasjonskonto må være forskjellige",
       "amountRequired": "Beløp må være større enn 0",
-      "loadFailed": "Kunne ikke laste kontoer. Vennligst prøv igjen."
+      "loadFailed": "Kunne ikke laste kontoer. Vennligst prøv igjen.",
+      "sepaTransferFailed": "Kunne ikke behandle SEPA-overføring. Vennligst prøv igjen.",
+      "sepaNotAvailable": "SEPA-overføringer er ikke tilgjengelige for øyeblikket"
     }
   },
   "accounts": {

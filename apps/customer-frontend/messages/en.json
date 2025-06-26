@@ -98,6 +98,37 @@
     "createAnother": "Create Another Account",
     "backToDashboard": "Back to Dashboard",
     "success": "Transfer completed successfully! Redirecting to dashboard...",
+    "type": {
+      "internal": "Internal Transfer",
+      "sepa": "SEPA Transfer",
+      "selectType": "Select transfer type",
+      "internalDescription": "Transfer between your own accounts",
+      "sepaDescription": "Transfer to European bank accounts"
+    },
+    "sepa": {
+      "title": "SEPA Transfer",
+      "iban": "IBAN",
+      "ibanPlaceholder": "Enter recipient's IBAN",
+      "bic": "BIC/SWIFT Code",
+      "bicPlaceholder": "Optional - Enter BIC code",
+      "recipientName": "Recipient Name",
+      "recipientNamePlaceholder": "Enter recipient's full name",
+      "bankName": "Bank Name",
+      "bankNamePlaceholder": "Enter recipient's bank name",
+      "country": "Country",
+      "countryPlaceholder": "Select recipient's country",
+      "transferMessage": "Transfer Message",
+      "transferMessagePlaceholder": "Optional reference message",
+      "urgency": "Transfer Speed",
+      "urgencyOptions": {
+        "STANDARD": "Standard (1-2 business days)",
+        "EXPRESS": "Express (Same day)",
+        "INSTANT": "Instant (Within minutes)"
+      },
+      "selectAccount": "Select your account",
+      "selectCurrency": "Currency will be determined by selected account",
+      "supportedCurrencies": "Supported currencies: EUR, NOK, SEK, DKK"
+    },
     "confirmation": {
       "title": "Confirm Transfer",
       "transferSummary": "Transfer Summary",
@@ -111,13 +142,34 @@
       "confirmTransfer": "Confirm Transfer",
       "processing": "Processing...",
       "insufficientFunds": "Insufficient Funds",
-      "insufficientFundsDescription": "This transfer would result in a negative balance for the source account."
+      "insufficientFundsDescription": "This transfer would result in a negative balance for the source account.",
+      "sepaDetails": {
+        "recipient": "Recipient",
+        "bank": "Bank",
+        "iban": "IBAN",
+        "bic": "BIC",
+        "message": "Message",
+        "urgency": "Speed",
+        "estimatedSettlement": "Estimated Settlement"
+      }
+    },
+    "validation": {
+      "invalidIBAN": "Invalid IBAN format",
+      "invalidBIC": "Invalid BIC format",
+      "recipientNameRequired": "Recipient name is required",
+      "bankNameRequired": "Bank name is required",
+      "countryRequired": "Country is required",
+      "sepaCurrencyOnly": "SEPA transfers only support EUR, NOK, SEK, DKK",
+      "accountRequired": "Please select an account",
+      "ibanRequired": "IBAN is required for SEPA transfers"
     },
     "errors": {
       "transferFailed": "Failed to process transfer. Please try again.",
       "sameAccount": "Source and destination accounts must be different",
       "amountRequired": "Amount must be greater than 0",
-      "loadFailed": "Failed to load accounts. Please try again."
+      "loadFailed": "Failed to load accounts. Please try again.",
+      "sepaTransferFailed": "Failed to process SEPA transfer. Please try again.",
+      "sepaNotAvailable": "SEPA transfers are not available at the moment"
     }
   },
   "accounts": {

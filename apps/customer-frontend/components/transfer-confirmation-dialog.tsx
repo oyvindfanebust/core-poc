@@ -7,9 +7,9 @@ import { Account, Balance } from '@/lib/api';
 
 export interface TransferSummary {
   fromAccount: Account;
-  toAccount: Account;
+  toAccount: Account | null; // null for SEPA transfers
   fromBalance?: Balance;
-  toBalance?: Balance;
+  toBalance?: Balance | null; // null for SEPA transfers
   amount: number; // in cents
   currency: string;
 }
@@ -34,6 +34,21 @@ export function TransferConfirmationDialog({
 
   if (!isOpen) return null;
 
+  // Check if this is a SEPA transfer
+  const extendedSummary = transferSummary as TransferSummary & {
+    transferType?: 'sepa';
+    sepaDetails?: {
+      iban: string;
+      bic?: string;
+      recipientName: string;
+      bankName: string;
+      country: string;
+      transferMessage?: string;
+      urgency: string;
+    };
+  };
+  const isSEPATransfer = extendedSummary.transferType === 'sepa';
+
   const formatCurrency = (amount: string | number, currency: string) => {
     const value = typeof amount === 'string' ? parseFloat(amount) / 100 : amount / 100;
     return new Intl.NumberFormat('en-US', {
@@ -52,15 +67,15 @@ export function TransferConfirmationDialog({
     return isDebit ? current - change : current + change;
   };
 
-  const hasBalanceData = transferSummary.fromBalance && transferSummary.toBalance;
-  const fromNewBalance = hasBalanceData
-    ? calculateNewBalance(transferSummary.fromBalance!.balance, transferSummary.amount, true)
+  const fromNewBalance = transferSummary.fromBalance
+    ? calculateNewBalance(transferSummary.fromBalance.balance, transferSummary.amount, true)
     : null;
-  const toNewBalance = hasBalanceData
-    ? calculateNewBalance(transferSummary.toBalance!.balance, transferSummary.amount, false)
-    : null;
+  const toNewBalance =
+    transferSummary.toBalance && !isSEPATransfer
+      ? calculateNewBalance(transferSummary.toBalance.balance, transferSummary.amount, false)
+      : null;
 
-  const hasInsufficientFunds = hasBalanceData && fromNewBalance !== null && fromNewBalance < 0;
+  const hasInsufficientFunds = fromNewBalance !== null && fromNewBalance < 0;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -89,11 +104,11 @@ export function TransferConfirmationDialog({
                     {formatAccountName(transferSummary.fromAccount)}
                   </p>
                   <p className="text-xs text-gray-500">{transferSummary.fromAccount.accountId}</p>
-                  {hasBalanceData && (
+                  {transferSummary.fromBalance && (
                     <p className="text-xs text-gray-600 mt-1">
                       {t('currentBalance')}:{' '}
                       {formatCurrency(
-                        transferSummary.fromBalance!.balance,
+                        transferSummary.fromBalance.balance,
                         transferSummary.currency,
                       )}
                     </p>
@@ -119,32 +134,83 @@ export function TransferConfirmationDialog({
                 <ArrowRight className="h-5 w-5 text-gray-400" />
               </div>
 
-              {/* To Account */}
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">
-                    {formatAccountName(transferSummary.toAccount)}
-                  </p>
-                  <p className="text-xs text-gray-500">{transferSummary.toAccount.accountId}</p>
-                  {hasBalanceData && (
-                    <p className="text-xs text-gray-600 mt-1">
-                      {t('currentBalance')}:{' '}
-                      {formatCurrency(transferSummary.toBalance!.balance, transferSummary.currency)}
-                    </p>
-                  )}
+              {/* To Account or SEPA Details */}
+              {isSEPATransfer ? (
+                <div className="p-3 bg-blue-50 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <p className="text-sm font-medium text-blue-900">
+                        {extendedSummary.sepaDetails?.recipientName}
+                      </p>
+                      <p className="text-xs text-blue-700">
+                        {extendedSummary.sepaDetails?.bankName}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-green-600">
+                        +{formatCurrency(transferSummary.amount, transferSummary.currency)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* SEPA Details */}
+                  <div className="mt-3 pt-3 border-t border-blue-200">
+                    <div className="space-y-1 text-xs text-blue-800">
+                      <div className="flex justify-between">
+                        <span>{t('sepaDetails.iban')}:</span>
+                        <span className="font-mono">{extendedSummary.sepaDetails?.iban}</span>
+                      </div>
+                      {extendedSummary.sepaDetails?.bic && (
+                        <div className="flex justify-between">
+                          <span>{t('sepaDetails.bic')}:</span>
+                          <span className="font-mono">{extendedSummary.sepaDetails.bic}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between">
+                        <span>{t('sepaDetails.urgency')}:</span>
+                        <span>{extendedSummary.sepaDetails?.urgency}</span>
+                      </div>
+                      {extendedSummary.sepaDetails?.transferMessage && (
+                        <div className="flex justify-between">
+                          <span>{t('sepaDetails.message')}:</span>
+                          <span className="truncate ml-2">
+                            {extendedSummary.sepaDetails.transferMessage}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-green-600">
-                    +{formatCurrency(transferSummary.amount, transferSummary.currency)}
-                  </p>
-                  {toNewBalance !== null && (
-                    <p className="text-xs text-gray-600 mt-1">
-                      {t('newBalance')}:{' '}
-                      {formatCurrency(toNewBalance * 100, transferSummary.currency)}
+              ) : (
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {formatAccountName(transferSummary.toAccount!)}
                     </p>
-                  )}
+                    <p className="text-xs text-gray-500">{transferSummary.toAccount!.accountId}</p>
+                    {transferSummary.toBalance && (
+                      <p className="text-xs text-gray-600 mt-1">
+                        {t('currentBalance')}:{' '}
+                        {formatCurrency(
+                          transferSummary.toBalance.balance,
+                          transferSummary.currency,
+                        )}
+                      </p>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-green-600">
+                      +{formatCurrency(transferSummary.amount, transferSummary.currency)}
+                    </p>
+                    {toNewBalance !== null && (
+                      <p className="text-xs text-gray-600 mt-1">
+                        {t('newBalance')}:{' '}
+                        {formatCurrency(toNewBalance * 100, transferSummary.currency)}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -175,8 +241,24 @@ export function TransferConfirmationDialog({
               </div>
               <div className="flex justify-between">
                 <span>{t('processingTime')}:</span>
-                <span>{t('instant')}</span>
+                <span>
+                  {isSEPATransfer
+                    ? `${extendedSummary.sepaDetails?.urgency} (${
+                        extendedSummary.sepaDetails?.urgency === 'INSTANT'
+                          ? t('instant')
+                          : extendedSummary.sepaDetails?.urgency === 'EXPRESS'
+                            ? 'Same day'
+                            : '1-2 business days'
+                      })`
+                    : t('instant')}
+                </span>
               </div>
+              {isSEPATransfer && (
+                <div className="flex justify-between">
+                  <span>Transfer Type:</span>
+                  <span>SEPA Transfer</span>
+                </div>
+              )}
             </div>
           </div>
 

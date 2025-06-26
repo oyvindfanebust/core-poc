@@ -53,6 +53,35 @@ export interface TransferRequest {
   currency: string;
 }
 
+export interface SEPABankInfo {
+  iban: string;
+  bic?: string;
+  bankName: string;
+  recipientName: string;
+  country: string;
+}
+
+export interface SEPATransferRequest {
+  accountId: string;
+  amount: string;
+  currency: 'EUR' | 'NOK' | 'SEK' | 'DKK';
+  bankInfo: SEPABankInfo;
+  description?: string;
+  urgency?: 'STANDARD' | 'EXPRESS' | 'INSTANT';
+}
+
+export interface SEPATransferResponse {
+  transferId: string;
+  status: 'ACCEPTED' | 'REJECTED' | 'PENDING';
+  sepaTransactionId?: string;
+  estimatedSettlement?: string;
+  errorDetails?: {
+    code: string;
+    message: string;
+    retryable: boolean;
+  };
+}
+
 // API functions
 export const accountsApi = {
   async createAccount(data: CreateAccountRequest): Promise<{ accountId: string }> {
@@ -83,5 +112,23 @@ export const accountsApi = {
 export const transfersApi = {
   async createTransfer(data: TransferRequest): Promise<Transfer> {
     return apiClient.post('/transfers', data);
+  },
+};
+
+export const sepaApi = {
+  async createSEPATransfer(data: SEPATransferRequest): Promise<SEPATransferResponse> {
+    return apiClient.post('/sepa/transfers/outgoing', data);
+  },
+
+  async getSEPAStatus(): Promise<{ status: string; version: string }> {
+    return apiClient.get('/sepa/status');
+  },
+
+  async getSEPASuspenseBalances(currency: string): Promise<{
+    outgoing: Balance;
+    incoming: Balance;
+    settlement: Balance;
+  }> {
+    return apiClient.get(`/sepa/suspense/${currency}`);
   },
 };

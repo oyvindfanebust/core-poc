@@ -310,10 +310,6 @@ export class BankingEventHandler implements CDCEventHandler {
         return 'Loan disbursement';
       case TransferType.LOAN_PAYMENT:
         return 'Loan payment';
-      case TransferType.EXTERNAL_CREDIT:
-        return 'External bank credit';
-      case TransferType.EXTERNAL_DEBIT:
-        return 'External bank debit';
       case TransferType.CUSTOMER_TRANSFER:
       default:
         return 'Customer transfer';

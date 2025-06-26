@@ -101,7 +101,7 @@ export class PaymentProcessingService {
       const transferId = await this.processPaymentTransaction(
         customerDepositAccount,
         new AccountId(paymentPlan.accountId),
-        new Money(paymentPlan.monthlyPayment, 'USD'), // TODO: Get currency from payment plan
+        new Money(paymentPlan.monthlyPayment, 'EUR'), // TODO: Get currency from payment plan
       );
 
       result.paymentProcessed = true;

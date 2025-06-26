@@ -21,8 +21,8 @@ describe('System Account ID', () => {
 
   describe('generateSystemAccountId', () => {
     it('should generate correct ID for external transaction account', () => {
-      const id = generateSystemAccountId('EXTERNAL_TRANSACTION', 'USD');
-      expect(id).toBe('SYSTEM-EXTERNAL-USD');
+      const id = generateSystemAccountId('EXTERNAL_TRANSACTION', 'EUR');
+      expect(id).toBe('SYSTEM-EXTERNAL-EUR');
     });
 
     it('should generate correct ID for equity account', () => {
@@ -31,24 +31,24 @@ describe('System Account ID', () => {
     });
 
     it('should generate correct ID for liability account', () => {
-      const id = generateSystemAccountId('LIABILITY', 'GBP');
-      expect(id).toBe('SYSTEM-LIABILITY-GBP');
+      const id = generateSystemAccountId('LIABILITY', 'NOK');
+      expect(id).toBe('SYSTEM-LIABILITY-NOK');
     });
 
     it('should generate different IDs for different currencies', () => {
-      const usdId = generateSystemAccountId('EXTERNAL_TRANSACTION', 'USD');
       const eurId = generateSystemAccountId('EXTERNAL_TRANSACTION', 'EUR');
-      expect(usdId).not.toBe(eurId);
-      expect(usdId).toBe('SYSTEM-EXTERNAL-USD');
+      const nokId = generateSystemAccountId('EXTERNAL_TRANSACTION', 'NOK');
+      expect(eurId).not.toBe(nokId);
       expect(eurId).toBe('SYSTEM-EXTERNAL-EUR');
+      expect(nokId).toBe('SYSTEM-EXTERNAL-NOK');
     });
   });
 
   describe('isSystemAccount', () => {
     it('should return true for system account string IDs', () => {
-      expect(isSystemAccount('SYSTEM-EXTERNAL-USD')).toBe(true);
+      expect(isSystemAccount('SYSTEM-EXTERNAL-EUR')).toBe(true);
       expect(isSystemAccount('SYSTEM-EQUITY-EUR')).toBe(true);
-      expect(isSystemAccount('SEPA-OUT-SUSPENSE-EUR')).toBe(true);
+      expect(isSystemAccount('SEPA-OUT-SUSPENSE-NOK')).toBe(true);
     });
 
     it('should return false for customer account numeric IDs', () => {
@@ -58,7 +58,7 @@ describe('System Account ID', () => {
 
     it('should work with AccountId objects', () => {
       // Register a system account mapping first
-      const systemIdentifier = 'SYSTEM-EXTERNAL-USD';
+      const systemIdentifier = 'SYSTEM-EXTERNAL-EUR';
       const numericId = 123456789n;
       registerSystemAccountId(systemIdentifier, numericId);
 
@@ -70,7 +70,7 @@ describe('System Account ID', () => {
     });
 
     it('should return true for registered system accounts', () => {
-      const systemId = 'SYSTEM-TEST-USD';
+      const systemId = 'SYSTEM-TEST-EUR';
       const numericId = 123456789n;
 
       registerSystemAccountId(systemId, numericId);
@@ -85,13 +85,13 @@ describe('System Account ID', () => {
     });
 
     it('should return false for system account IDs', () => {
-      expect(isCustomerAccount('SYSTEM-EXTERNAL-USD')).toBe(false);
-      expect(isCustomerAccount('SEPA-OUT-SUSPENSE-EUR')).toBe(false);
+      expect(isCustomerAccount('SYSTEM-EXTERNAL-EUR')).toBe(false);
+      expect(isCustomerAccount('SEPA-OUT-SUSPENSE-NOK')).toBe(false);
     });
 
     it('should work with AccountId objects', () => {
       // Register a system account mapping first
-      const systemIdentifier = 'SYSTEM-EXTERNAL-USD';
+      const systemIdentifier = 'SYSTEM-EXTERNAL-EUR';
       const numericId = 123456789n;
       registerSystemAccountId(systemIdentifier, numericId);
 
@@ -105,7 +105,7 @@ describe('System Account ID', () => {
 
   describe('getSystemAccountNumericId', () => {
     it('should generate and return a numeric ID for new system accounts', () => {
-      const systemId = 'SYSTEM-TEST-USD';
+      const systemId = 'SYSTEM-TEST-EUR';
       const numericId = getSystemAccountNumericId(systemId);
 
       expect(typeof numericId).toBe('bigint');
@@ -113,7 +113,7 @@ describe('System Account ID', () => {
     });
 
     it('should return the same numeric ID for the same system account', () => {
-      const systemId = 'SYSTEM-TEST-EUR';
+      const systemId = 'SYSTEM-TEST-NOK';
       const numericId1 = getSystemAccountNumericId(systemId);
       const numericId2 = getSystemAccountNumericId(systemId);
 
@@ -121,8 +121,8 @@ describe('System Account ID', () => {
     });
 
     it('should generate different numeric IDs for different system accounts', () => {
-      const systemId1 = 'SYSTEM-TEST-USD';
-      const systemId2 = 'SYSTEM-TEST-EUR';
+      const systemId1 = 'SYSTEM-TEST-EUR';
+      const systemId2 = 'SYSTEM-TEST-NOK';
 
       const numericId1 = getSystemAccountNumericId(systemId1);
       const numericId2 = getSystemAccountNumericId(systemId2);
@@ -133,7 +133,7 @@ describe('System Account ID', () => {
 
   describe('registerSystemAccountId', () => {
     it('should register a system account ID mapping', () => {
-      const systemId = 'SYSTEM-TEST-USD';
+      const systemId = 'SYSTEM-TEST-EUR';
       const numericId = 123456789n;
 
       registerSystemAccountId(systemId, numericId);
@@ -143,7 +143,7 @@ describe('System Account ID', () => {
     });
 
     it('should override existing mapping when registering same system ID', () => {
-      const systemId = 'SYSTEM-TEST-USD';
+      const systemId = 'SYSTEM-TEST-EUR';
       const numericId1 = 123456789n;
       const numericId2 = 987654321n;
 
@@ -162,8 +162,8 @@ describe('System Account ID', () => {
     });
 
     it('should return all registered mappings', () => {
-      const mapping1 = { systemId: 'SYSTEM-TEST1-USD', numericId: 123n };
-      const mapping2 = { systemId: 'SYSTEM-TEST2-EUR', numericId: 456n };
+      const mapping1 = { systemId: 'SYSTEM-TEST1-EUR', numericId: 123n };
+      const mapping2 = { systemId: 'SYSTEM-TEST2-NOK', numericId: 456n };
 
       registerSystemAccountId(mapping1.systemId, mapping1.numericId);
       registerSystemAccountId(mapping2.systemId, mapping2.numericId);
@@ -175,7 +175,7 @@ describe('System Account ID', () => {
     });
 
     it('should return readonly map', () => {
-      const systemId = 'SYSTEM-TEST-USD';
+      const systemId = 'SYSTEM-TEST-EUR';
       const numericId = 123456789n;
 
       registerSystemAccountId(systemId, numericId);
@@ -194,8 +194,8 @@ describe('System Account ID', () => {
 
   describe('clearSystemAccountMappings', () => {
     it('should clear all registered mappings', () => {
-      registerSystemAccountId('SYSTEM-TEST1-USD', 123n);
-      registerSystemAccountId('SYSTEM-TEST2-EUR', 456n);
+      registerSystemAccountId('SYSTEM-TEST1-EUR', 123n);
+      registerSystemAccountId('SYSTEM-TEST2-NOK', 456n);
 
       expect(getSystemAccountMappings().size).toBe(2);
 
@@ -237,12 +237,10 @@ describe('System Account ID', () => {
     });
 
     it('should return false for non-SEPA currencies', () => {
-      expect(isSEPACurrency('USD')).toBe(false);
-      expect(isSEPACurrency('GBP')).toBe(false);
-      expect(isSEPACurrency('JPY')).toBe(false);
-      expect(isSEPACurrency('CAD')).toBe(false);
-      expect(isSEPACurrency('AUD')).toBe(false);
-      expect(isSEPACurrency('CHF')).toBe(false);
+      expect(isSEPACurrency('USD' as never)).toBe(false);
+      expect(isSEPACurrency('GBP' as never)).toBe(false);
+      expect(isSEPACurrency('JPY' as never)).toBe(false);
+      expect(isSEPACurrency('CAD' as never)).toBe(false);
     });
   });
 
@@ -302,11 +300,11 @@ describe('System Account ID', () => {
     });
 
     it('should handle external transaction account workflow', () => {
-      const currency = 'USD';
+      const currency = 'EUR';
 
       // Generate system account ID
       const systemAccountId = generateSystemAccountId('EXTERNAL_TRANSACTION', currency);
-      expect(systemAccountId).toBe('SYSTEM-EXTERNAL-USD');
+      expect(systemAccountId).toBe('SYSTEM-EXTERNAL-EUR');
 
       // Verify it's recognized as a system account
       expect(isSystemAccount(systemAccountId)).toBe(true);

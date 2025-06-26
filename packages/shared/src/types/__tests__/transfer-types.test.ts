@@ -32,12 +32,12 @@ describe('TransferType', () => {
       expect(TransferType.LOAN_PAYMENT).toBe(7);
     });
 
-    it('should have EXTERNAL_CREDIT with value 8', () => {
-      expect(TransferType.EXTERNAL_CREDIT).toBe(8);
+    it('should have INTERNAL_TRANSFER with value 8', () => {
+      expect(TransferType.INTERNAL_TRANSFER).toBe(8);
     });
 
-    it('should have EXTERNAL_DEBIT with value 9', () => {
-      expect(TransferType.EXTERNAL_DEBIT).toBe(9);
+    it('should have REVERSAL with value 9', () => {
+      expect(TransferType.REVERSAL).toBe(9);
     });
   });
 

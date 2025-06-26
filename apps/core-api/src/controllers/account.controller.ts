@@ -195,7 +195,7 @@ export class AccountController {
         remainingPayments: paymentPlan.remainingPayments,
         loanType: paymentPlan.loanType,
         paymentFrequency: paymentPlan.paymentFrequency,
-        fees: paymentPlan.fees.map(fee => ({
+        fees: paymentPlan.fees.map((fee: any) => ({
           type: fee.type,
           amount: fee.amount.toString(),
           description: fee.description,
@@ -327,7 +327,7 @@ export class AccountController {
       );
 
       // Convert BigInt fields to strings for JSON serialization
-      const serializedTransfers = transfers.map(transfer => ({
+      const serializedTransfers = transfers.map((transfer: any) => ({
         transferId: transfer.transferId,
         fromAccountId: transfer.fromAccountId,
         toAccountId: transfer.toAccountId,

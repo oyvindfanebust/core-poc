@@ -1,90 +1,27 @@
 {
   "version": "1.0",
-  "lastUpdated": "2025-06-25T08:46:19.256Z",
+  "lastUpdated": "2025-06-26T00:00:00.000Z",
   "accounts": {
-    "SEPA-OUT-SUSPENSE-EUR": {
-      "tigerBeetleId": "3372285189696484306669368771462352",
-      "accountType": "SEPA_OUTGOING_SUSPENSE",
+    "SYSTEM-SUSPENSE-IN": {
+      "tigerBeetleId": "1000000000000000000000000000000001",
+      "accountType": "INCOMING_SUSPENSE",
       "currency": "EUR",
-      "description": "SEPA outgoing transfer suspense account for EUR",
-      "createdAt": "2025-06-25T08:46:19.111Z"
+      "description": "General incoming transfer suspense account",
+      "createdAt": "2025-06-26T00:00:00.000Z"
     },
-    "SEPA-IN-SUSPENSE-EUR": {
-      "tigerBeetleId": "3372286053823902239075902067017278",
-      "accountType": "SEPA_INCOMING_SUSPENSE",
+    "SYSTEM-SUSPENSE-OUT": {
+      "tigerBeetleId": "1000000000000000000000000000000002",
+      "accountType": "OUTGOING_SUSPENSE",
       "currency": "EUR",
-      "description": "SEPA incoming transfer suspense account for EUR",
-      "createdAt": "2025-06-25T08:46:19.120Z"
+      "description": "General outgoing transfer suspense account",
+      "createdAt": "2025-06-26T00:00:00.000Z"
     },
-    "SEPA-SETTLEMENT-EUR": {
-      "tigerBeetleId": "3372286067336696803044820373752339",
-      "accountType": "SEPA_SETTLEMENT",
+    "SYSTEM-CLEARING": {
+      "tigerBeetleId": "1000000000000000000000000000000003",
+      "accountType": "CLEARING",
       "currency": "EUR",
-      "description": "SEPA settlement account for EUR",
-      "createdAt": "2025-06-25T08:46:19.131Z"
-    },
-    "SEPA-OUT-SUSPENSE-NOK": {
-      "tigerBeetleId": "3372286087187824664178979701318930",
-      "accountType": "SEPA_OUTGOING_SUSPENSE",
-      "currency": "NOK",
-      "description": "SEPA outgoing transfer suspense account for NOK",
-      "createdAt": "2025-06-25T08:46:19.149Z"
-    },
-    "SEPA-IN-SUSPENSE-NOK": {
-      "tigerBeetleId": "3372286105185915645480200167120361",
-      "accountType": "SEPA_INCOMING_SUSPENSE",
-      "currency": "NOK",
-      "description": "SEPA incoming transfer suspense account for NOK",
-      "createdAt": "2025-06-25T08:46:19.163Z"
-    },
-    "SEPA-SETTLEMENT-NOK": {
-      "tigerBeetleId": "3372286118792167857234991838890622",
-      "accountType": "SEPA_SETTLEMENT",
-      "currency": "NOK",
-      "description": "SEPA settlement account for NOK",
-      "createdAt": "2025-06-25T08:46:19.175Z"
-    },
-    "SEPA-OUT-SUSPENSE-SEK": {
-      "tigerBeetleId": "3372286132035031081871020393006146",
-      "accountType": "SEPA_OUTGOING_SUSPENSE",
-      "currency": "SEK",
-      "description": "SEPA outgoing transfer suspense account for SEK",
-      "createdAt": "2025-06-25T08:46:19.186Z"
-    },
-    "SEPA-IN-SUSPENSE-SEK": {
-      "tigerBeetleId": "3372286146330669089962023092891362",
-      "accountType": "SEPA_INCOMING_SUSPENSE",
-      "currency": "SEK",
-      "description": "SEPA incoming transfer suspense account for SEK",
-      "createdAt": "2025-06-25T08:46:19.199Z"
-    },
-    "SEPA-SETTLEMENT-SEK": {
-      "tigerBeetleId": "3372286179845352412728307876577920",
-      "accountType": "SEPA_SETTLEMENT",
-      "currency": "SEK",
-      "description": "SEPA settlement account for SEK",
-      "createdAt": "2025-06-25T08:46:19.224Z"
-    },
-    "SEPA-OUT-SUSPENSE-DKK": {
-      "tigerBeetleId": "3372286190740325434971531594220994",
-      "accountType": "SEPA_OUTGOING_SUSPENSE",
-      "currency": "DKK",
-      "description": "SEPA outgoing transfer suspense account for DKK",
-      "createdAt": "2025-06-25T08:46:19.236Z"
-    },
-    "SEPA-IN-SUSPENSE-DKK": {
-      "tigerBeetleId": "3372286204108151719617375310829183",
-      "accountType": "SEPA_INCOMING_SUSPENSE",
-      "currency": "DKK",
-      "description": "SEPA incoming transfer suspense account for DKK",
-      "createdAt": "2025-06-25T08:46:19.245Z"
-    },
-    "SEPA-SETTLEMENT-DKK": {
-      "tigerBeetleId": "3372286215858591280532968453349428",
-      "accountType": "SEPA_SETTLEMENT",
-      "currency": "DKK",
-      "description": "SEPA settlement account for DKK",
-      "createdAt": "2025-06-25T08:46:19.256Z"
+      "description": "General clearing account for transfers",
+      "createdAt": "2025-06-26T00:00:00.000Z"
     }
   }
 }

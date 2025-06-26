@@ -18,7 +18,7 @@ export class SystemAccountController {
       const accountsWithIdentifiers = Object.entries(accounts).map(
         ([systemIdentifier, account]) => ({
           systemIdentifier,
-          ...account,
+          ...(account as any),
         }),
       );
 
@@ -100,7 +100,7 @@ export class SystemAccountController {
       const accountsWithIdentifiers = Object.entries(accounts).map(
         ([systemIdentifier, account]) => ({
           systemIdentifier,
-          ...account,
+          ...(account as any),
         }),
       );
 

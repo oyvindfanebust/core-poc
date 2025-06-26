@@ -8,16 +8,10 @@ export interface AccountType {
 }
 
 export interface LedgerCode {
-  USD: number;
   EUR: number;
-  GBP: number;
   NOK: number;
   SEK: number;
   DKK: number;
-  JPY: number;
-  CAD: number;
-  AUD: number;
-  CHF: number;
 }
 
 export type Currency = keyof LedgerCode;

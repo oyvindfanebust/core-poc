@@ -58,7 +58,7 @@ describe('CDC Transfer Integration', () => {
         .send({
           type: 'DEPOSIT',
           customerId: 'CUSTOMER-ABC-123',
-          currency: 'USD',
+          currency: 'EUR',
           initialBalance: '100000', // $1000.00
         })
         .expect(201);
@@ -68,7 +68,7 @@ describe('CDC Transfer Integration', () => {
         .send({
           type: 'DEPOSIT',
           customerId: 'CUSTOMER-XYZ-456',
-          currency: 'USD',
+          currency: 'EUR',
           initialBalance: '50000', // $500.00
         })
         .expect(201);
@@ -100,7 +100,7 @@ describe('CDC Transfer Integration', () => {
           fromAccountId,
           toAccountId,
           amount: transferAmount,
-          currency: 'USD',
+          currency: 'EUR',
         })
         .expect(201);
 
@@ -135,7 +135,7 @@ describe('CDC Transfer Integration', () => {
       expect(transferRecord.from_account_id).toBe(fromAccountId);
       expect(transferRecord.to_account_id).toBe(toAccountId);
       expect(transferRecord.amount).toBe(transferAmount);
-      expect(transferRecord.currency).toBe('USD');
+      expect(transferRecord.currency).toBe('EUR');
       expect(transferRecord.description).toBe('Customer transfer');
       expect(transferRecord.created_at).toBeDefined();
 
@@ -151,7 +151,7 @@ describe('CDC Transfer Integration', () => {
         .send({
           type: 'DEPOSIT',
           customerId: 'MULTI-1',
-          currency: 'USD',
+          currency: 'EUR',
           initialBalance: '200000',
         })
         .expect(201);
@@ -161,7 +161,7 @@ describe('CDC Transfer Integration', () => {
         .send({
           type: 'DEPOSIT',
           customerId: 'MULTI-2',
-          currency: 'USD',
+          currency: 'EUR',
           initialBalance: '100000',
         })
         .expect(201);
@@ -176,7 +176,7 @@ describe('CDC Transfer Integration', () => {
           fromAccountId: account1Id,
           toAccountId: account2Id,
           amount: '50000',
-          currency: 'USD',
+          currency: 'EUR',
         })
         .expect(201);
 
@@ -186,7 +186,7 @@ describe('CDC Transfer Integration', () => {
           fromAccountId: account2Id,
           toAccountId: account1Id,
           amount: '25000',
-          currency: 'USD',
+          currency: 'EUR',
         })
         .expect(201);
 

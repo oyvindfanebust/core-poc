@@ -10,23 +10,23 @@ export const testAmounts = {
   large: 1000000n,
 };
 
-export const testCurrencies = ['USD', 'EUR', 'GBP', 'NOK'] as const;
+export const testCurrencies = ['EUR', 'NOK', 'SEK', 'DKK'] as const;
 
 export const testLoanData = {
   principalAmount: 100000n,
   interestRate: 5.5,
   termMonths: 36,
-  currency: 'USD' as const,
+  currency: 'EUR' as const,
 };
 
 export const testDepositData = {
   initialBalance: 25000n,
-  currency: 'USD' as const,
+  currency: 'EUR' as const,
 };
 
 export const testCreditData = {
   creditLimit: 10000n,
-  currency: 'USD' as const,
+  currency: 'EUR' as const,
 };
 
 export const createTestAccountRequest = (
@@ -36,7 +36,7 @@ export const createTestAccountRequest = (
   const base = {
     type,
     customerId,
-    currency: 'USD' as const,
+    currency: 'EUR' as const,
   };
 
   switch (type) {

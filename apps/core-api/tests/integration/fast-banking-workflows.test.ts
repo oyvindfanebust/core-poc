@@ -58,7 +58,7 @@ describe('Fast Banking Workflows (Mock Services)', () => {
         .send({
           type: 'DEPOSIT',
           customerId: 'FAST-CUSTOMER-1',
-          currency: 'USD',
+          currency: 'EUR',
           initialBalance: '100000', // $1000.00
         })
         .expect(201);
@@ -71,7 +71,7 @@ describe('Fast Banking Workflows (Mock Services)', () => {
         .send({
           type: 'DEPOSIT',
           customerId: 'FAST-CUSTOMER-2',
-          currency: 'USD',
+          currency: 'EUR',
           initialBalance: '50000', // $500.00
         })
         .expect(201);
@@ -93,7 +93,7 @@ describe('Fast Banking Workflows (Mock Services)', () => {
           fromAccountId: account1Id,
           toAccountId: account2Id,
           amount: '25000', // $250.00
-          currency: 'USD',
+          currency: 'EUR',
         })
         .expect(201);
 
@@ -117,7 +117,7 @@ describe('Fast Banking Workflows (Mock Services)', () => {
         .send({
           type: 'DEPOSIT',
           customerId: 'MULTI-CUSTOMER-1',
-          currency: 'USD',
+          currency: 'EUR',
           initialBalance: '1000000', // $10,000.00
         })
         .expect(201);
@@ -127,7 +127,7 @@ describe('Fast Banking Workflows (Mock Services)', () => {
         .send({
           type: 'DEPOSIT',
           customerId: 'MULTI-CUSTOMER-2',
-          currency: 'USD',
+          currency: 'EUR',
           initialBalance: '500000', // $5,000.00
         })
         .expect(201);
@@ -145,7 +145,7 @@ describe('Fast Banking Workflows (Mock Services)', () => {
               fromAccountId: account1Id,
               toAccountId: account2Id,
               amount: '10000', // $100.00 each
-              currency: 'USD',
+              currency: 'EUR',
             })
             .expect(201),
         );
@@ -172,7 +172,7 @@ describe('Fast Banking Workflows (Mock Services)', () => {
         .send({
           type: 'DEPOSIT',
           customerId: 'LOW-BALANCE-CUSTOMER',
-          currency: 'USD',
+          currency: 'EUR',
           initialBalance: '1000', // $10.00
         })
         .expect(201);
@@ -182,7 +182,7 @@ describe('Fast Banking Workflows (Mock Services)', () => {
         .send({
           type: 'DEPOSIT',
           customerId: 'RECIPIENT-CUSTOMER',
-          currency: 'USD',
+          currency: 'EUR',
           initialBalance: '0',
         })
         .expect(201);
@@ -197,7 +197,7 @@ describe('Fast Banking Workflows (Mock Services)', () => {
           fromAccountId,
           toAccountId,
           amount: '2000', // $20.00 - more than available
-          currency: 'USD',
+          currency: 'EUR',
         })
         .expect(500); // Should fail due to insufficient funds
 
@@ -217,7 +217,7 @@ describe('Fast Banking Workflows (Mock Services)', () => {
         .send({
           type: 'DEPOSIT',
           customerId: 'CDC-TEST-1',
-          currency: 'USD',
+          currency: 'EUR',
           initialBalance: '100000',
         })
         .expect(201);
@@ -227,7 +227,7 @@ describe('Fast Banking Workflows (Mock Services)', () => {
         .send({
           type: 'DEPOSIT',
           customerId: 'CDC-TEST-2',
-          currency: 'USD',
+          currency: 'EUR',
           initialBalance: '50000',
         })
         .expect(201);
@@ -238,7 +238,7 @@ describe('Fast Banking Workflows (Mock Services)', () => {
           fromAccountId: account1Response.body.accountId,
           toAccountId: account2Response.body.accountId,
           amount: '25000',
-          currency: 'USD',
+          currency: 'EUR',
         })
         .expect(201);
 
@@ -250,7 +250,7 @@ describe('Fast Banking Workflows (Mock Services)', () => {
         account1Response.body.accountId,
         account2Response.body.accountId,
         '25000',
-        'USD',
+        'EUR',
       );
 
       // Verify CDC event was recorded

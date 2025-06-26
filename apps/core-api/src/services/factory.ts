@@ -4,7 +4,6 @@ import {
   TransferRepository,
   TigerBeetleService,
   SystemAccountConfigService,
-  SEPASuspenseAccountService,
   getConfig,
   getTestConfig,
   logger,
@@ -13,7 +12,6 @@ import {
   AccountService,
   LoanService,
   PaymentProcessingService,
-  SEPAService,
   CDCManagerService,
 } from '@core-poc/domain';
 import { createClient } from 'tigerbeetle-node';
@@ -22,13 +20,11 @@ export interface ServiceContainer {
   accountService: AccountService;
   loanService: LoanService;
   paymentProcessingService: PaymentProcessingService;
-  sepaService: SEPAService;
   database: DatabaseConnection;
   tigerBeetleService: TigerBeetleService;
   cdcManager: CDCManagerService;
   transferRepository: TransferRepository;
   systemAccountConfigService: SystemAccountConfigService;
-  sepaSuspenseAccountService: SEPASuspenseAccountService;
 }
 
 export class ServiceFactory {
@@ -108,16 +104,6 @@ export class ServiceFactory {
       const systemAccountConfigService = new SystemAccountConfigService();
       await systemAccountConfigService.initialize();
 
-      // Create SEPA services
-      const sepaSuspenseAccountService = new SEPASuspenseAccountService(
-        tigerBeetleService,
-        systemAccountConfigService,
-      );
-
-      // Load system account mappings and initialize SEPA accounts
-      await sepaSuspenseAccountService.loadSystemAccountMappings();
-      await sepaSuspenseAccountService.initializeAllSEPASuspenseAccounts();
-
       // Create domain services
       const loanService = new LoanService(accountService, paymentPlanRepository);
 
@@ -125,13 +111,6 @@ export class ServiceFactory {
       const paymentProcessingService = new PaymentProcessingService(
         paymentPlanRepository,
         accountService,
-      );
-
-      // Create SEPA service
-      const sepaService = new SEPAService(
-        accountService,
-        tigerBeetleService,
-        sepaSuspenseAccountService,
       );
 
       // Create CDC Manager
@@ -142,13 +121,11 @@ export class ServiceFactory {
         accountService,
         loanService,
         paymentProcessingService,
-        sepaService,
         database,
         tigerBeetleService,
         cdcManager,
         transferRepository,
         systemAccountConfigService,
-        sepaSuspenseAccountService,
       };
 
       logger.info('Core API services initialized successfully');
@@ -198,16 +175,6 @@ export class ServiceFactory {
       const systemAccountConfigService = new SystemAccountConfigService();
       await systemAccountConfigService.initialize();
 
-      // Create SEPA services
-      const sepaSuspenseAccountService = new SEPASuspenseAccountService(
-        tigerBeetleService,
-        systemAccountConfigService,
-      );
-
-      // Load system account mappings and initialize SEPA accounts
-      await sepaSuspenseAccountService.loadSystemAccountMappings();
-      await sepaSuspenseAccountService.initializeAllSEPASuspenseAccounts();
-
       // Create domain services
       const loanService = new LoanService(accountService, paymentPlanRepository);
 
@@ -215,13 +182,6 @@ export class ServiceFactory {
       const paymentProcessingService = new PaymentProcessingService(
         paymentPlanRepository,
         accountService,
-      );
-
-      // Create SEPA service
-      const sepaService = new SEPAService(
-        accountService,
-        tigerBeetleService,
-        sepaSuspenseAccountService,
       );
 
       // Create CDC Manager
@@ -232,13 +192,11 @@ export class ServiceFactory {
         accountService,
         loanService,
         paymentProcessingService,
-        sepaService,
         database,
         tigerBeetleService,
         cdcManager,
         transferRepository,
         systemAccountConfigService,
-        sepaSuspenseAccountService,
       };
 
       logger.info('Test services initialized successfully');

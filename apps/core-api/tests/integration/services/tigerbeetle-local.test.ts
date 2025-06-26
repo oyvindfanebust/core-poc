@@ -23,7 +23,7 @@ describe('TigerBeetleService Integration', () => {
       const accountId = await tigerBeetleService.createAccount({
         type: 'DEPOSIT',
         customerId: testCustomers.customer3,
-        currency: 'USD',
+        currency: 'EUR',
       });
 
       expect(accountId).toBeDefined();
@@ -38,7 +38,7 @@ describe('TigerBeetleService Integration', () => {
       const accountId = await tigerBeetleService.createAccount({
         type: 'DEPOSIT',
         customerId: testCustomers.customer2,
-        currency: 'USD',
+        currency: 'EUR',
         initialBalance: testAmounts.small,
       });
 
@@ -57,14 +57,14 @@ describe('TigerBeetleService Integration', () => {
       fromAccountId = await tigerBeetleService.createAccount({
         type: 'DEPOSIT',
         customerId: 'TRANSFER_FROM',
-        currency: 'USD',
+        currency: 'EUR',
         initialBalance: 10000n,
       });
 
       toAccountId = await tigerBeetleService.createAccount({
         type: 'DEPOSIT',
         customerId: 'TRANSFER_TO',
-        currency: 'USD',
+        currency: 'EUR',
         initialBalance: 0n,
       });
     }, 10000);
@@ -76,7 +76,7 @@ describe('TigerBeetleService Integration', () => {
         fromAccountId,
         toAccountId,
         amount: transferAmount,
-        currency: 'USD',
+        currency: 'EUR',
       });
 
       expect(transferId).toBeDefined();

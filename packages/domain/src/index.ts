@@ -2,8 +2,6 @@
 export * from './domain/services/loan.service.js';
 export * from './services/account.service.js';
 export * from './services/payment-processing.service.js';
-export * from './services/sepa.service.js';
-export * from './services/mock-sepa-network.service.js';
 export { CDCManagerService } from './services/cdc-manager.service.js';
 
 // Re-export value objects from core-services for convenience

@@ -13,10 +13,10 @@ describe('System Accounts API Integration Tests', () => {
       expect(response.body).toHaveProperty('accounts');
       expect(response.body).toHaveProperty('count');
 
-      // Should have 12 SEPA accounts (3 types × 4 currencies)
-      expect(response.body.count).toBe(12);
+      // Should have 3 core banking accounts
+      expect(response.body.count).toBe(3);
       expect(Array.isArray(response.body.accounts)).toBe(true);
-      expect(response.body.accounts).toHaveLength(12);
+      expect(response.body.accounts).toHaveLength(3);
 
       // Verify account structure
       const account = response.body.accounts[0];
@@ -28,7 +28,7 @@ describe('System Accounts API Integration Tests', () => {
       expect(account).toHaveProperty('createdAt');
     });
 
-    it('should include all required SEPA account types', async () => {
+    it('should include all required core account types', async () => {
       const response = await api.get('/api/system-accounts');
 
       expect(response.status).toBe(200);
@@ -36,13 +36,13 @@ describe('System Accounts API Integration Tests', () => {
       const accountTypes = response.body.accounts.map((account: any) => account.accountType);
       const uniqueAccountTypes = [...new Set(accountTypes)];
 
-      expect(uniqueAccountTypes).toContain('SEPA_OUTGOING_SUSPENSE');
-      expect(uniqueAccountTypes).toContain('SEPA_INCOMING_SUSPENSE');
-      expect(uniqueAccountTypes).toContain('SEPA_SETTLEMENT');
+      expect(uniqueAccountTypes).toContain('OUTGOING_SUSPENSE');
+      expect(uniqueAccountTypes).toContain('INCOMING_SUSPENSE');
+      expect(uniqueAccountTypes).toContain('CLEARING');
       expect(uniqueAccountTypes).toHaveLength(3);
     });
 
-    it('should include all SEPA currencies', async () => {
+    it('should include EUR currency for all accounts', async () => {
       const response = await api.get('/api/system-accounts');
 
       expect(response.status).toBe(200);
@@ -51,24 +51,19 @@ describe('System Accounts API Integration Tests', () => {
       const uniqueCurrencies = [...new Set(currencies)];
 
       expect(uniqueCurrencies).toContain('EUR');
-      expect(uniqueCurrencies).toContain('NOK');
-      expect(uniqueCurrencies).toContain('SEK');
-      expect(uniqueCurrencies).toContain('DKK');
-      expect(uniqueCurrencies).toHaveLength(4);
+      expect(uniqueCurrencies).toHaveLength(1);
     });
   });
 
   describe('GET /api/system-accounts/:systemIdentifier', () => {
-    it('should return specific SEPA outgoing suspense account', async () => {
-      const response = await api.get('/api/system-accounts/SEPA-OUT-SUSPENSE-EUR');
+    it('should return specific outgoing suspense account', async () => {
+      const response = await api.get('/api/system-accounts/SYSTEM-SUSPENSE-OUT');
 
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('systemIdentifier', 'SEPA-OUT-SUSPENSE-EUR');
+      expect(response.body).toHaveProperty('systemIdentifier', 'SYSTEM-SUSPENSE-OUT');
       expect(response.body).toHaveProperty('currency', 'EUR');
-      expect(response.body).toHaveProperty('accountType', 'SEPA_OUTGOING_SUSPENSE');
-      expect(response.body.description).toContain(
-        'SEPA outgoing transfer suspense account for EUR',
-      );
+      expect(response.body).toHaveProperty('accountType', 'OUTGOING_SUSPENSE');
+      expect(response.body.description).toContain('General outgoing transfer suspense account');
     });
 
     it('should return 404 for non-existent system account', async () => {
@@ -81,37 +76,34 @@ describe('System Accounts API Integration Tests', () => {
   });
 
   describe('GET /api/system-accounts/type/:accountType', () => {
-    it('should return settlement accounts only', async () => {
-      const response = await api.get('/api/system-accounts/type/SEPA_SETTLEMENT');
+    it('should return clearing accounts only', async () => {
+      const response = await api.get('/api/system-accounts/type/CLEARING');
 
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('accountType', 'SEPA_SETTLEMENT');
-      expect(response.body).toHaveProperty('count', 4);
+      expect(response.body).toHaveProperty('accountType', 'CLEARING');
+      expect(response.body).toHaveProperty('count', 1);
 
-      // All accounts should be settlement type
+      // All accounts should be clearing type
       response.body.accounts.forEach((account: any) => {
-        expect(account.accountType).toBe('SEPA_SETTLEMENT');
-        expect(account.systemIdentifier).toMatch(/^SEPA-SETTLEMENT-/);
+        expect(account.accountType).toBe('CLEARING');
+        expect(account.systemIdentifier).toBe('SYSTEM-CLEARING');
       });
 
-      // Should have all 4 currencies
+      // Should have EUR currency
       const currencies = response.body.accounts.map((account: any) => account.currency);
       expect(currencies).toContain('EUR');
-      expect(currencies).toContain('NOK');
-      expect(currencies).toContain('SEK');
-      expect(currencies).toContain('DKK');
     });
 
     it('should return outgoing suspense accounts only', async () => {
-      const response = await api.get('/api/system-accounts/type/SEPA_OUTGOING_SUSPENSE');
+      const response = await api.get('/api/system-accounts/type/OUTGOING_SUSPENSE');
 
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('accountType', 'SEPA_OUTGOING_SUSPENSE');
-      expect(response.body).toHaveProperty('count', 4);
+      expect(response.body).toHaveProperty('accountType', 'OUTGOING_SUSPENSE');
+      expect(response.body).toHaveProperty('count', 1);
 
       response.body.accounts.forEach((account: any) => {
-        expect(account.accountType).toBe('SEPA_OUTGOING_SUSPENSE');
-        expect(account.systemIdentifier).toMatch(/^SEPA-OUT-SUSPENSE-/);
+        expect(account.accountType).toBe('OUTGOING_SUSPENSE');
+        expect(account.systemIdentifier).toBe('SYSTEM-SUSPENSE-OUT');
       });
     });
 
@@ -136,26 +128,13 @@ describe('System Accounts API Integration Tests', () => {
     });
   });
 
-  describe('Expected SEPA Account Structure', () => {
-    it('should have all required SEPA accounts created automatically', async () => {
+  describe('Expected Core Account Structure', () => {
+    it('should have all required core accounts created automatically', async () => {
       const response = await api.get('/api/system-accounts');
 
       expect(response.status).toBe(200);
 
-      const expectedAccounts = [
-        'SEPA-OUT-SUSPENSE-EUR',
-        'SEPA-IN-SUSPENSE-EUR',
-        'SEPA-SETTLEMENT-EUR',
-        'SEPA-OUT-SUSPENSE-NOK',
-        'SEPA-IN-SUSPENSE-NOK',
-        'SEPA-SETTLEMENT-NOK',
-        'SEPA-OUT-SUSPENSE-SEK',
-        'SEPA-IN-SUSPENSE-SEK',
-        'SEPA-SETTLEMENT-SEK',
-        'SEPA-OUT-SUSPENSE-DKK',
-        'SEPA-IN-SUSPENSE-DKK',
-        'SEPA-SETTLEMENT-DKK',
-      ];
+      const expectedAccounts = ['SYSTEM-SUSPENSE-OUT', 'SYSTEM-SUSPENSE-IN', 'SYSTEM-CLEARING'];
 
       const accountIdentifiers = response.body.accounts.map(
         (account: any) => account.systemIdentifier,

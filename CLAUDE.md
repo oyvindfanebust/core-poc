@@ -100,7 +100,9 @@ npm run format:check     # Check formatting
 
 ### SEPA Implementation
 
-- `packages/core-services/src/services/sepa-suspense-account.service.ts` - SEPA accounts
+- `apps/core-api/src/controllers/sepa.controller.ts` - SEPA REST endpoints
+- `packages/core-services/src/services/sepa-suspense-account.service.ts` - SEPA account management
+- `apps/sepa-mock-service/` - SEPA testing and simulation (port 7006)
 - `config/system-accounts.json` - System account mappings
 
 ### Application Entry Points
@@ -108,6 +110,7 @@ npm run format:check     # Check formatting
 - `apps/core-api/` - Main API server (port 7001)
 - `apps/customer-frontend/` - Next.js frontend (port 7002)
 - `apps/batch-processor/` - Background jobs (port 7003)
+- `apps/sepa-mock-service/` - SEPA testing interface (port 7006)
 - `apps/*/src/services/factory.ts` - Dependency injection containers
 
 ### Configuration
@@ -188,4 +191,5 @@ npm run format:check     # Check formatting
 - **7001**: Core API (main backend)
 - **7002**: Customer Frontend (Next.js)
 - **7003**: Batch Processor (background jobs)
+- **7006**: SEPA Mock Service (testing interface)
 - **5432**: PostgreSQL (metadata storage)

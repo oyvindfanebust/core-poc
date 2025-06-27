@@ -64,7 +64,7 @@ async function createApp(): Promise<express.Application> {
     app.use(helmet());
     app.use(
       cors({
-        origin: ['http://localhost:7002', 'http://localhost:7005'], // Allow both customer and admin frontends
+        origin: ['http://localhost:7002', 'http://localhost:7005', 'http://localhost:7006'], // Allow customer frontend, admin frontend, and SEPA mock service
         credentials: true,
       }),
     );
@@ -175,6 +175,12 @@ async function createApp(): Promise<express.Application> {
       sepaController.createOutgoingTransfer.bind(sepaController),
     );
 
+    app.post(
+      '/sepa/transfers/incoming',
+      validateRequest(SEPATransferRequestSchema),
+      sepaController.createIncomingTransfer.bind(sepaController),
+    );
+
     app.get('/sepa/status', sepaController.getStatus.bind(sepaController));
 
     app.get(
@@ -232,6 +238,7 @@ async function createApp(): Promise<express.Application> {
         'GET /api/system-accounts/type/:accountType',
         'GET /api/system-accounts/validate',
         'POST /sepa/transfers/outgoing',
+        'POST /sepa/transfers/incoming',
         'GET /sepa/status',
         'GET /sepa/suspense/:currency',
         'GET /health',

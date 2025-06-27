@@ -48,7 +48,8 @@ export class SEPAController {
         BigInt(transferRequest.accountId),
       );
 
-      const transferAmount = BigInt(transferRequest.amount);
+      // Convert from euros to cents (multiply by 100)
+      const transferAmount = BigInt(Math.round(parseFloat(transferRequest.amount) * 100));
       if (accountBalance.balance < transferAmount) {
         res.status(400).json({
           error: {
@@ -122,6 +123,104 @@ export class SEPAController {
         error: {
           code: 'SEPA_TRANSFER_FAILED',
           message: 'Failed to process SEPA transfer',
+          retryable: true,
+        },
+      });
+    }
+  }
+
+  /**
+   * Process an incoming SEPA transfer
+   * POST /sepa/transfers/incoming
+   */
+  async createIncomingTransfer(req: Request, res: Response): Promise<void> {
+    try {
+      const transferRequest = req.body as SEPATransferRequest;
+
+      logger.info('Processing SEPA incoming transfer', {
+        accountId: transferRequest.accountId,
+        amount: transferRequest.amount,
+        currency: transferRequest.currency,
+        senderIban: transferRequest.bankInfo.iban,
+        urgency: transferRequest.urgency || 'STANDARD',
+      });
+
+      // Get the appropriate SEPA incoming suspense account for this currency
+      const sepaAccount = await this.sepaAccountService.getSEPAAccount(
+        'INCOMING_SUSPENSE',
+        transferRequest.currency,
+      );
+
+      if (!sepaAccount) {
+        res.status(500).json({
+          error: {
+            code: 'SEPA_SUSPENSE_NOT_CONFIGURED',
+            message: `SEPA incoming suspense account not configured for ${transferRequest.currency}`,
+            retryable: false,
+          },
+        });
+        return;
+      }
+
+      // Convert from euros to cents (multiply by 100)
+      const transferAmount = BigInt(Math.round(parseFloat(transferRequest.amount) * 100));
+      const sepaTransactionId = `SEPA-IN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+      // For incoming transfers, we credit the customer account from SEPA incoming suspense
+      // This simulates funds being received from the external SEPA network
+      const suspenseTransferId = await this.tigerBeetleService.createTransfer({
+        fromAccountId: sepaAccount.numericId,
+        toAccountId: BigInt(transferRequest.accountId),
+        amount: transferAmount,
+        currency: transferRequest.currency,
+        transferType: 2, // SEPA_INCOMING
+        description: `SEPA incoming: ${sepaTransactionId}`,
+      });
+
+      // In a real implementation, this would:
+      // 1. Receive the payment notification from the SEPA network
+      // 2. Validate the incoming transfer details
+      // 3. Credit the customer account
+      // 4. Send acknowledgment back to the network
+
+      const response: SEPATransferResponse = {
+        transferId: suspenseTransferId.toString(),
+        status: 'ACCEPTED',
+        sepaTransactionId,
+        estimatedSettlement: new Date().toISOString(), // Immediate for incoming
+      };
+
+      logger.info('SEPA incoming transfer processed successfully', {
+        transferId: suspenseTransferId.toString(),
+        sepaTransactionId,
+        accountId: transferRequest.accountId,
+        amount: transferRequest.amount,
+        currency: transferRequest.currency,
+      });
+
+      res.status(201).json(response);
+    } catch (error) {
+      logger.error('Failed to process SEPA incoming transfer', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        requestBody: req.body,
+      });
+
+      if (error instanceof Error && error.message.includes('Account not found')) {
+        res.status(404).json({
+          error: {
+            code: 'ACCOUNT_NOT_FOUND',
+            message: 'Target account not found',
+            retryable: false,
+          },
+        });
+        return;
+      }
+
+      res.status(500).json({
+        error: {
+          code: 'SEPA_TRANSFER_FAILED',
+          message: 'Failed to process incoming SEPA transfer',
           retryable: true,
         },
       });

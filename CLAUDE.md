@@ -14,9 +14,9 @@ Core banking system using TigerBeetle ledger, Node.js, TypeScript, and PostgreSQ
 ### Development
 
 ```bash
-npm run dev:all          # Start all services (recommended)
-npm run dev:backend      # Backend only
-npm run dev:frontend     # Frontend only
+npm run dev              # Start all services (recommended)
+npm run dev:backend      # Backend only (Core API + Batch Processor)
+npm run dev:frontend     # Frontend only (Customer UI)
 docker-compose up -d     # Start infrastructure (PostgreSQL, TigerBeetle)
 direnv allow             # Reload environment variables
 ```

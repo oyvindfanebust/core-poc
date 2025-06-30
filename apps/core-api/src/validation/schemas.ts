@@ -4,14 +4,41 @@ import { z } from 'zod';
 
 // Base schemas for reusable validation - SEPA currencies only
 export const CurrencySchema = z.enum(['EUR', 'NOK', 'SEK', 'DKK'] as const);
+
+// Extended currency schema for external transactions
+export const ExtendedCurrencySchema = z.enum([
+  'EUR',
+  'NOK',
+  'SEK',
+  'DKK',
+  'USD',
+  'GBP',
+  'JPY',
+  'CAD',
+  'AUD',
+  'CHF',
+] as const);
 export const AccountTypeSchema = z.enum(['DEPOSIT', 'LOAN', 'CREDIT'] as const);
 
-// Money amount validation (positive BigInt as string)
+// Money amount validation (non-negative BigInt as string)
 export const MoneyAmountSchema = z.string().refine(
   val => {
     try {
       const amount = BigInt(val);
       return amount >= 0n;
+    } catch {
+      return false;
+    }
+  },
+  { message: 'Amount must be a valid number' },
+);
+
+// Positive money amount validation for transactions (BigInt as string)
+export const PositiveMoneyAmountSchema = z.string().refine(
+  val => {
+    try {
+      const amount = BigInt(val);
+      return amount > 0n;
     } catch {
       return false;
     }
@@ -238,3 +265,74 @@ export type SEPABankInfo = z.infer<typeof SEPABankInfoSchema>;
 export type SEPACurrencyParam = z.infer<typeof SEPACurrencyParamSchema>;
 export type LoanDisbursementRequest = z.infer<typeof LoanDisbursementSchema>;
 export type LoanIdParam = z.infer<typeof LoanIdParamSchema>;
+
+// External transaction validation schemas
+export const RoutingNumberSchema = z
+  .string()
+  .length(9, 'Routing number must be exactly 9 digits')
+  .regex(/^[0-9]{9}$/, 'Routing number must contain only digits');
+
+export const SWIFTCodeSchema = z
+  .string()
+  .min(8, 'SWIFT code must be at least 8 characters')
+  .max(11, 'SWIFT code cannot exceed 11 characters')
+  .regex(/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/, 'SWIFT code must be in valid format');
+
+export const ExternalTransactionUrgencySchema = z.enum([
+  'STANDARD',
+  'SAME_DAY',
+  'EXPRESS',
+  'PRIORITY',
+] as const);
+
+// ACH Credit transaction schema
+export const ACHCreditRequestSchema = z.object({
+  targetAccountId: AccountIdSchema,
+  amount: PositiveMoneyAmountSchema,
+  currency: z.literal('USD'), // ACH is USD only
+  routingNumber: RoutingNumberSchema,
+  originatingBankName: z
+    .string()
+    .min(1, 'Originating bank name is required')
+    .max(100, 'Bank name cannot exceed 100 characters'),
+  reference: z
+    .string()
+    .min(1, 'Reference is required')
+    .max(80, 'Reference cannot exceed 80 characters'),
+  urgency: ExternalTransactionUrgencySchema.optional().default('STANDARD'),
+});
+
+// Wire Transfer Credit transaction schema
+export const WireCreditRequestSchema = z.object({
+  targetAccountId: AccountIdSchema,
+  amount: PositiveMoneyAmountSchema,
+  currency: ExtendedCurrencySchema,
+  swiftCode: SWIFTCodeSchema,
+  originatingBankName: z
+    .string()
+    .min(1, 'Originating bank name is required')
+    .max(100, 'Bank name cannot exceed 100 characters'),
+  correspondentBank: z
+    .string()
+    .max(100, 'Correspondent bank name cannot exceed 100 characters')
+    .optional(),
+  reference: z
+    .string()
+    .min(1, 'Reference is required')
+    .max(140, 'Reference cannot exceed 140 characters'),
+  urgency: ExternalTransactionUrgencySchema.optional().default('STANDARD'),
+});
+
+// Transaction ID parameter schema
+export const TransactionIdParamSchema = z.object({
+  transactionId: z
+    .string()
+    .min(1, 'Transaction ID is required')
+    .max(100, 'Transaction ID cannot exceed 100 characters'),
+});
+
+// Type exports for external transactions
+export type ACHCreditRequest = z.infer<typeof ACHCreditRequestSchema>;
+export type WireCreditRequest = z.infer<typeof WireCreditRequestSchema>;
+export type TransactionIdParam = z.infer<typeof TransactionIdParamSchema>;
+export type ExtendedCurrency = z.infer<typeof ExtendedCurrencySchema>;

@@ -11,6 +11,7 @@ import swaggerUi from 'swagger-ui-express';
 };
 
 import { AccountController } from './controllers/account.controller.js';
+import { ExternalTransactionController } from './controllers/external-transaction.controller.js';
 import { HealthController } from './controllers/health.controller.js';
 import { LoanFundingController } from './controllers/loan-funding.controller.js';
 import { MetricsController, metricsMiddleware } from './controllers/metrics.controller.js';
@@ -31,6 +32,9 @@ import {
   SEPACurrencyParamSchema,
   LoanDisbursementSchema,
   LoanIdParamSchema,
+  ACHCreditRequestSchema,
+  WireCreditRequestSchema,
+  TransactionIdParamSchema,
 } from './validation/schemas.js';
 
 let services: ServiceContainer;
@@ -62,6 +66,8 @@ async function createApp(): Promise<express.Application> {
     );
 
     const loanFundingController = new LoanFundingController(services.loanService);
+
+    const externalTransactionController = new ExternalTransactionController();
 
     const app = express();
 
@@ -208,6 +214,25 @@ async function createApp(): Promise<express.Application> {
       loanFundingController.getFundingStatus.bind(loanFundingController),
     );
 
+    // External transaction routes
+    app.post(
+      '/api/v1/external-transactions/ach-credit',
+      validateRequest(ACHCreditRequestSchema),
+      externalTransactionController.processACHCredit.bind(externalTransactionController),
+    );
+
+    app.post(
+      '/api/v1/external-transactions/wire-credit',
+      validateRequest(WireCreditRequestSchema),
+      externalTransactionController.processWireCredit.bind(externalTransactionController),
+    );
+
+    app.get(
+      '/api/v1/external-transactions/status/:transactionId',
+      validateRequest(TransactionIdParamSchema, 'params'),
+      externalTransactionController.getTransactionStatus.bind(externalTransactionController),
+    );
+
     // API info endpoint
     app.get('/api/info', (req, res) => {
       res.json({
@@ -237,6 +262,7 @@ async function createApp(): Promise<express.Application> {
           systemAccounts: '/api/system-accounts',
           sepa: '/sepa',
           loanFunding: '/api/v1/loans',
+          externalTransactions: '/api/v1/external-transactions',
         },
       });
     });
@@ -263,6 +289,9 @@ async function createApp(): Promise<express.Application> {
         'GET /sepa/suspense/:currency',
         'POST /api/v1/loans/:loanId/disburse',
         'GET /api/v1/loans/:loanId/funding-status',
+        'POST /api/v1/external-transactions/ach-credit',
+        'POST /api/v1/external-transactions/wire-credit',
+        'GET /api/v1/external-transactions/status/:transactionId',
         'GET /health',
         'GET /metrics',
         'GET /api-docs',

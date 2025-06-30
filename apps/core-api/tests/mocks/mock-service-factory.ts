@@ -6,9 +6,9 @@ import {
 import { AccountService, LoanService, PaymentProcessingService } from '@core-poc/domain';
 
 import { MockCDCManagerService } from './mock-cdc-manager.service.js';
-import { MockTigerBeetleService } from './mock-tigerbeetle.service.js';
-import { MockSystemAccountConfigService } from './mock-system-account-config.service.js';
 import { MockSEPASuspenseAccountService } from './mock-sepa-suspense-account.service.js';
+import { MockSystemAccountConfigService } from './mock-system-account-config.service.js';
+import { MockTigerBeetleService } from './mock-tigerbeetle.service.js';
 
 export interface MockServiceContainer {
   accountService: AccountService;

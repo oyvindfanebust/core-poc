@@ -52,6 +52,21 @@ export function validateRequest<T>(
  * Generic error handler middleware
  */
 export function errorHandler(error: Error, req: Request, res: Response, _next: NextFunction) {
+  // Handle JSON parsing errors
+  if (error instanceof SyntaxError && 'body' in error) {
+    logger.warn('Invalid JSON in request', {
+      path: req.path,
+      method: req.method,
+      error: error.message,
+    });
+
+    res.status(400).json({
+      error: 'Invalid JSON',
+      details: 'The request body contains invalid JSON',
+    });
+    return;
+  }
+
   logger.error('Unhandled error', {
     error: error.message,
     stack: error.stack,

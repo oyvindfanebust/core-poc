@@ -31,6 +31,7 @@ npm run dev:all
 
 - **API Documentation**: http://localhost:7001/api-docs
 - **Customer Frontend**: http://localhost:7002
+- **External Transaction Simulator**: http://localhost:7006
 
 ## 📁 Repository Structure
 
@@ -39,7 +40,8 @@ core-poc/
 ├── apps/
 │   ├── core-api/           # Main API server (port 7001)
 │   ├── batch-processor/    # Background jobs (port 7003)
-│   └── customer-frontend/  # Next.js app (port 7002)
+│   ├── customer-frontend/  # Next.js app (port 7002)
+│   └── sepa-mock-service/  # External transaction simulator (port 7006)
 ├── packages/
 │   ├── core-services/      # TigerBeetle, database services
 │   ├── domain/            # Business logic
@@ -70,7 +72,8 @@ curl -X POST http://localhost:7001/accounts \
 
 - **Account Management**: Multi-currency deposit, loan, and credit accounts
 - **Money Transfers**: Secure transfers with full audit trails
-- **Loan Processing**: Payment plans, amortization schedules
+- **Loan Processing**: Payment plans, amortization schedules, disbursements
+- **External Transactions**: ACH and Wire credit processing from external banks
 - **Invoice Management**: Automated invoice generation and tracking
 
 ### SEPA Integration
@@ -80,6 +83,22 @@ curl -X POST http://localhost:7001/accounts \
 - **Account Types**: Outgoing suspense, incoming suspense, settlement accounts
 - **Configuration**: JSON-based mapping in `config/system-accounts.json`
 - **API Endpoint**: `/api/system-accounts` for account inspection
+
+### External Transaction Processing
+
+- **ACH Credits**: USD transactions with STANDARD (2 days), SAME_DAY (6 hours), EXPRESS (2 hours) settlement
+- **Wire Transfers**: Multi-currency (EUR, USD, GBP, JPY, CAD, AUD, CHF) with SWIFT network support
+- **Settlement Tracking**: Complete audit trail with estimated and actual settlement dates
+- **Status Monitoring**: Real-time transaction status lookup and error reporting
+- **Testing Interface**: Comprehensive simulator at port 7006 for development and testing
+
+### Loan Funding System
+
+- **Loan Disbursements**: Controlled release of loan funds to customer accounts
+- **Multi-Currency Support**: Handle loans and disbursements in different currencies
+- **Currency Conversion**: Automatic conversion with exchange rate tracking
+- **Progressive Disbursements**: Support for construction loans and line of credit
+- **Validation Controls**: Comprehensive checks for loan eligibility and limits
 
 ### Enterprise Features
 
@@ -110,6 +129,14 @@ direnv allow            # Reload environment
 curl http://localhost:7001/api/system-accounts           # View all system accounts
 curl http://localhost:7001/api/system-accounts | grep SEPA  # SEPA accounts only
 npm run test -- --testNamePattern=sepa                  # Run SEPA tests
+
+# External Transactions
+curl http://localhost:7001/api/v1/external-transactions/status/ACH-STANDARD-123  # Check transaction status
+npm run test -- tests/integration/fast-external-transactions.test.ts  # Run external transaction tests
+
+# Loan Funding
+curl -X POST http://localhost:7001/api/v1/loans/{loanId}/disburse  # Disburse loan funds
+npm run test -- tests/integration/fast-loan-funding.test.ts  # Run loan funding tests
 ```
 
 ## 🏗 Architecture Highlights
@@ -138,6 +165,8 @@ Detailed documentation is available in the `docs/` folder:
 - **[Development](docs/DEVELOPMENT.md)** - Development workflow, testing, and debugging
 - **[Internationalization](docs/INTERNATIONALIZATION.md)** - Multi-language setup and usage
 - **[SEPA Architecture](docs/SEPA_ARCHITECTURE.md)** - SEPA payment infrastructure details
+- **[External Transactions](docs/EXTERNAL_TRANSACTIONS.md)** - ACH and Wire credit processing system
+- **[Loan Funding](docs/LOAN_FUNDING.md)** - Loan disbursement and funding operations
 
 ## 🧪 Testing
 
@@ -182,6 +211,7 @@ Each SEPA currency gets 3 system accounts:
 - **7001**: Core API
 - **7002**: Customer Frontend
 - **7003**: Batch Processor
+- **7006**: External Transaction Simulator
 - **5432**: PostgreSQL
 
 ### Environment Variables

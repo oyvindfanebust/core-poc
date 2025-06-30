@@ -41,7 +41,7 @@ core-poc/
 │   ├── core-api/           # Main API server (port 7001)
 │   ├── batch-processor/    # Background jobs (port 7003)
 │   ├── customer-frontend/  # Next.js app (port 7002)
-│   └── sepa-mock-service/  # External transaction simulator (port 7006)
+│   └── external-transaction-simulator/  # External transaction simulator (port 7006)
 ├── packages/
 │   ├── core-services/      # TigerBeetle, database services
 │   ├── domain/            # Business logic

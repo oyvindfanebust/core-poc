@@ -1,12 +1,14 @@
-# SEPA Mock Service Documentation
+# External Transaction Simulator Documentation
 
-The SEPA Mock Service provides comprehensive simulation of external SEPA network behaviors for testing and development purposes. It enables testing of various SEPA scenarios without requiring real external bank connections.
+The External Transaction Simulator provides comprehensive simulation of external payment network behaviors including SEPA, ACH, and Wire transfers for testing and development purposes. It enables testing of various payment scenarios without requiring real external bank connections.
 
 ## Overview
 
-The Mock SEPA Network Service simulates:
+The External Transaction Simulator simulates:
 
-- SEPA message processing and validation
+- **SEPA transfers**: EU payment processing and validation
+- **ACH transfers**: US domestic payment processing
+- **Wire transfers**: International multi-currency transfers
 - Bank response scenarios (success, rejection, timeouts)
 - Network delays and timing behaviors
 - Business rule enforcement (cut-off times, holidays, limits)

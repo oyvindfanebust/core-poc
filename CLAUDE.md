@@ -143,7 +143,7 @@ See TEST_GUIDE.md for detailed test instructions.
 - `apps/core-api/src/controllers/sepa.controller.ts` - SEPA transfer endpoints
 - `apps/core-api/src/controllers/loan-funding.controller.ts` - Loan disbursement endpoints
 - `packages/core-services/src/services/sepa-suspense-account.service.ts` - SEPA account management
-- `apps/sepa-mock-service/` - Complete external transaction simulator (port 7006)
+- `apps/external-transaction-simulator/` - Complete external transaction simulator (port 7006)
 - `config/system-accounts.json` - System account mappings
 
 ### Application Entry Points
@@ -151,7 +151,7 @@ See TEST_GUIDE.md for detailed test instructions.
 - `apps/core-api/` - Main API server (port 7001)
 - `apps/customer-frontend/` - Next.js frontend (port 7002)
 - `apps/batch-processor/` - Background jobs (port 7003)
-- `apps/sepa-mock-service/` - SEPA testing interface (port 7006)
+- `apps/external-transaction-simulator/` - External transaction testing interface (port 7006)
 - `apps/*/src/services/factory.ts` - Dependency injection containers
 
 ### Configuration
@@ -232,5 +232,5 @@ See TEST_GUIDE.md for detailed test instructions.
 - **7001**: Core API (main backend)
 - **7002**: Customer Frontend (Next.js)
 - **7003**: Batch Processor (background jobs)
-- **7006**: External Transaction Simulator (SEPA Mock Service)
+- **7006**: External Transaction Simulator (ACH, Wire, SEPA testing)
 - **5432**: PostgreSQL (metadata storage)

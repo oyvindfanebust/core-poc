@@ -8,14 +8,14 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev --workspace=@core-poc/core-api\" \"npm run dev --workspace=@core-poc/batch-processor\" \"npm run dev --workspace=@core-poc/customer-frontend\" \"npm run dev --workspace=@core-poc/sepa-mock-service\"",
+    "dev": "concurrently \"npm run dev --workspace=@core-poc/core-api\" \"npm run dev --workspace=@core-poc/batch-processor\" \"npm run dev --workspace=@core-poc/customer-frontend\" \"npm run dev --workspace=@core-poc/external-transaction-simulator\"",
     "dev:backend": "concurrently \"npm run dev --workspace=@core-poc/core-api\" \"npm run dev --workspace=@core-poc/batch-processor\"",
     "dev:frontend": "npm run dev --workspace=@core-poc/customer-frontend",
     "build": "NODE_ENV=production npm run build --workspaces",
     "build:core-api": "npm run build --workspace=@core-poc/core-api",
     "build:batch-processor": "npm run build --workspace=@core-poc/batch-processor",
     "build:customer-frontend": "NODE_ENV=production npm run build --workspace=@core-poc/customer-frontend",
-    "build:sepa-mock-service": "npm run build --workspace=@core-poc/sepa-mock-service",
+    "build:external-transaction-simulator": "npm run build --workspace=@core-poc/external-transaction-simulator",
     "test": "npm run test --workspaces",
     "test:core-api": "npm run test --workspace=@core-poc/core-api",
     "test:batch-processor": "npm run test --workspace=@core-poc/batch-processor",

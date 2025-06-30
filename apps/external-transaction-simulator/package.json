@@ -1,5 +1,5 @@
 {
-  "name": "@core-poc/sepa-mock-service",
+  "name": "@core-poc/external-transaction-simulator",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,7 +9,7 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit",
-    "test": "echo 'No tests for SEPA mock service'"
+    "test": "echo 'No tests for external transaction simulator'"
   },
   "dependencies": {
     "next": "15.3.3",

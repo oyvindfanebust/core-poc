@@ -12,6 +12,7 @@ import swaggerUi from 'swagger-ui-express';
 
 import { AccountController } from './controllers/account.controller.js';
 import { HealthController } from './controllers/health.controller.js';
+import { LoanFundingController } from './controllers/loan-funding.controller.js';
 import { MetricsController, metricsMiddleware } from './controllers/metrics.controller.js';
 import { SEPAController } from './controllers/sepa.controller.js';
 import { SystemAccountController } from './controllers/system-account.controller.js';
@@ -28,6 +29,8 @@ import {
   AccountTypeParamSchema,
   SEPATransferRequestSchema,
   SEPACurrencyParamSchema,
+  LoanDisbursementSchema,
+  LoanIdParamSchema,
 } from './validation/schemas.js';
 
 let services: ServiceContainer;
@@ -57,6 +60,8 @@ async function createApp(): Promise<express.Application> {
       services.sepaAccountService,
       services.tigerBeetleService,
     );
+
+    const loanFundingController = new LoanFundingController(services.loanService);
 
     const app = express();
 
@@ -189,6 +194,20 @@ async function createApp(): Promise<express.Application> {
       sepaController.getSuspenseBalances.bind(sepaController),
     );
 
+    // Loan funding routes
+    app.post(
+      '/api/v1/loans/:loanId/disburse',
+      validateRequest(LoanIdParamSchema, 'params'),
+      validateRequest(LoanDisbursementSchema),
+      loanFundingController.disburseLoan.bind(loanFundingController),
+    );
+
+    app.get(
+      '/api/v1/loans/:loanId/funding-status',
+      validateRequest(LoanIdParamSchema, 'params'),
+      loanFundingController.getFundingStatus.bind(loanFundingController),
+    );
+
     // API info endpoint
     app.get('/api/info', (req, res) => {
       res.json({
@@ -217,6 +236,7 @@ async function createApp(): Promise<express.Application> {
           transfers: '/transfers',
           systemAccounts: '/api/system-accounts',
           sepa: '/sepa',
+          loanFunding: '/api/v1/loans',
         },
       });
     });
@@ -241,6 +261,8 @@ async function createApp(): Promise<express.Application> {
         'POST /sepa/transfers/incoming',
         'GET /sepa/status',
         'GET /sepa/suspense/:currency',
+        'POST /api/v1/loans/:loanId/disburse',
+        'GET /api/v1/loans/:loanId/funding-status',
         'GET /health',
         'GET /metrics',
         'GET /api-docs',

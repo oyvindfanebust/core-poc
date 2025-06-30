@@ -46,6 +46,40 @@ export interface SEPAStatus {
   lastChecked: string;
 }
 
+export interface LoanDisbursementRequest {
+  targetAccountId: string;
+  amount?: string;
+  description?: string;
+}
+
+export interface LoanDisbursementResponse {
+  transferId: string;
+  status: 'SUCCESS' | 'FAILED';
+  disbursedAmount: string;
+  targetAccountId: string;
+  loanAccountId: string;
+  timestamp: string;
+  errorDetails?: {
+    code: string;
+    message: string;
+    retryable: boolean;
+  };
+}
+
+export interface LoanFundingStatus {
+  loanId: string;
+  totalLoanAmount: string;
+  principalAmount: string;
+  monthlyPayment: string;
+  remainingPayments: number;
+  loanType: string;
+  paymentFrequency: string;
+  interestRate: number;
+  nextPaymentDate: string;
+  status: string;
+  lastChecked: string;
+}
+
 export interface SEPASuspenseBalances {
   currency: string;
   outgoing: {
@@ -136,6 +170,21 @@ class CoreApiClient {
   // Get account balance (for validation)
   async getAccountBalance(accountId: string): Promise<any> {
     return this.request<any>(`/accounts/${accountId}/balance`);
+  }
+
+  // Loan funding methods
+  async disburseLoan(
+    loanId: string,
+    disbursementRequest: LoanDisbursementRequest,
+  ): Promise<LoanDisbursementResponse> {
+    return this.request<LoanDisbursementResponse>(`/api/v1/loans/${loanId}/disburse`, {
+      method: 'POST',
+      body: JSON.stringify(disbursementRequest),
+    });
+  }
+
+  async getLoanFundingStatus(loanId: string): Promise<LoanFundingStatus> {
+    return this.request<LoanFundingStatus>(`/api/v1/loans/${loanId}/funding-status`);
   }
 }
 

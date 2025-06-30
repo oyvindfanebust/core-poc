@@ -7,6 +7,8 @@ import { AccountService, LoanService, PaymentProcessingService } from '@core-poc
 
 import { MockCDCManagerService } from './mock-cdc-manager.service.js';
 import { MockTigerBeetleService } from './mock-tigerbeetle.service.js';
+import { MockSystemAccountConfigService } from './mock-system-account-config.service.js';
+import { MockSEPASuspenseAccountService } from './mock-sepa-suspense-account.service.js';
 
 export interface MockServiceContainer {
   accountService: AccountService;
@@ -16,6 +18,8 @@ export interface MockServiceContainer {
   tigerBeetleService: MockTigerBeetleService;
   cdcManager: MockCDCManagerService;
   transferRepository: TransferRepository;
+  systemAccountConfigService: MockSystemAccountConfigService;
+  sepaAccountService: MockSEPASuspenseAccountService;
 }
 
 /**
@@ -42,9 +46,11 @@ export class MockServiceFactory {
     // Create mock services - no external dependencies
     const tigerBeetleService = new MockTigerBeetleService();
     const cdcManager = new MockCDCManagerService();
+    const systemAccountConfigService = new MockSystemAccountConfigService();
 
     // Initialize mock services
     await cdcManager.initialize();
+    await systemAccountConfigService.initialize();
 
     // Create business services using mocks
     const accountService = new AccountService(tigerBeetleService as any);
@@ -62,6 +68,12 @@ export class MockServiceFactory {
       accountService,
     );
 
+    // Create mock SEPA service
+    const sepaAccountService = new MockSEPASuspenseAccountService(
+      tigerBeetleService as any,
+      systemAccountConfigService as any,
+    );
+
     // Use real database connection - tests can still use it for data verification
     const database = DatabaseConnection.getInstance();
 
@@ -73,6 +85,8 @@ export class MockServiceFactory {
       tigerBeetleService,
       cdcManager,
       transferRepository,
+      systemAccountConfigService,
+      sepaAccountService,
     };
 
     return MockServiceFactory.instance;
@@ -88,6 +102,8 @@ export class MockServiceFactory {
         // Reset mock state
         MockServiceFactory.instance.tigerBeetleService.reset();
         MockServiceFactory.instance.cdcManager.clearEvents();
+        MockServiceFactory.instance.systemAccountConfigService.reset();
+        MockServiceFactory.instance.sepaAccountService.reset();
 
         MockServiceFactory.instance = null;
       } catch (error) {
@@ -100,6 +116,8 @@ export class MockServiceFactory {
     if (MockServiceFactory.instance) {
       MockServiceFactory.instance.tigerBeetleService.reset();
       MockServiceFactory.instance.cdcManager.clearEvents();
+      MockServiceFactory.instance.systemAccountConfigService.reset();
+      MockServiceFactory.instance.sepaAccountService.reset();
     }
   }
 }

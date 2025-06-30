@@ -1,9 +1,11 @@
 'use client';
 
-import { Building2, Send, Activity, AlertCircle, TrendingUp, Euro } from 'lucide-react';
+import { Building2, Send, Activity, AlertCircle, TrendingUp, Euro, Banknote } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
+// eslint-disable-next-line import/no-unresolved
 import { MOCK_BANKS } from '@/config/mock-banks';
+// eslint-disable-next-line import/no-unresolved
 import { coreApiClient, SEPAStatus } from '@/lib/core-api-client';
 
 export default function HomePage() {
@@ -66,9 +68,9 @@ export default function HomePage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">SEPA Mock Banking Service</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">External Transaction Simulator</h1>
         <p className="text-lg text-gray-600">
-          Simulate external SEPA transfers and test banking integrations
+          Simulate external transfers, SEPA payments, and loan disbursements
         </p>
       </div>
 
@@ -144,7 +146,7 @@ export default function HomePage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Simulate Incoming Transfer */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center mb-4">
@@ -195,6 +197,23 @@ export default function HomePage() {
             View Balances
           </a>
         </div>
+
+        {/* Loan Funding */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center mb-4">
+            <Banknote className="h-8 w-8 text-purple-600 mr-3" />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Loan Funding</h3>
+              <p className="text-sm text-gray-600">Disburse loan funds to customer accounts</p>
+            </div>
+          </div>
+          <a
+            href="/funding"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
+          >
+            Manage Disbursements
+          </a>
+        </div>
       </div>
 
       {/* Mock Banks Overview */}
@@ -234,6 +253,9 @@ export default function HomePage() {
           </p>
           <p>
             • <strong>Balances:</strong> Monitor suspense account positions and settlement status
+          </p>
+          <p>
+            • <strong>Loan Funding:</strong> Disburse loan proceeds to customer deposit accounts
           </p>
           <p>
             • Use the customer frontend at{' '}

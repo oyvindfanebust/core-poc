@@ -32,6 +32,14 @@ export interface LoanAccount {
   monthlyPayment: Money;
 }
 
+export interface DisbursementResult {
+  transferId: string;
+  disbursedAmount: Money;
+  targetAccountId: AccountId;
+  loanAccountId: AccountId;
+  timestamp: Date;
+}
+
 export class LoanService {
   constructor(
     private accountService: AccountService,
@@ -383,5 +391,93 @@ export class LoanService {
       totalPayments: BigInt(Math.round(totalPayments)),
       totalInterest: BigInt(Math.round(totalInterest)),
     };
+  }
+
+  /**
+   * Disburse loan funds to a customer deposit account
+   * @param loanId The loan account ID
+   * @param targetAccountId The deposit account to receive funds
+   * @param amount Optional partial disbursement amount (defaults to full loan balance)
+   * @param description Optional disbursement description
+   */
+  async disburseLoan(
+    loanId: AccountId,
+    targetAccountId: AccountId,
+    amount?: Money,
+    description?: string,
+  ): Promise<DisbursementResult> {
+    try {
+      logger.info('Starting loan disbursement', {
+        loanId: loanId.toString(),
+        targetAccountId: targetAccountId.toString(),
+        amount: amount?.toString(),
+        description,
+      });
+
+      // Get the payment plan to verify loan exists and get details
+      const paymentPlan = await this.paymentPlanRepository.findByAccountId(loanId);
+      if (!paymentPlan) {
+        throw new Error(`Loan account ${loanId.toString()} not found`);
+      }
+
+      // Get loan account balance to determine available funds
+      const loanBalance = await this.accountService.getAccountBalance(loanId.value);
+      // Get currency from the payment plan since TigerBeetle doesn't return currency
+      const loanCurrency = 'EUR' as Currency; // TODO: Get from account metadata
+      const availableFunds = new Money(loanBalance.balance, loanCurrency);
+
+      // Determine disbursement amount
+      const disbursementAmount = amount || availableFunds;
+
+      // Validate disbursement amount
+      if (disbursementAmount.amount <= 0n) {
+        throw new Error('Disbursement amount must be greater than zero');
+      }
+
+      if (disbursementAmount.amount > availableFunds.amount) {
+        throw new Error(
+          `Insufficient loan funds. Available: ${availableFunds.toString()}, Requested: ${disbursementAmount.toString()}`,
+        );
+      }
+
+      // Verify target account exists and is a deposit account
+      await this.accountService.getAccountBalance(targetAccountId.value);
+      // Note: We assume if getAccountBalance succeeds, the account exists
+      // In a real implementation, we'd verify account type via account service
+
+      // Create transfer from loan account to deposit account
+      const transferId = await this.accountService.transfer(
+        loanId.value,
+        targetAccountId.value,
+        disbursementAmount.amount,
+        disbursementAmount.currency,
+        description || `Loan disbursement from ${loanId.toString()}`,
+      );
+
+      const result: DisbursementResult = {
+        transferId: transferId.toString(),
+        disbursedAmount: disbursementAmount,
+        targetAccountId,
+        loanAccountId: loanId,
+        timestamp: new Date(),
+      };
+
+      logger.info('Loan disbursement completed successfully', {
+        transferId: result.transferId,
+        disbursedAmount: result.disbursedAmount.toString(),
+        loanId: loanId.toString(),
+        targetAccountId: targetAccountId.toString(),
+      });
+
+      return result;
+    } catch (error) {
+      logger.error('Failed to disburse loan', {
+        loanId: loanId.toString(),
+        targetAccountId: targetAccountId.toString(),
+        amount: amount?.toString(),
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
   }
 }

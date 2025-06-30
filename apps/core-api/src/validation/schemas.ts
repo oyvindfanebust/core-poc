@@ -136,6 +136,17 @@ export const CustomerIdParamSchema = z.object({
   customerId: CustomerIdSchema,
 });
 
+// Loan disbursement validation
+export const LoanDisbursementSchema = z.object({
+  targetAccountId: AccountIdSchema,
+  amount: MoneyAmountSchema.optional(),
+  description: z.string().max(200, 'Description cannot exceed 200 characters').optional(),
+});
+
+export const LoanIdParamSchema = z.object({
+  loanId: AccountIdSchema,
+});
+
 // Account name update schema
 export const UpdateAccountNameSchema = z.object({
   accountName: z
@@ -225,3 +236,5 @@ export type AccountTypeParam = z.infer<typeof AccountTypeParamSchema>;
 export type SEPATransferRequest = z.infer<typeof SEPATransferRequestSchema>;
 export type SEPABankInfo = z.infer<typeof SEPABankInfoSchema>;
 export type SEPACurrencyParam = z.infer<typeof SEPACurrencyParamSchema>;
+export type LoanDisbursementRequest = z.infer<typeof LoanDisbursementSchema>;
+export type LoanIdParam = z.infer<typeof LoanIdParamSchema>;

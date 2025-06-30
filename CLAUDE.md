@@ -5,9 +5,28 @@ Core banking system using TigerBeetle ledger, Node.js, TypeScript, and PostgreSQ
 ## Project Overview
 
 - **Domain**: Banking operations (accounts, transfers, loans, SEPA payments)
+- **Focus**: Account servicing operations (not loan origination/underwriting)
 - **Stack**: Node.js, TypeScript, TigerBeetle, PostgreSQL, Next.js
 - **Architecture**: Domain-driven design with clean separation of concerns
 - **Test Customer**: `CUSTOMER-ABC-123`
+
+### Banking Focus: Servicing vs Origination
+
+This system focuses on **account servicing** - the ongoing management of existing accounts and loans:
+
+- **Account Management**: Opening deposit/savings accounts, balance inquiries, statements
+- **Payment Processing**: Transfers, SEPA payments, transaction history
+- **Loan Servicing**: Payment collection, disbursements, amortization tracking
+- **Customer Service**: Account maintenance, transaction disputes, reporting
+
+**NOT in scope** (loan origination activities):
+- Credit scoring/underwriting
+- Loan application processing
+- Risk assessment/pricing
+- Document collection/verification
+- Regulatory approval workflows
+
+The system assumes loans are already approved and focuses on the operational aspects of running a bank's day-to-day account servicing operations.
 
 ## Essential Commands
 
@@ -57,18 +76,38 @@ npm run format:check     # Check formatting
 
 - [ ] `npm run build` - TypeScript compiles cleanly
 - [ ] `npm run lint` - No linting errors
-- [ ] `npm test` - All tests pass
+- [ ] `npm test` - All tests pass (see Test Requirements below)
 - [ ] Frontend changes: All translations added (en/no/sr)
 - [ ] API changes: Documentation updated
 - [ ] TodoWrite tasks: Marked complete
+
+### Test Requirements
+
+Some integration tests require backend services running:
+
+```bash
+# Start services before running tests
+docker-compose up -d
+npm run dev:backend &
+sleep 10
+
+# Then run tests
+npm test
+
+# Stop services after
+pkill -f "npm run dev:backend"
+```
+
+See TEST_GUIDE.md for detailed test instructions.
 
 ## Architecture Principles
 
 ### Data Storage
 
 - **TigerBeetle (ports 6000-6001)**: ALL financial transactions and balances
-- **PostgreSQL (port 5432)**: Metadata only, NEVER financial data
+- **PostgreSQL (port 5432)**: Metadata only, NEVER financial data  
 - **Configuration**: JSON files for system account mappings
+- **External Transaction Simulator (port 7006)**: Complete testing interface for external transfers and loan disbursements
 
 ### Design Patterns
 
@@ -98,11 +137,12 @@ npm run format:check     # Check formatting
 - `packages/domain/src/services/` - Domain services (accounts, transfers, loans)
 - `packages/domain/src/repositories/` - Data access interfaces
 
-### SEPA Implementation
+### External Transaction Simulation
 
-- `apps/core-api/src/controllers/sepa.controller.ts` - SEPA REST endpoints
+- `apps/core-api/src/controllers/sepa.controller.ts` - SEPA transfer endpoints  
+- `apps/core-api/src/controllers/loan-funding.controller.ts` - Loan disbursement endpoints
 - `packages/core-services/src/services/sepa-suspense-account.service.ts` - SEPA account management
-- `apps/sepa-mock-service/` - SEPA testing and simulation (port 7006)
+- `apps/sepa-mock-service/` - Complete external transaction simulator (port 7006)
 - `config/system-accounts.json` - System account mappings
 
 ### Application Entry Points
@@ -191,5 +231,5 @@ npm run format:check     # Check formatting
 - **7001**: Core API (main backend)
 - **7002**: Customer Frontend (Next.js)
 - **7003**: Batch Processor (background jobs)
-- **7006**: SEPA Mock Service (testing interface)
+- **7006**: External Transaction Simulator (SEPA Mock Service)
 - **5432**: PostgreSQL (metadata storage)

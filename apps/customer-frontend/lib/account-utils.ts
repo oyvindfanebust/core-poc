@@ -1,8 +1,8 @@
 import {
-  validateIBAN as validateIBANComprehensive,
-  validateBIC as validateBICComprehensive,
-  formatIBAN as formatIBANComprehensive,
-  extractCountryFromIBAN as extractCountryFromIBANComprehensive,
+  validateIBAN,
+  validateBIC,
+  formatIBAN,
+  extractCountryFromIBAN,
   validateSEPAIBAN,
   getIBANDisplayInfo,
 } from '@core-poc/shared';
@@ -58,9 +58,7 @@ export function maskAccountId(accountId: string): string {
 /**
  * Validate IBAN format with comprehensive checksum verification
  */
-export function validateIBAN(iban: string): boolean {
-  return validateIBANComprehensive(iban);
-}
+export { validateIBAN };
 
 /**
  * Validate IBAN specifically for SEPA transfers
@@ -79,23 +77,22 @@ export function getIBANInfo(iban: string) {
 /**
  * Validate BIC format
  */
-export function validateBIC(bic: string): boolean {
-  return validateBICComprehensive(bic);
-}
+export { validateBIC };
 
 /**
  * Format IBAN with spaces for display
  */
-export function formatIBAN(iban: string): string {
-  return formatIBANComprehensive(iban);
-}
+export { formatIBAN };
 
 /**
  * Extract country code from IBAN
  */
-export function extractCountryFromIBAN(iban: string): string {
-  return extractCountryFromIBANComprehensive(iban);
-}
+export { extractCountryFromIBAN };
+
+/**
+ * Re-export SEPA validation functions
+ */
+export { validateSEPAIBAN, getIBANDisplayInfo };
 
 /**
  * Check if currency is supported for SEPA transfers

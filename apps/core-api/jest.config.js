@@ -69,6 +69,7 @@ export default {
         '^.+\\.ts$': ['ts-jest', { useESM: true }],
       },
       maxWorkers: 4, // Can run in parallel since using mocks
+      setupFiles: ['<rootDir>/tests/setup-fast-tests.js'], // Environment setup for fast tests
     },
     {
       displayName: 'e2e',

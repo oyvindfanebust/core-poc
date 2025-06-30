@@ -1,5 +1,10 @@
 import { PaymentPlanRepository, logger, PaymentPlan } from '@core-poc/core-services';
-import { AccountService, PaymentProcessingService, AccountId } from '@core-poc/domain';
+import {
+  AccountService,
+  PaymentProcessingService,
+  PaymentProcessingResult,
+  AccountId,
+} from '@core-poc/domain';
 
 export class PaymentPlanJob {
   private isRunning = false;
@@ -26,7 +31,8 @@ export class PaymentPlanJob {
       logger.info('Starting scheduled payment processing');
 
       // Use the payment processing service to handle all the logic
-      const results = await this.paymentProcessingService.processScheduledPayments();
+      const results: PaymentProcessingResult[] =
+        await this.paymentProcessingService.processScheduledPayments();
 
       const successful = results.filter(r => r.paymentProcessed).length;
       const failed = results.filter(r => !r.paymentProcessed).length;

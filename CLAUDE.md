@@ -20,6 +20,7 @@ This system focuses on **account servicing** - the ongoing management of existin
 - **Customer Service**: Account maintenance, transaction disputes, reporting
 
 **NOT in scope** (loan origination activities):
+
 - Credit scoring/underwriting
 - Loan application processing
 - Risk assessment/pricing
@@ -105,7 +106,7 @@ See TEST_GUIDE.md for detailed test instructions.
 ### Data Storage
 
 - **TigerBeetle (ports 6000-6001)**: ALL financial transactions and balances
-- **PostgreSQL (port 5432)**: Metadata only, NEVER financial data  
+- **PostgreSQL (port 5432)**: Metadata only, NEVER financial data
 - **Configuration**: JSON files for system account mappings
 - **External Transaction Simulator (port 7006)**: Complete testing interface for external transfers and loan disbursements
 
@@ -139,7 +140,7 @@ See TEST_GUIDE.md for detailed test instructions.
 
 ### External Transaction Simulation
 
-- `apps/core-api/src/controllers/sepa.controller.ts` - SEPA transfer endpoints  
+- `apps/core-api/src/controllers/sepa.controller.ts` - SEPA transfer endpoints
 - `apps/core-api/src/controllers/loan-funding.controller.ts` - Loan disbursement endpoints
 - `packages/core-services/src/services/sepa-suspense-account.service.ts` - SEPA account management
 - `apps/sepa-mock-service/` - Complete external transaction simulator (port 7006)

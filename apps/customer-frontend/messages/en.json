@@ -13,7 +13,9 @@
     "error": "Error",
     "success": "Success",
     "currency": "Currency",
-    "account": "Account"
+    "account": "Account",
+    "viewFull": "View Full",
+    "hide": "Hide"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -203,6 +205,7 @@
     "sentTo": "Sent to",
     "transferButton": "Transfer",
     "viewFullId": "View full account ID",
+    "hideFullId": "Hide full account ID",
     "transactionReference": "Reference",
     "viewDetails": "View details",
     "accountNickname": "Account nickname",
@@ -232,6 +235,7 @@
   "tooltips": {
     "accountId": "Your unique account identifier",
     "transactionId": "Transaction reference number",
+    "customerId": "Your unique customer identifier",
     "balance": "Current available balance"
   }
 }

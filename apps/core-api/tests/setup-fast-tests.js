@@ -1,9 +1,9 @@
 /**
  * Setup file for fast integration tests
- * 
+ *
  * Sets environment variables to ensure fast tests cannot accidentally
  * connect to external services like TigerBeetle, PostgreSQL, or RabbitMQ.
- * 
+ *
  * Fast tests should use mocks only and fail if they try to make external calls.
  */
 

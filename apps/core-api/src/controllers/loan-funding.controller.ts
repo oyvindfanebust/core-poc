@@ -46,6 +46,7 @@ export class LoanFundingController {
       // Parse amount if provided
       let amount: Money | undefined;
       if (disbursementRequest.amount) {
+        // Amount is expected to be in cents (smallest currency unit)
         // For simplicity, we'll use EUR as default currency
         // In a real implementation, we'd get this from the loan account metadata
         amount = new Money(BigInt(disbursementRequest.amount), 'EUR');

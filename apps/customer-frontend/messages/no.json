@@ -13,7 +13,9 @@
     "error": "Feil",
     "success": "Suksess",
     "currency": "Valuta",
-    "account": "Konto"
+    "account": "Konto",
+    "viewFull": "Vis full",
+    "hide": "Skjul"
   },
   "navigation": {
     "dashboard": "Oversikt",
@@ -203,6 +205,7 @@
     "sentTo": "Sendt til",
     "transferButton": "Overfør",
     "viewFullId": "Vis full konto-ID",
+    "hideFullId": "Skjul full konto-ID",
     "transactionReference": "Referanse",
     "viewDetails": "Vis detaljer",
     "accountNickname": "Kontonavn",
@@ -232,6 +235,7 @@
   "tooltips": {
     "accountId": "Din unike kontoidentifikator",
     "transactionId": "Transaksjonsreferansenummer",
+    "customerId": "Din unike kundeidentifikator",
     "balance": "Nåværende tilgjengelig saldo"
   }
 }

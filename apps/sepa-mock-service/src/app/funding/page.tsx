@@ -7,6 +7,14 @@ import { useState, useEffect } from 'react';
 // eslint-disable-next-line import/no-unresolved
 import { coreApiClient, LoanDisbursementRequest, LoanFundingStatus } from '@/lib/core-api-client';
 
+interface AccountDetails {
+  accountId: string;
+  accountName: string;
+  accountType: string;
+  currency: string;
+  balance?: number;
+}
+
 export default function LoanFundingPage() {
   const [formData, setFormData] = useState({
     customerIdForLoans: 'CUSTOMER-ABC-123', // Default test customer
@@ -15,9 +23,9 @@ export default function LoanFundingPage() {
     amount: '',
     description: 'Loan disbursement',
   });
-  const [customerAccounts, setCustomerAccounts] = useState<any[]>([]);
-  const [loanAccounts, setLoanAccounts] = useState<any[]>([]);
-  const [depositAccounts, setDepositAccounts] = useState<any[]>([]);
+  const [customerAccounts, setCustomerAccounts] = useState<AccountDetails[]>([]);
+  const [loanAccounts, setLoanAccounts] = useState<AccountDetails[]>([]);
+  const [depositAccounts, setDepositAccounts] = useState<AccountDetails[]>([]);
   const [loanStatus, setLoanStatus] = useState<LoanFundingStatus | null>(null);
   const [loadingAccounts, setLoadingAccounts] = useState(false);
   const [loadingLoanStatus, setLoadingLoanStatus] = useState(false);
@@ -33,6 +41,7 @@ export default function LoanFundingPage() {
     if (formData.customerIdForLoans) {
       loadCustomerAccounts(formData.customerIdForLoans);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleInputChange = (field: string, value: string) => {
@@ -117,7 +126,7 @@ export default function LoanFundingPage() {
     }
   };
 
-  const formatAccountDisplay = (account: any): string => {
+  const formatAccountDisplay = (account: AccountDetails): string => {
     const name = account.accountName || 'Unnamed Account';
     const currency = account.currency;
     const id = account.accountId;
@@ -127,6 +136,7 @@ export default function LoanFundingPage() {
 
   const formatAmount = (amountStr: string): string => {
     const amount = parseFloat(amountStr);
+    // API returns amounts in cents, so we need to convert to currency units
     return (amount / 100).toFixed(2);
   };
 
@@ -142,7 +152,9 @@ export default function LoanFundingPage() {
 
       const disbursementRequest: LoanDisbursementRequest = {
         targetAccountId: formData.targetAccountId,
-        amount: formData.amount || undefined,
+        amount: formData.amount
+          ? Math.round(parseFloat(formData.amount) * 100).toString()
+          : undefined,
         description: formData.description || undefined,
       };
 

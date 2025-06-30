@@ -13,17 +13,17 @@ The test suite uses containerized services to ensure consistent and reproducible
 
 ### Required Services
 
-| Service | Container | Test Port | Dev Port | Management |
-| ------- | --------- | --------- | -------- | ---------- |
-| PostgreSQL | `postgres:15-alpine` | 5433 | 5432 | Auto-managed by Jest |
-| TigerBeetle | `ghcr.io/tigerbeetle/tigerbeetle:0.16.44` | 6001 | 6000 | Manual start required |
-| RabbitMQ | Included in docker-compose | Default | Default | Manual start required |
+| Service     | Container                                 | Test Port | Dev Port | Management            |
+| ----------- | ----------------------------------------- | --------- | -------- | --------------------- |
+| PostgreSQL  | `postgres:15-alpine`                      | 5433      | 5432     | Auto-managed by Jest  |
+| TigerBeetle | `ghcr.io/tigerbeetle/tigerbeetle:0.16.44` | 6001      | 6000     | Manual start required |
+| RabbitMQ    | Included in docker-compose                | Default   | Default  | Manual start required |
 
 ### Backend Services
 
-| Service | Port | Description |
-| ------- | ---- | ----------- |
-| Core API | 7001 | Main backend API |
+| Service         | Port | Description              |
+| --------------- | ---- | ------------------------ |
+| Core API        | 7001 | Main backend API         |
 | Batch Processor | 7003 | Background job processor |
 
 ## Quick Start
@@ -64,23 +64,27 @@ npm test --workspace=@core-poc/domain
 ## Test Categories
 
 ### 1. Unit Tests
+
 - **Location**: `*/tests/unit/**/*.test.ts`
 - **Requirements**: None (can run standalone)
 - **Command**: `npm run test:unit`
 
 ### 2. Fast Integration Tests
+
 - **Location**: `*/tests/integration/fast-*.test.ts`
-- **Requirements**: 
+- **Requirements**:
   - System accounts tests require Core API (port 7001)
   - Other fast tests use mocks
 - **Command**: `npm test -- --testNamePattern="fast-"`
 
 ### 3. Integration Tests
+
 - **Location**: `*/tests/integration/*.test.ts` (non-fast)
 - **Requirements**: Full infrastructure (PostgreSQL, TigerBeetle, RabbitMQ)
 - **Command**: `npm run test:integration`
 
 ### 4. End-to-End Tests
+
 - **Location**: `*/tests/e2e/**/*.test.ts`
 - **Requirements**: All services running
 - **Command**: `npm run test:e2e`
@@ -89,14 +93,14 @@ npm test --workspace=@core-poc/domain
 
 ### Test Container Commands
 
-| Command | Description |
-| ------- | ----------- |
-| `npm run docker:test:up` | Start PostgreSQL + TigerBeetle test containers |
-| `npm run docker:test:down` | Stop all test containers |
-| `npm run docker:tigerbeetle:up` | Start TigerBeetle test container only |
-| `npm run docker:tigerbeetle:down` | Stop TigerBeetle test container only |
-| `npm run docker:dev:up` | Start development containers |
-| `npm run docker:dev:down` | Stop development containers |
+| Command                           | Description                                    |
+| --------------------------------- | ---------------------------------------------- |
+| `npm run docker:test:up`          | Start PostgreSQL + TigerBeetle test containers |
+| `npm run docker:test:down`        | Stop all test containers                       |
+| `npm run docker:tigerbeetle:up`   | Start TigerBeetle test container only          |
+| `npm run docker:tigerbeetle:down` | Stop TigerBeetle test container only           |
+| `npm run docker:dev:up`           | Start development containers                   |
+| `npm run docker:dev:down`         | Stop development containers                    |
 
 ### Manual Container Management
 
@@ -177,15 +181,15 @@ For CI/CD pipelines, start services as part of the test job:
 ```yaml
 - name: Start Infrastructure
   run: docker-compose up -d
-  
+
 - name: Start Backend Services
   run: |
     npm run dev:backend &
     sleep 10
-    
+
 - name: Run Tests
   run: npm test
-  
+
 - name: Stop Services
   run: |
     pkill -f "npm run dev:backend" || true

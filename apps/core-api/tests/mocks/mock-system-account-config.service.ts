@@ -2,7 +2,7 @@ import { SystemAccountConfigService, SystemAccountEntry, Currency } from '@core-
 
 /**
  * Mock implementation of SystemAccountConfigService for fast testing
- * 
+ *
  * Provides predictable test data without file system dependencies
  * Mimics the same interface as the real service but with in-memory data
  */
@@ -14,115 +14,114 @@ export class MockSystemAccountConfigService extends SystemAccountConfigService {
   };
 
   private accountsData: Record<string, SystemAccountEntry> = {
-      // Core system accounts
-      'SYSTEM-SUSPENSE-OUT': {
-        tigerBeetleId: '1000000001',
-        accountType: 'OUTGOING_SUSPENSE',
-        currency: 'EUR' as Currency,
-        description: 'General outgoing transfer suspense account for EUR transactions',
-        createdAt: '2024-01-01T12:00:00.000Z',
-      },
-      'SYSTEM-SUSPENSE-IN': {
-        tigerBeetleId: '1000000002',
-        accountType: 'INCOMING_SUSPENSE',
-        currency: 'EUR' as Currency,
-        description: 'General incoming transfer suspense account for EUR transactions',
-        createdAt: '2024-01-01T12:00:00.000Z',
-      },
-      'SYSTEM-CLEARING': {
-        tigerBeetleId: '1000000003',
-        accountType: 'CLEARING',
-        currency: 'EUR' as Currency,
-        description: 'General clearing account for EUR transactions',
-        createdAt: '2024-01-01T12:00:00.000Z',
-      },
-      // SEPA accounts for all currencies
-      'SEPA-OUT-SUSPENSE-EUR': {
-        tigerBeetleId: '2000000001',
-        accountType: 'SEPA_OUTGOING_SUSPENSE',
-        currency: 'EUR' as Currency,
-        description: 'SEPA outgoing suspense account for EUR',
-        createdAt: '2024-01-01T12:00:00.000Z',
-      },
-      'SEPA-OUT-SUSPENSE-NOK': {
-        tigerBeetleId: '2000000002',
-        accountType: 'SEPA_OUTGOING_SUSPENSE',
-        currency: 'NOK' as Currency,
-        description: 'SEPA outgoing suspense account for NOK',
-        createdAt: '2024-01-01T12:00:00.000Z',
-      },
-      'SEPA-OUT-SUSPENSE-SEK': {
-        tigerBeetleId: '2000000003',
-        accountType: 'SEPA_OUTGOING_SUSPENSE',
-        currency: 'SEK' as Currency,
-        description: 'SEPA outgoing suspense account for SEK',
-        createdAt: '2024-01-01T12:00:00.000Z',
-      },
-      'SEPA-OUT-SUSPENSE-DKK': {
-        tigerBeetleId: '2000000004',
-        accountType: 'SEPA_OUTGOING_SUSPENSE',
-        currency: 'DKK' as Currency,
-        description: 'SEPA outgoing suspense account for DKK',
-        createdAt: '2024-01-01T12:00:00.000Z',
-      },
-      'SEPA-IN-SUSPENSE-EUR': {
-        tigerBeetleId: '2000000005',
-        accountType: 'SEPA_INCOMING_SUSPENSE',
-        currency: 'EUR' as Currency,
-        description: 'SEPA incoming suspense account for EUR',
-        createdAt: '2024-01-01T12:00:00.000Z',
-      },
-      'SEPA-IN-SUSPENSE-NOK': {
-        tigerBeetleId: '2000000006',
-        accountType: 'SEPA_INCOMING_SUSPENSE',
-        currency: 'NOK' as Currency,
-        description: 'SEPA incoming suspense account for NOK',
-        createdAt: '2024-01-01T12:00:00.000Z',
-      },
-      'SEPA-IN-SUSPENSE-SEK': {
-        tigerBeetleId: '2000000007',
-        accountType: 'SEPA_INCOMING_SUSPENSE',
-        currency: 'SEK' as Currency,
-        description: 'SEPA incoming suspense account for SEK',
-        createdAt: '2024-01-01T12:00:00.000Z',
-      },
-      'SEPA-IN-SUSPENSE-DKK': {
-        tigerBeetleId: '2000000008',
-        accountType: 'SEPA_INCOMING_SUSPENSE',
-        currency: 'DKK' as Currency,
-        description: 'SEPA incoming suspense account for DKK',
-        createdAt: '2024-01-01T12:00:00.000Z',
-      },
-      'SEPA-SETTLEMENT-EUR': {
-        tigerBeetleId: '2000000009',
-        accountType: 'SEPA_SETTLEMENT',
-        currency: 'EUR' as Currency,
-        description: 'SEPA settlement account for EUR',
-        createdAt: '2024-01-01T12:00:00.000Z',
-      },
-      'SEPA-SETTLEMENT-NOK': {
-        tigerBeetleId: '2000000010',
-        accountType: 'SEPA_SETTLEMENT',
-        currency: 'NOK' as Currency,
-        description: 'SEPA settlement account for NOK',
-        createdAt: '2024-01-01T12:00:00.000Z',
-      },
-      'SEPA-SETTLEMENT-SEK': {
-        tigerBeetleId: '2000000011',
-        accountType: 'SEPA_SETTLEMENT',
-        currency: 'SEK' as Currency,
-        description: 'SEPA settlement account for SEK',
-        createdAt: '2024-01-01T12:00:00.000Z',
-      },
-      'SEPA-SETTLEMENT-DKK': {
-        tigerBeetleId: '2000000012',
-        accountType: 'SEPA_SETTLEMENT',
-        currency: 'DKK' as Currency,
-        description: 'SEPA settlement account for DKK',
-        createdAt: '2024-01-01T12:00:00.000Z',
-      },
-    };
-
+    // Core system accounts
+    'SYSTEM-SUSPENSE-OUT': {
+      tigerBeetleId: '1000000001',
+      accountType: 'OUTGOING_SUSPENSE',
+      currency: 'EUR' as Currency,
+      description: 'General outgoing transfer suspense account for EUR transactions',
+      createdAt: '2024-01-01T12:00:00.000Z',
+    },
+    'SYSTEM-SUSPENSE-IN': {
+      tigerBeetleId: '1000000002',
+      accountType: 'INCOMING_SUSPENSE',
+      currency: 'EUR' as Currency,
+      description: 'General incoming transfer suspense account for EUR transactions',
+      createdAt: '2024-01-01T12:00:00.000Z',
+    },
+    'SYSTEM-CLEARING': {
+      tigerBeetleId: '1000000003',
+      accountType: 'CLEARING',
+      currency: 'EUR' as Currency,
+      description: 'General clearing account for EUR transactions',
+      createdAt: '2024-01-01T12:00:00.000Z',
+    },
+    // SEPA accounts for all currencies
+    'SEPA-OUT-SUSPENSE-EUR': {
+      tigerBeetleId: '2000000001',
+      accountType: 'SEPA_OUTGOING_SUSPENSE',
+      currency: 'EUR' as Currency,
+      description: 'SEPA outgoing suspense account for EUR',
+      createdAt: '2024-01-01T12:00:00.000Z',
+    },
+    'SEPA-OUT-SUSPENSE-NOK': {
+      tigerBeetleId: '2000000002',
+      accountType: 'SEPA_OUTGOING_SUSPENSE',
+      currency: 'NOK' as Currency,
+      description: 'SEPA outgoing suspense account for NOK',
+      createdAt: '2024-01-01T12:00:00.000Z',
+    },
+    'SEPA-OUT-SUSPENSE-SEK': {
+      tigerBeetleId: '2000000003',
+      accountType: 'SEPA_OUTGOING_SUSPENSE',
+      currency: 'SEK' as Currency,
+      description: 'SEPA outgoing suspense account for SEK',
+      createdAt: '2024-01-01T12:00:00.000Z',
+    },
+    'SEPA-OUT-SUSPENSE-DKK': {
+      tigerBeetleId: '2000000004',
+      accountType: 'SEPA_OUTGOING_SUSPENSE',
+      currency: 'DKK' as Currency,
+      description: 'SEPA outgoing suspense account for DKK',
+      createdAt: '2024-01-01T12:00:00.000Z',
+    },
+    'SEPA-IN-SUSPENSE-EUR': {
+      tigerBeetleId: '2000000005',
+      accountType: 'SEPA_INCOMING_SUSPENSE',
+      currency: 'EUR' as Currency,
+      description: 'SEPA incoming suspense account for EUR',
+      createdAt: '2024-01-01T12:00:00.000Z',
+    },
+    'SEPA-IN-SUSPENSE-NOK': {
+      tigerBeetleId: '2000000006',
+      accountType: 'SEPA_INCOMING_SUSPENSE',
+      currency: 'NOK' as Currency,
+      description: 'SEPA incoming suspense account for NOK',
+      createdAt: '2024-01-01T12:00:00.000Z',
+    },
+    'SEPA-IN-SUSPENSE-SEK': {
+      tigerBeetleId: '2000000007',
+      accountType: 'SEPA_INCOMING_SUSPENSE',
+      currency: 'SEK' as Currency,
+      description: 'SEPA incoming suspense account for SEK',
+      createdAt: '2024-01-01T12:00:00.000Z',
+    },
+    'SEPA-IN-SUSPENSE-DKK': {
+      tigerBeetleId: '2000000008',
+      accountType: 'SEPA_INCOMING_SUSPENSE',
+      currency: 'DKK' as Currency,
+      description: 'SEPA incoming suspense account for DKK',
+      createdAt: '2024-01-01T12:00:00.000Z',
+    },
+    'SEPA-SETTLEMENT-EUR': {
+      tigerBeetleId: '2000000009',
+      accountType: 'SEPA_SETTLEMENT',
+      currency: 'EUR' as Currency,
+      description: 'SEPA settlement account for EUR',
+      createdAt: '2024-01-01T12:00:00.000Z',
+    },
+    'SEPA-SETTLEMENT-NOK': {
+      tigerBeetleId: '2000000010',
+      accountType: 'SEPA_SETTLEMENT',
+      currency: 'NOK' as Currency,
+      description: 'SEPA settlement account for NOK',
+      createdAt: '2024-01-01T12:00:00.000Z',
+    },
+    'SEPA-SETTLEMENT-SEK': {
+      tigerBeetleId: '2000000011',
+      accountType: 'SEPA_SETTLEMENT',
+      currency: 'SEK' as Currency,
+      description: 'SEPA settlement account for SEK',
+      createdAt: '2024-01-01T12:00:00.000Z',
+    },
+    'SEPA-SETTLEMENT-DKK': {
+      tigerBeetleId: '2000000012',
+      accountType: 'SEPA_SETTLEMENT',
+      currency: 'DKK' as Currency,
+      description: 'SEPA settlement account for DKK',
+      createdAt: '2024-01-01T12:00:00.000Z',
+    },
+  };
 
   constructor() {
     // Call parent constructor with undefined path to avoid file system operations
@@ -133,12 +132,12 @@ export class MockSystemAccountConfigService extends SystemAccountConfigService {
 
   private initializeMockData(): void {
     const currentTime = new Date().toISOString();
-    
+
     // Update all accounts to have current timestamps
     Object.values(this.accountsData).forEach(account => {
       account.createdAt = currentTime;
     });
-    
+
     this.mockConfig.accounts = this.accountsData;
     this.mockConfig.lastUpdated = currentTime;
   }
@@ -210,7 +209,11 @@ export class MockSystemAccountConfigService extends SystemAccountConfigService {
   /**
    * Get configuration metadata
    */
-  override getConfigMetadata(): { version: string; lastUpdated: string; accountCount: number } | null {
+  override getConfigMetadata(): {
+    version: string;
+    lastUpdated: string;
+    accountCount: number;
+  } | null {
     return {
       version: this.mockConfig.version,
       lastUpdated: this.mockConfig.lastUpdated,

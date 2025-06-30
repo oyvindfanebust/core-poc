@@ -1,6 +1,17 @@
 'use client';
 
-import { Building2, Send, Activity, AlertCircle, TrendingUp, Euro, Banknote } from 'lucide-react';
+import {
+  Building2,
+  Send,
+  Activity,
+  AlertCircle,
+  TrendingUp,
+  Euro,
+  Banknote,
+  DollarSign,
+  Globe,
+  History,
+} from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 // eslint-disable-next-line import/no-unresolved
@@ -146,7 +157,7 @@ export default function HomePage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {/* Simulate Incoming Transfer */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center mb-4">
@@ -198,6 +209,40 @@ export default function HomePage() {
           </a>
         </div>
 
+        {/* ACH Transfers */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center mb-4">
+            <DollarSign className="h-8 w-8 text-orange-600 mr-3" />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">ACH Transfers</h3>
+              <p className="text-sm text-gray-600">Simulate US domestic ACH credit transfers</p>
+            </div>
+          </div>
+          <a
+            href="/ach"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700"
+          >
+            Simulate ACH
+          </a>
+        </div>
+
+        {/* Wire Transfers */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center mb-4">
+            <Globe className="h-8 w-8 text-red-600 mr-3" />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Wire Transfers</h3>
+              <p className="text-sm text-gray-600">Simulate international wire transfers</p>
+            </div>
+          </div>
+          <a
+            href="/wire"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
+          >
+            Simulate Wire
+          </a>
+        </div>
+
         {/* Loan Funding */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center mb-4">
@@ -212,6 +257,23 @@ export default function HomePage() {
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
           >
             Manage Disbursements
+          </a>
+        </div>
+
+        {/* Transaction History */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center mb-4">
+            <History className="h-8 w-8 text-gray-600 mr-3" />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Transaction History</h3>
+              <p className="text-sm text-gray-600">View and analyze all simulated transactions</p>
+            </div>
+          </div>
+          <a
+            href="/history"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700"
+          >
+            View History
           </a>
         </div>
       </div>
@@ -244,18 +306,30 @@ export default function HomePage() {
         <h3 className="text-lg font-medium text-blue-900 mb-2">Getting Started</h3>
         <div className="text-sm text-blue-700 space-y-2">
           <p>
-            • <strong>Incoming Transfers:</strong> Simulate external banks sending money to customer
-            accounts
+            • <strong>SEPA Incoming:</strong> Simulate European banks sending money to customer
+            accounts (EUR, NOK, SEK, DKK)
           </p>
           <p>
-            • <strong>Outgoing Transfers:</strong> Process SEPA transfers initiated from the
-            customer frontend
+            • <strong>SEPA Outgoing:</strong> Process SEPA transfers initiated from the customer
+            frontend
+          </p>
+          <p>
+            • <strong>ACH Transfers:</strong> Simulate US domestic ACH credit transfers with major
+            banks
+          </p>
+          <p>
+            • <strong>Wire Transfers:</strong> Simulate international wire transfers via SWIFT
+            network
           </p>
           <p>
             • <strong>Balances:</strong> Monitor suspense account positions and settlement status
           </p>
           <p>
             • <strong>Loan Funding:</strong> Disburse loan proceeds to customer deposit accounts
+          </p>
+          <p>
+            • <strong>Transaction History:</strong> View, search, and export all simulated external
+            transactions
           </p>
           <p>
             • Use the customer frontend at{' '}

@@ -1,14 +1,14 @@
-import { 
-  SEPASuspenseAccountService, 
-  TigerBeetleService, 
+import {
+  SEPASuspenseAccountService,
+  TigerBeetleService,
   SystemAccountConfigService,
   SEPAAccountCreationResult,
-  SEPAInitializationResult
+  SEPAInitializationResult,
 } from '@core-poc/core-services';
 
 /**
  * Mock implementation of SEPASuspenseAccountService for fast testing
- * 
+ *
  * Provides predictable responses without TigerBeetle dependencies
  * Simulates all SEPA account operations in-memory
  */
@@ -29,7 +29,7 @@ export class MockSEPASuspenseAccountService extends SEPASuspenseAccountService {
   private initializeMockAccounts(): void {
     const currencies = ['EUR', 'NOK', 'SEK', 'DKK'] as const;
     const accountTypes = ['OUTGOING_SUSPENSE', 'INCOMING_SUSPENSE', 'SETTLEMENT'] as const;
-    
+
     let numericId = 2000000001n;
 
     for (const currency of currencies) {
@@ -68,7 +68,7 @@ export class MockSEPASuspenseAccountService extends SEPASuspenseAccountService {
    */
   override async initializeAllSEPAAccounts(): Promise<SEPAInitializationResult> {
     const created = Array.from(this.mockAccounts.values());
-    
+
     return {
       created,
       errors: [],
@@ -86,7 +86,7 @@ export class MockSEPASuspenseAccountService extends SEPASuspenseAccountService {
   ): Promise<SEPAAccountCreationResult> {
     const accountId = this.getMockAccountId(type, currency);
     const mockResult = this.mockAccounts.get(accountId);
-    
+
     if (!mockResult) {
       throw new Error(`Mock account not found: ${accountId}`);
     }
@@ -103,7 +103,7 @@ export class MockSEPASuspenseAccountService extends SEPASuspenseAccountService {
   ): Promise<{ accountId: string; numericId: bigint }> {
     const accountId = this.getMockAccountId(type, currency);
     const mockResult = this.mockAccounts.get(accountId);
-    
+
     if (!mockResult) {
       throw new Error(`Mock SEPA account not found: ${accountId}`);
     }
@@ -123,7 +123,7 @@ export class MockSEPASuspenseAccountService extends SEPASuspenseAccountService {
     configured: string[];
   }> {
     const configured = Array.from(this.mockAccounts.keys());
-    
+
     return {
       valid: true,
       missing: [],

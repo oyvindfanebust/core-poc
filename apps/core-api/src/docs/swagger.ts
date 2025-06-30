@@ -427,6 +427,290 @@ const options: swaggerJSDoc.Options = {
           },
           required: ['accountId', 'totalPayments', 'totalInterest', 'schedule'],
         },
+        ACHCreditRequest: {
+          type: 'object',
+          properties: {
+            targetAccountId: {
+              type: 'string',
+              description: 'Target account identifier for credit',
+              example: '1234567890123456789',
+            },
+            amount: {
+              type: 'string',
+              description: 'Transaction amount in cents',
+              example: '250000',
+            },
+            currency: {
+              type: 'string',
+              enum: ['USD'],
+              description: 'Transaction currency (ACH only supports USD)',
+              example: 'USD',
+            },
+            routingNumber: {
+              type: 'string',
+              pattern: '^[0-9]{9}$',
+              description: 'US bank routing number (9 digits)',
+              example: '021000021',
+            },
+            originatingBankName: {
+              type: 'string',
+              minLength: 1,
+              maxLength: 100,
+              description: 'Name of the originating bank',
+              example: 'JPMorgan Chase Bank, N.A.',
+            },
+            reference: {
+              type: 'string',
+              minLength: 1,
+              maxLength: 140,
+              description: 'Transaction reference description',
+              example: 'Payroll deposit for employee #12345',
+            },
+            urgency: {
+              type: 'string',
+              enum: ['STANDARD', 'SAME_DAY', 'EXPRESS'],
+              description: 'Processing urgency level',
+              example: 'STANDARD',
+            },
+          },
+          required: [
+            'targetAccountId',
+            'amount',
+            'currency',
+            'routingNumber',
+            'originatingBankName',
+            'reference',
+            'urgency',
+          ],
+        },
+        WireCreditRequest: {
+          type: 'object',
+          properties: {
+            targetAccountId: {
+              type: 'string',
+              description: 'Target account identifier for credit',
+              example: '1234567890123456789',
+            },
+            amount: {
+              type: 'string',
+              description: 'Transaction amount in cents',
+              example: '750000',
+            },
+            currency: {
+              type: 'string',
+              enum: ['EUR', 'USD', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF'],
+              description: 'Transaction currency',
+              example: 'EUR',
+            },
+            swiftCode: {
+              type: 'string',
+              minLength: 8,
+              maxLength: 11,
+              pattern: '^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$',
+              description: 'SWIFT/BIC code of originating bank',
+              example: 'DEUTDEFF',
+            },
+            originatingBankName: {
+              type: 'string',
+              minLength: 1,
+              maxLength: 100,
+              description: 'Name of the originating bank',
+              example: 'Deutsche Bank AG',
+            },
+            correspondentBank: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Correspondent bank (optional)',
+              example: 'Deutsche Bank Trust Company Americas',
+            },
+            reference: {
+              type: 'string',
+              minLength: 1,
+              maxLength: 140,
+              description: 'Transaction reference description',
+              example: 'International business payment - Invoice #INV-2024-001',
+            },
+            urgency: {
+              type: 'string',
+              enum: ['STANDARD', 'EXPRESS', 'PRIORITY'],
+              description: 'Processing urgency level',
+              example: 'STANDARD',
+            },
+          },
+          required: [
+            'targetAccountId',
+            'amount',
+            'currency',
+            'swiftCode',
+            'originatingBankName',
+            'reference',
+            'urgency',
+          ],
+        },
+        ExternalTransactionResponse: {
+          type: 'object',
+          properties: {
+            transactionId: {
+              type: 'string',
+              description: 'Unique transaction identifier',
+              example: 'ACH-STANDARD-1234567890-abc123',
+            },
+            status: {
+              type: 'string',
+              enum: ['SUCCESS', 'FAILED'],
+              description: 'Transaction processing status',
+              example: 'SUCCESS',
+            },
+            amount: {
+              type: 'string',
+              description: 'Transaction amount in cents',
+              example: '250000',
+            },
+            currency: {
+              type: 'string',
+              description: 'Transaction currency',
+              example: 'USD',
+            },
+            targetAccountId: {
+              type: 'string',
+              description: 'Target account identifier',
+              example: '1234567890123456789',
+            },
+            timestamp: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Transaction processing timestamp',
+              example: '2024-01-01T12:00:00.000Z',
+            },
+            estimatedSettlement: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Estimated settlement date/time',
+              example: '2024-01-03T12:00:00.000Z',
+            },
+            errorDetails: {
+              type: 'object',
+              description: 'Error details (only present when status is FAILED)',
+              properties: {
+                code: {
+                  type: 'string',
+                  description: 'Error code',
+                  example: 'ACH_PROCESSING_FAILED',
+                },
+                message: {
+                  type: 'string',
+                  description: 'Error message',
+                  example: 'ACH network temporarily unavailable',
+                },
+                retryable: {
+                  type: 'boolean',
+                  description: 'Whether the transaction can be retried',
+                  example: true,
+                },
+              },
+            },
+          },
+          required: [
+            'transactionId',
+            'status',
+            'amount',
+            'currency',
+            'targetAccountId',
+            'timestamp',
+          ],
+        },
+        TransactionStatusResponse: {
+          type: 'object',
+          properties: {
+            transactionId: {
+              type: 'string',
+              description: 'Unique transaction identifier',
+              example: 'WIRE-STANDARD-1234567890-xyz789',
+            },
+            status: {
+              type: 'string',
+              enum: ['SUCCESS', 'FAILED'],
+              description: 'Transaction status',
+              example: 'SUCCESS',
+            },
+            type: {
+              type: 'string',
+              enum: ['ACH_CREDIT', 'WIRE_CREDIT'],
+              description: 'Transaction type',
+              example: 'WIRE_CREDIT',
+            },
+            amount: {
+              type: 'string',
+              description: 'Transaction amount in cents',
+              example: '750000',
+            },
+            currency: {
+              type: 'string',
+              description: 'Transaction currency',
+              example: 'EUR',
+            },
+            targetAccountId: {
+              type: 'string',
+              description: 'Target account identifier',
+              example: '1234567890123456789',
+            },
+            originatingBank: {
+              type: 'string',
+              description: 'Name of the originating bank',
+              example: 'Deutsche Bank AG',
+            },
+            reference: {
+              type: 'string',
+              description: 'Transaction reference',
+              example: 'International business payment - Invoice #INV-2024-001',
+            },
+            timestamp: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Transaction processing timestamp',
+              example: '2024-01-01T12:00:00.000Z',
+            },
+            settlementDate: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Actual or estimated settlement date',
+              example: '2024-01-02T12:00:00.000Z',
+            },
+            errorDetails: {
+              type: 'object',
+              description: 'Error details (only present when status is FAILED)',
+              properties: {
+                code: {
+                  type: 'string',
+                  description: 'Error code',
+                  example: 'WIRE_PROCESSING_FAILED',
+                },
+                message: {
+                  type: 'string',
+                  description: 'Error message',
+                  example: 'SWIFT network processing error',
+                },
+                retryable: {
+                  type: 'boolean',
+                  description: 'Whether the transaction can be retried',
+                  example: true,
+                },
+              },
+            },
+          },
+          required: [
+            'transactionId',
+            'status',
+            'type',
+            'amount',
+            'currency',
+            'targetAccountId',
+            'originatingBank',
+            'reference',
+            'timestamp',
+            'settlementDate',
+          ],
+        },
         HealthResponse: {
           type: 'object',
           properties: {
@@ -1002,6 +1286,427 @@ const options: swaggerJSDoc.Options = {
                             code: 'invalid_string',
                           },
                         ],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            '500': {
+              description: 'Internal server error',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/Error',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      '/api/v1/external-transactions/ach-credit': {
+        post: {
+          tags: ['External Transactions'],
+          summary: 'Process ACH credit transaction',
+          description:
+            'Processes an incoming ACH credit transaction from an external bank. ACH transactions support multiple urgency levels with different settlement times.',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ACHCreditRequest',
+                },
+                examples: {
+                  standard: {
+                    summary: 'Standard ACH Credit (2 days settlement)',
+                    value: {
+                      targetAccountId: '1234567890123456789',
+                      amount: '250000',
+                      currency: 'USD',
+                      routingNumber: '021000021',
+                      originatingBankName: 'JPMorgan Chase Bank, N.A.',
+                      reference: 'Payroll deposit for employee #12345',
+                      urgency: 'STANDARD',
+                    },
+                  },
+                  sameDay: {
+                    summary: 'Same Day ACH Credit (6 hours settlement)',
+                    value: {
+                      targetAccountId: '1234567890123456789',
+                      amount: '100000',
+                      currency: 'USD',
+                      routingNumber: '021000021',
+                      originatingBankName: 'JPMorgan Chase Bank, N.A.',
+                      reference: 'Urgent vendor payment',
+                      urgency: 'SAME_DAY',
+                    },
+                  },
+                  express: {
+                    summary: 'Express ACH Credit (2 hours settlement)',
+                    value: {
+                      targetAccountId: '1234567890123456789',
+                      amount: '500000',
+                      currency: 'USD',
+                      routingNumber: '021000021',
+                      originatingBankName: 'JPMorgan Chase Bank, N.A.',
+                      reference: 'Emergency fund transfer',
+                      urgency: 'EXPRESS',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'ACH credit transaction processed successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/ExternalTransactionResponse',
+                  },
+                  examples: {
+                    success: {
+                      summary: 'Successful ACH credit transaction',
+                      value: {
+                        transactionId: 'ACH-STANDARD-1234567890-abc123',
+                        status: 'SUCCESS',
+                        amount: '250000',
+                        currency: 'USD',
+                        targetAccountId: '1234567890123456789',
+                        timestamp: '2024-01-01T12:00:00.000Z',
+                        estimatedSettlement: '2024-01-03T12:00:00.000Z',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            '400': {
+              description: 'Invalid request data or transaction failed',
+              content: {
+                'application/json': {
+                  schema: {
+                    oneOf: [
+                      { $ref: '#/components/schemas/Error' },
+                      { $ref: '#/components/schemas/ExternalTransactionResponse' },
+                    ],
+                  },
+                  examples: {
+                    validationError: {
+                      summary: 'Validation error',
+                      value: {
+                        error: 'Validation failed',
+                        details: [
+                          {
+                            field: 'routingNumber',
+                            message: 'Routing number must be exactly 9 digits',
+                            code: 'too_small',
+                          },
+                        ],
+                      },
+                    },
+                    transactionFailed: {
+                      summary: 'Transaction processing failed',
+                      value: {
+                        transactionId: 'ACH-STANDARD-1234567890-def456',
+                        status: 'FAILED',
+                        amount: '250000',
+                        currency: 'USD',
+                        targetAccountId: '1234567890123456789',
+                        timestamp: '2024-01-01T12:00:00.000Z',
+                        errorDetails: {
+                          code: 'ACH_PROCESSING_FAILED',
+                          message: 'ACH network temporarily unavailable',
+                          retryable: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            '500': {
+              description: 'Internal server error',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/Error',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      '/api/v1/external-transactions/wire-credit': {
+        post: {
+          tags: ['External Transactions'],
+          summary: 'Process Wire credit transaction',
+          description:
+            'Processes an incoming international wire transfer from an external bank. Wire transfers support multiple currencies and faster settlement than ACH.',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/WireCreditRequest',
+                },
+                examples: {
+                  standardEUR: {
+                    summary: 'Standard EUR Wire Transfer',
+                    value: {
+                      targetAccountId: '1234567890123456789',
+                      amount: '750000',
+                      currency: 'EUR',
+                      swiftCode: 'DEUTDEFF',
+                      originatingBankName: 'Deutsche Bank AG',
+                      correspondentBank: 'Deutsche Bank Trust Company Americas',
+                      reference: 'International business payment - Invoice #INV-2024-001',
+                      urgency: 'STANDARD',
+                    },
+                  },
+                  expressUSD: {
+                    summary: 'Express USD Wire Transfer',
+                    value: {
+                      targetAccountId: '1234567890123456789',
+                      amount: '1000000',
+                      currency: 'USD',
+                      swiftCode: 'CHASUS33',
+                      originatingBankName: 'JPMorgan Chase Bank, N.A.',
+                      reference: 'Urgent settlement payment',
+                      urgency: 'EXPRESS',
+                    },
+                  },
+                  priorityGBP: {
+                    summary: 'Priority GBP Wire Transfer',
+                    value: {
+                      targetAccountId: '1234567890123456789',
+                      amount: '500000',
+                      currency: 'GBP',
+                      swiftCode: 'BARCGB22',
+                      originatingBankName: 'Barclays Bank PLC',
+                      reference: 'Time-sensitive commercial transaction',
+                      urgency: 'PRIORITY',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Wire credit transaction processed successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/ExternalTransactionResponse',
+                  },
+                  examples: {
+                    success: {
+                      summary: 'Successful wire credit transaction',
+                      value: {
+                        transactionId: 'WIRE-STANDARD-1234567890-xyz789',
+                        status: 'SUCCESS',
+                        amount: '750000',
+                        currency: 'EUR',
+                        targetAccountId: '1234567890123456789',
+                        timestamp: '2024-01-01T12:00:00.000Z',
+                        estimatedSettlement: '2024-01-02T12:00:00.000Z',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            '400': {
+              description: 'Invalid request data or transaction failed',
+              content: {
+                'application/json': {
+                  schema: {
+                    oneOf: [
+                      { $ref: '#/components/schemas/Error' },
+                      { $ref: '#/components/schemas/ExternalTransactionResponse' },
+                    ],
+                  },
+                  examples: {
+                    validationError: {
+                      summary: 'Validation error',
+                      value: {
+                        error: 'Validation failed',
+                        details: [
+                          {
+                            field: 'swiftCode',
+                            message: 'SWIFT code must be in valid format',
+                            code: 'invalid_string',
+                          },
+                        ],
+                      },
+                    },
+                    transactionFailed: {
+                      summary: 'Transaction processing failed',
+                      value: {
+                        transactionId: 'WIRE-STANDARD-1234567890-failed1',
+                        status: 'FAILED',
+                        amount: '750000',
+                        currency: 'EUR',
+                        targetAccountId: '1234567890123456789',
+                        timestamp: '2024-01-01T12:00:00.000Z',
+                        errorDetails: {
+                          code: 'WIRE_PROCESSING_FAILED',
+                          message: 'SWIFT network processing error',
+                          retryable: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            '500': {
+              description: 'Internal server error',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/Error',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      '/api/v1/external-transactions/status/{transactionId}': {
+        get: {
+          tags: ['External Transactions'],
+          summary: 'Get transaction status',
+          description:
+            'Retrieves the current status and details of an external transaction by its unique transaction ID.',
+          parameters: [
+            {
+              name: 'transactionId',
+              in: 'path',
+              required: true,
+              schema: {
+                type: 'string',
+                pattern: '^(ACH|WIRE)-(STANDARD|SAME_DAY|EXPRESS|PRIORITY)-[0-9]+-[a-z0-9]+$',
+              },
+              description: 'Unique transaction identifier',
+              examples: {
+                achTransaction: {
+                  summary: 'ACH Transaction ID',
+                  value: 'ACH-STANDARD-1234567890-abc123',
+                },
+                wireTransaction: {
+                  summary: 'Wire Transaction ID',
+                  value: 'WIRE-EXPRESS-9876543210-xyz789',
+                },
+              },
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'Transaction status retrieved successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/TransactionStatusResponse',
+                  },
+                  examples: {
+                    successfulACH: {
+                      summary: 'Successful ACH Transaction Status',
+                      value: {
+                        transactionId: 'ACH-STANDARD-1234567890-abc123',
+                        status: 'SUCCESS',
+                        type: 'ACH_CREDIT',
+                        amount: '250000',
+                        currency: 'USD',
+                        targetAccountId: '1234567890123456789',
+                        originatingBank: 'JPMorgan Chase Bank, N.A.',
+                        reference: 'Payroll deposit for employee #12345',
+                        timestamp: '2024-01-01T12:00:00.000Z',
+                        settlementDate: '2024-01-03T12:00:00.000Z',
+                      },
+                    },
+                    successfulWire: {
+                      summary: 'Successful Wire Transaction Status',
+                      value: {
+                        transactionId: 'WIRE-EXPRESS-9876543210-xyz789',
+                        status: 'SUCCESS',
+                        type: 'WIRE_CREDIT',
+                        amount: '750000',
+                        currency: 'EUR',
+                        targetAccountId: '1234567890123456789',
+                        originatingBank: 'Deutsche Bank AG',
+                        reference: 'International business payment - Invoice #INV-2024-001',
+                        timestamp: '2024-01-01T12:00:00.000Z',
+                        settlementDate: '2024-01-01T16:00:00.000Z',
+                      },
+                    },
+                    failedTransaction: {
+                      summary: 'Failed Transaction Status',
+                      value: {
+                        transactionId: 'ACH-STANDARD-1234567890-failed1',
+                        status: 'FAILED',
+                        type: 'ACH_CREDIT',
+                        amount: '250000',
+                        currency: 'USD',
+                        targetAccountId: '1234567890123456789',
+                        originatingBank: 'JPMorgan Chase Bank, N.A.',
+                        reference: 'Failed payroll deposit',
+                        timestamp: '2024-01-01T12:00:00.000Z',
+                        settlementDate: '2024-01-01T12:00:00.000Z',
+                        errorDetails: {
+                          code: 'ACH_PROCESSING_FAILED',
+                          message: 'ACH network temporarily unavailable',
+                          retryable: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            '400': {
+              description: 'Invalid transaction ID format',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/Error',
+                  },
+                  examples: {
+                    invalidFormat: {
+                      summary: 'Invalid transaction ID format',
+                      value: {
+                        error: 'Validation failed',
+                        details: [
+                          {
+                            field: 'transactionId',
+                            message: 'Transaction ID must match required format',
+                            code: 'invalid_string',
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            '404': {
+              description: 'Transaction not found',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/Error',
+                  },
+                  examples: {
+                    notFound: {
+                      summary: 'Transaction not found',
+                      value: {
+                        error: 'Transaction not found',
+                        details: 'No transaction found with the specified ID',
                       },
                     },
                   },

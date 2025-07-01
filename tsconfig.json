@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "files": [],
+  "references": [
+    { "path": "./apps/core-api" },
+    { "path": "./apps/batch-processor" },
+    { "path": "./apps/customer-frontend" },
+    { "path": "./apps/external-transaction-simulator" },
+    { "path": "./packages/core-services" },
+    { "path": "./packages/domain" },
+    { "path": "./packages/shared" }
+  ]
+}

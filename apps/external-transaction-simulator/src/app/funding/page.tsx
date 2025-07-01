@@ -4,7 +4,6 @@ import { ArrowLeft, Banknote, AlertCircle, CheckCircle, RefreshCw } from 'lucide
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
-// eslint-disable-next-line import/no-unresolved
 import { coreApiClient, LoanDisbursementRequest, LoanFundingStatus } from '@/lib/core-api-client';
 
 interface AccountDetails {

@@ -4,9 +4,7 @@ import { Building2, Send, AlertCircle, CheckCircle, Clock, Globe, Banknote } fro
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
-// eslint-disable-next-line import/no-unresolved
 import { INTERNATIONAL_BANKS } from '@/config/international-banks';
-// eslint-disable-next-line import/no-unresolved
 import { coreApiClient } from '@/lib/core-api-client';
 
 interface CustomerAccount {

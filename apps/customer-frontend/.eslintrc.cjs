@@ -17,7 +17,6 @@ module.exports = {
     },
   },
   rules: {
-    // Disable import resolution for Next.js @ paths - known ESLint issue
     'import/no-unresolved': ['error', { ignore: ['^@/'] }],
   },
 };

@@ -58,6 +58,8 @@ npm run format           # Format with Prettier
 npm run format:check     # Check formatting
 ```
 
+**ESLint Architecture**: The monorepo uses `eslint-import-resolver-typescript` to properly resolve TypeScript path mappings across all workspaces. Each workspace has its own `.lintstagedrc.json` for context-aware linting during pre-commit hooks.
+
 ## GitHub Issue Workflow
 
 ### Task Management Process

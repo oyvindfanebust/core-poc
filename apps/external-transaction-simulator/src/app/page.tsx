@@ -14,9 +14,7 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-// eslint-disable-next-line import/no-unresolved
 import { MOCK_BANKS } from '@/config/mock-banks';
-// eslint-disable-next-line import/no-unresolved
 import { coreApiClient, SEPAStatus } from '@/lib/core-api-client';
 
 export default function HomePage() {

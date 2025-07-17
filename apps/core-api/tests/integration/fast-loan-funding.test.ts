@@ -144,6 +144,48 @@ describe('Fast Loan Funding Tests (Mock Services)', () => {
       expect(depositBalance.balance).toBe(5000000n); // 50k received
     });
 
+    it('should successfully disburse funds for non-EUR currency', async () => {
+      const testCustomerId = 'CUSTOMER-DISBURSE-NOK';
+
+      const depositId = await services.tigerBeetleService.createAccount({
+        type: 'DEPOSIT',
+        customerId: testCustomerId,
+        currency: 'NOK',
+        initialBalance: 0n,
+      });
+
+      const loanAccount = await services.loanService.createLoanWithPaymentPlan({
+        customerId: new CustomerId(testCustomerId),
+        currency: 'NOK',
+        principalAmount: new Money(10000000n, 'NOK'),
+        interestRate: 5.5,
+        termMonths: 60,
+        loanType: 'ANNUITY',
+        paymentFrequency: 'MONTHLY',
+        fees: [],
+        accountName: 'NOK Loan',
+      });
+
+      const response = await request(app)
+        .post(`/api/v1/loans/${loanAccount.accountId.toString()}/disburse`)
+        .send({
+          targetAccountId: depositId.toString(),
+          amount: '5000000',
+          description: 'NOK loan disbursement',
+        })
+        .expect(200);
+
+      expect(response.body.status).toBe('SUCCESS');
+
+      const loanBalance = await services.tigerBeetleService.getAccountBalance(
+        loanAccount.accountId.value,
+      );
+      const depositBalance = await services.tigerBeetleService.getAccountBalance(depositId);
+
+      expect(loanBalance.balance).toBe(5000000n);
+      expect(depositBalance.balance).toBe(5000000n);
+    });
+
     it('should fail when target account does not exist', async () => {
       // Create a proper loan with payment plan
       const testCustomerId = 'CUSTOMER-TEST-TARGET-FAIL';

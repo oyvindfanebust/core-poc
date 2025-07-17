@@ -144,7 +144,7 @@
       "confirmTransfer": "Bekreft overføring",
       "processing": "Behandler...",
       "insufficientFunds": "Utilstrekkelige midler",
-      "insufficientFundsDescription": "Denne overføringen vil resultere i negativ saldo for kilden kontoen.",
+      "insufficientFundsDescription": "Denne overføringen vil resultere i negativ saldo for kildekontoen.",
       "sepaDetails": {
         "recipient": "Mottaker",
         "bank": "Bank",

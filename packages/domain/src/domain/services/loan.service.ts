@@ -422,8 +422,11 @@ export class LoanService {
 
       // Get loan account balance to determine available funds
       const loanBalance = await this.accountService.getAccountBalance(loanId.value);
-      // Get currency from the payment plan since TigerBeetle doesn't return currency
-      const loanCurrency = 'EUR' as Currency; // TODO: Get from account metadata
+
+      // Retrieve currency from stored account metadata
+      const accountMeta = await this.accountService.getAccountMetadata(loanId.value);
+      const loanCurrency: Currency = accountMeta?.currency || 'EUR';
+
       const availableFunds = new Money(loanBalance.balance, loanCurrency);
 
       // Determine disbursement amount
